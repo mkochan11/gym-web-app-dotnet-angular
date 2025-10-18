@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 
-// Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();

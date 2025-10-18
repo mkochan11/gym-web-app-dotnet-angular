@@ -1,7 +1,6 @@
-namespace GymWebApp.Data.Entities.Abstract
+namespace GymWebApp.Data.Entities.Abstract;
+
+public abstract class Employee : User
 {
-    public abstract class Employee : User
-    {
-        public List<Employment> Employments { get; set; } = new List<Employment>();
-    }
+    public List<Employment> Employments { get; set; } = [];
 }

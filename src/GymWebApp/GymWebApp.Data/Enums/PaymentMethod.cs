@@ -1,10 +1,9 @@
-namespace GymWebApp.Data.Enums
+namespace GymWebApp.Data.Enums;
+
+public enum PaymentMethod
 {
-    public enum PaymentMethod
-    {
-        Cash = 0,
-        Card = 1,
-        BankTransfer = 2,
-        Other = 3
-    }
+    Cash = 0,
+    Card = 1,
+    BankTransfer = 2,
+    Other = 3
 }

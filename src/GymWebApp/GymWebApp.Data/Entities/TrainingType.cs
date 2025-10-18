@@ -3,7 +3,7 @@ using GymWebApp.Data.Entities.Abstract;
 
 namespace GymWebApp.Data.Entities
 {
-    public class TrainingType : BaseEntity
+    public class TrainingType : AuditableEntity
     {
         [Required]
         [MaxLength(100)]
