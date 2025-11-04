@@ -1,4 +1,6 @@
 using GymWebApp.Data;
+using GymWebApp.Data.Entities;
+using GymWebApp.Data.Enums;
 using GymWebApp.Data.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +56,32 @@ namespace GymWebApp.WebAPI.Extensions
             }
             
             Log.Information("User roles creation completed");
+        }
+
+        private static async Task CreateUsersAsync(IServiceProvider services)
+        {
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+            if (!await userManager.Users.AnyAsync())
+            {
+                var ownerUser = new ApplicationUser
+                {
+                    Email = "owner@gymWebApp.com",
+                    UserName = "owner@gymWebApp.com"
+                };
+
+                var result = await userManager.CreateAsync(ownerUser, "Owner123!");
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(ownerUser, UserRole.Owner.ToString());
+                    seedUsersIds.AdminId = (await userManager.FindByEmailAsync(adminUser.Email))?.Id;
+                }
+                else
+                {
+                    throw new Exception($"Failed to create Admin user: {string.Join(", ", adminResult.Errors.Select(e => e.Description))}");
+                }
+            }
         }
     }
 }

@@ -4,13 +4,13 @@ using GymWebApp.Data.Entities.Abstract;
 
 namespace GymWebApp.Data.Entities;
 
-public class GroupTraining : Training
+public class GroupTraining : BaseTrainingEntity
 {
     [Required]
     public int TrainerId { get; set; }
     
     [ForeignKey(nameof(TrainerId))]
-    public Trainer Trainer { get; set; } = null!;
+    public Employee Trainer { get; set; } = null!;
     
     [Required]
     public int MaxParticipantNumber { get; set; }
@@ -22,4 +22,6 @@ public class GroupTraining : Training
     
     [ForeignKey(nameof(TrainingTypeId))]
     public TrainingType TrainingType { get; set; } = null!;
+
+    public int DifficultyLevel { get; set; }
 }

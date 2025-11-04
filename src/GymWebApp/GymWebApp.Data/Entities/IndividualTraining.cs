@@ -4,13 +4,13 @@ using GymWebApp.Data.Entities.Abstract;
 
 namespace GymWebApp.Data.Entities;
 
-public class IndividualTraining : Training
+public class IndividualTraining : BaseTrainingEntity
 {
     [Required]
     public int TrainerId { get; set; }
     
     [ForeignKey(nameof(TrainerId))]
-    public Trainer Trainer { get; set; } = null!;
+    public Employee Trainer { get; set; } = null!;
     
     public int? ClientId { get; set; }
     

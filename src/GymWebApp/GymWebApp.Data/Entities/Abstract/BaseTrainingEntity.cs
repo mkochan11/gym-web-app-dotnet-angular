@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GymWebApp.Data.Entities.Abstract;
 
-public abstract class Training : AuditableEntity
+public abstract class BaseTrainingEntity : AuditableEntity
 {
     [Required]
     public DateTime Date { get; set; }

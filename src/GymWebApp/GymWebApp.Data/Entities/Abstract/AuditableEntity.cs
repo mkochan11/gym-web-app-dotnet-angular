@@ -13,8 +13,8 @@ public abstract class AuditableEntity : BaseEntity
     public int? UpdatedById { get; set; }
 
     [ForeignKey(nameof(CreatedById))]
-    public User CreatedBy { get; set; }
+    public BaseUserEntity CreatedBy { get; set; } = null!;
 
     [ForeignKey(nameof(UpdatedById))]
-    public User? UpdatedBy { get; set; }
+    public BaseUserEntity? UpdatedBy { get; set; }
 }

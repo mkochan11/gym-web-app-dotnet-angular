@@ -1,4 +1,6 @@
-﻿using GymWebApp.Data.Entities;
+﻿using System.Reflection.Emit;
+using GymWebApp.Data.Entities;
+using GymWebApp.Data.Entities.Abstract;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +13,7 @@ namespace GymWebApp.Data
 
         // Domain entities
         public DbSet<Client> Clients { get; set; }
-        public DbSet<Trainer> Trainers { get; set; }
-        public DbSet<Manager> Managers { get; set; }
-        public DbSet<Receptionist> Receptionists { get; set; }
+        public DbSet<Employee> Employees { get; set; }
 
         // Training entities
         public DbSet<IndividualTraining> IndividualTrainings { get; set; }
@@ -36,6 +36,23 @@ namespace GymWebApp.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            foreach (var fk in builder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                fk.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+
+            builder.Entity<AuditableEntity>()
+                .HasOne(a => a.CreatedBy)
+                .WithMany()
+                .HasForeignKey(a => a.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<AuditableEntity>()
+                .HasOne(a => a.UpdatedBy)
+                .WithMany()
+                .HasForeignKey(a => a.UpdatedById)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

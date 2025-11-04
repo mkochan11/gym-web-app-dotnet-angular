@@ -10,7 +10,4 @@ public class Trainer : Employee
     public List<GroupTraining> GroupTrainings { get; set; } = [];
 
     public List<TrainingPlan> TrainingPlans { get; set;} = [];
-    
-    [MaxLength(1000)]
-    public string? Specializations { get; set; }
 }

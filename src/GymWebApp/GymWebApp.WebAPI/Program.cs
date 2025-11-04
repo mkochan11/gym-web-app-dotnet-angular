@@ -1,4 +1,5 @@
 using System.Text;
+using GymWebApp.ApplicationCore.Services;
 using GymWebApp.Data;
 using GymWebApp.Data.Entities;
 using GymWebApp.WebAPI.Extensions;
@@ -55,12 +56,14 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     // Database
     services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
+    
     // Identity
     services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders()
         .AddApiEndpoints();
+
+    services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
 
     // JWT Authentication
     var jwtKey = configuration["Jwt:Key"];

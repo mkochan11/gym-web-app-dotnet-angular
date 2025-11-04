@@ -2,7 +2,7 @@ using GymWebApp.Data.Entities.Abstract;
 
 namespace GymWebApp.Data.Entities;
 
-public class Client : User
+public class Client : BaseUserEntity
 {
     public List<GymMembership> GymMemberships { get; set; } = [];
     public List<IndividualTraining> IndividualTrainings { get; set; } = [];

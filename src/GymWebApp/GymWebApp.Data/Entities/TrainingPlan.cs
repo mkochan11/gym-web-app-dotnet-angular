@@ -25,7 +25,7 @@ public class TrainingPlan : AuditableEntity
     public int TrainerId { get; set; }
     
     [ForeignKey(nameof(TrainerId))]
-    public Trainer Trainer { get; set; } = null!;
+    public Employee Trainer { get; set; } = null!;
     
     public DateTime? StartDate { get; set; }
     
