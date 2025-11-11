@@ -1,5 +1,5 @@
+using GymWebApp.Data.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GymWebApp.Data.Entities.Abstract;
 
@@ -25,5 +25,5 @@ public abstract class BaseUserEntity : BaseEntity
     public DateTime? DateOfBirth { get; set; }
     
     [MaxLength(10)]
-    public string? Gender { get; set; }
+    public Gender Gender { get; set; }
 }
