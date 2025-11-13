@@ -1,0 +1,27 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+  <h2>Sign in</h2>
+
+  <label>
+    Email
+    <input formControlName="email" type="email" />
+  </label>
+  <div *ngIf="form.controls.email.touched && form.controls.email.invalid" class="error">
+    Valid email is required.
+  </div>
+
+  <label>
+    Password
+    <input formControlName="password" type="password" />
+  </label>
+  <div *ngIf="form.controls.password.touched && form.controls.password.invalid" class="error">
+    Password is required.
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <button type="submit" [disabled]="loading">
+    {{ loading ? 'Signing in...' : 'Sign in' }}
+  </button>
+</form>
