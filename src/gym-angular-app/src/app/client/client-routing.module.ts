@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard } from '../shared/guards/auth.guard';
 import { roleGuard } from '../shared/guards/role.guard';
-import { ClientLayoutComponent } from './layouts/client-layout/client-layout.component';
+import { ClientLayoutComponent } from '../layouts/client-layout/client-layout.component';
 
 const routes: Routes = [
   {

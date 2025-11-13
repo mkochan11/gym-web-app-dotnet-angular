@@ -5,7 +5,7 @@
     Email
     <input formControlName="email" type="email" />
   </label>
-  <div *ngIf="form.controls.email.touched && form.controls.email.invalid" class="error">
+  <div *ngIf="form.controls['email'].touched && form.controls['email'].invalid" class="error">
     Valid email is required.
   </div>
 
@@ -13,7 +13,7 @@
     Password
     <input formControlName="password" type="password" />
   </label>
-  <div *ngIf="form.controls.password.touched && form.controls.password.invalid" class="error">
+  <div *ngIf="form.controls['password'].touched && form.controls['password'].invalid" class="error">
     Password is required.
   </div>
 

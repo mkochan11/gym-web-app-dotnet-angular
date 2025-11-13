@@ -1,0 +1,12 @@
+<header>
+  <h2>Client Dashboard</h2>
+  <nav>
+    <a routerLink="/client/products">Products</a>
+    <a routerLink="/client/settings">Settings</a>
+    <a (click)="logout()">Logout</a>
+  </nav>
+</header>
+
+<div class="content">
+  <router-outlet></router-outlet>
+</div>

@@ -52,6 +52,18 @@ finally
 
 static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+    services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAngularDevClient", builder =>
+        {
+            builder
+                .WithOrigins("http://localhost:4200")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+    });
+
     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
     services.AddDbContext<ApplicationDbContext>(options =>
@@ -129,6 +141,7 @@ static void ConfigurePipeline(WebApplication app)
     });
 
     app.UseHttpsRedirection();
+    app.UseCors("AllowAngularDevClient");
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
