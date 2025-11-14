@@ -1,9 +1,13 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
+import { ClientLayoutComponent } from './layouts/client-layout/client-layout.component';
+import { ManagementLayoutComponent } from './layouts/management-layout/management-layout.component';
+import { authGuard } from './shared/guards/auth.guard';
+import { roleGuard } from './shared/guards/role.guard';
 
 export const routes: Routes = [
-  
+
   {
     path: '',
     component: MainLayoutComponent,
@@ -21,31 +25,37 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+        loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
+      },
+      {
+        path: 'register',
+        loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent)
       }
     ]
   },
 
   {
     path: 'client',
-    loadComponent: () =>
-      import('./layouts/client-layout/client-layout.component').then(m => m.ClientLayoutComponent),
+    component: ClientLayoutComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Client'] },
     children: [
       {
         path: '',
-        loadChildren: () => import('./client/client.module').then(m => m.ClientModule)
+        loadComponent: () => import('./client/dashboard/dashboard.component').then(m => m.DashboardComponent)
       }
     ]
   },
 
   {
     path: 'management',
-    loadComponent: () =>
-      import('./layouts/management-layout/management-layout.component').then(m => m.ManagementLayoutComponent),
+    component: ManagementLayoutComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin','Manager','Trainer','Receptionist','Owner'] },
     children: [
       {
         path: '',
-        loadChildren: () => import('./management/management.module').then(m => m.ManagementModule)
+        loadComponent: () => import('./management/dashboard/dashboard.component').then(m => m.DashboardComponent)
       }
     ]
   },

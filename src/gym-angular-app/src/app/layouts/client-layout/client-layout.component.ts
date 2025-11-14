@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-client-layout',
@@ -12,9 +13,15 @@ import { AuthService } from '../../shared/services/auth.service';
 })
 export class ClientLayoutComponent {
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
   logout() {
     this.auth.logout();
+    this.toastService.show('You\'ve been logged out', 'success');
+    this.router.navigate(['/']);
   }
 }

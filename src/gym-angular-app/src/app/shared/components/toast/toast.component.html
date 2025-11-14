@@ -1,0 +1,8 @@
+<div
+      *ngIf="toast$ | async as toast"
+      [@toastAnimation]
+      class="toast"
+      [ngClass]="toast.type"
+    >
+      {{ toast.text }}
+</div>

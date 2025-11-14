@@ -47,7 +47,7 @@ export class AuthService {
     } catch (err) {
       console.error("Failed to decode token", err);
     }
-}
+  }
 
   getToken(): string | null {
     try {
@@ -57,10 +57,9 @@ export class AuthService {
     }
   }
 
-getRole(): string | null {
-  return localStorage.getItem(ROLE_KEY);
-}
-
+  getRole(): string | null {
+    return localStorage.getItem(ROLE_KEY);
+  }
 
   logout(): void {
     try {

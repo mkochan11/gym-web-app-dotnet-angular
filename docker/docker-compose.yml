@@ -36,15 +36,15 @@ services:
       retries: 5
       start_period: 60s
 
-  frontend:
-    build:
-      context: ../src/gym-angular-app
-      dockerfile: Dockerfile
-    container_name: gym_frontend
-    ports:
-      - "4200:80"
-    depends_on:
-      - webapi
+  # frontend:
+  #   build:
+  #     context: ../src/gym-angular-app
+  #     dockerfile: Dockerfile
+  #   container_name: gym_frontend
+  #   ports:
+  #     - "4200:80"
+  #   depends_on:
+  #     - webapi
 
 volumes:
   mssql_data:

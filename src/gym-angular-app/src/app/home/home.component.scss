@@ -1,0 +1,23 @@
+.logout-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #1f7aec;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  opacity: 0;
+  animation: fadeInOut 3s ease forwards;
+  pointer-events: none;
+  z-index: 9999;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
