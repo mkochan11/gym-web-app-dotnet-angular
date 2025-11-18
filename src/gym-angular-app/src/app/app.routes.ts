@@ -35,6 +35,24 @@ export const routes: Routes = [
   },
 
   {
+    path: 'membership',
+    children: [
+      { 
+        path: '', 
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Client'] },
+        loadComponent: () => import('./membership/membership-selection/membership-selection.component').then(m => m.MembershipSelectionComponent) 
+      },
+      { 
+        path: 'payment', 
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Client'] },
+        loadComponent: () => import('./membership/payment/payment.component').then(m => m.PaymentComponent) 
+      }
+    ]
+  },
+
+  {
     path: 'client',
     component: ClientLayoutComponent,
     canActivate: [authGuard, roleGuard],

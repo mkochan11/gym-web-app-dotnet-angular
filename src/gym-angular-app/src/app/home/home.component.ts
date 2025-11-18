@@ -14,4 +14,14 @@ export class HomeComponent {
   loggedOut = false;
 
   constructor() {}
+
+  scrollToFeatures() {
+    const featuresElement = document.getElementById('features');
+    if (featuresElement) {
+      featuresElement.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }
 }

@@ -24,7 +24,7 @@ export class UserMenuComponent {
   items: MenuItem[] = [
       { label: 'Messages', icon: 'pi pi-comments', routerLink: ['/management/messages'], badge: this.badgeCount.toString() },
       { label: 'Settings', icon: 'pi pi-cog', routerLink: ['/management/settings'] },
-      { label: 'Log out', icon: 'pi pi-sign-out', command: () => this.logout() }
+      { label: 'Sign out', icon: 'pi pi-sign-out', command: () => this.logout() }
     ];
 
     logout() {

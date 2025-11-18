@@ -1,1 +1,57 @@
-<p>register works!</p>
+<form [formGroup]="form" (ngSubmit)="submit()" class="register-form">
+
+  <h2>Create Account</h2>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label for="firstName">First Name</label>
+      <input id="firstName" type="text" pInputText formControlName="firstName" class="w-full input-field" />
+      <p-message *ngIf="form.controls['firstName'].touched && form.controls['firstName'].invalid"
+                 severity="error" text="First name is required."></p-message>
+    </div>
+
+    <div class="form-field">
+      <label for="lastName">Last Name</label>
+      <input id="lastName" type="text" pInputText formControlName="lastName" class="w-full input-field" />
+      <p-message *ngIf="form.controls['lastName'].touched && form.controls['lastName'].invalid"
+                 severity="error" text="Last name is required."></p-message>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label for="email">Email</label>
+    <input id="email" type="email" pInputText formControlName="email" class="w-full input-field" />
+    <p-message *ngIf="form.controls['email'].touched && form.controls['email'].invalid"
+               severity="error" text="Valid email is required."></p-message>
+  </div>
+
+  <div class="form-field">
+    <label for="password">Password</label>
+    <p-password id="password" formControlName="password" [feedback]="true" 
+                [toggleMask]="true" class="w-full password-field" 
+                inputStyleClass="w-full input-field">
+    </p-password>
+    <p-message *ngIf="form.controls['password'].touched && form.controls['password'].invalid"
+               severity="error" text="Password must be at least 6 characters."></p-message>
+  </div>
+
+  <div class="form-field">
+    <label for="confirmPassword">Confirm Password</label>
+    <p-password id="confirmPassword" formControlName="confirmPassword" [feedback]="false" 
+                [toggleMask]="true" class="w-full password-field" 
+                inputStyleClass="w-full input-field">
+    </p-password>
+    <p-message *ngIf="form.controls['confirmPassword'].touched && form.hasError('mismatch')"
+               severity="error" text="Passwords do not match."></p-message>
+  </div>
+
+  <button pButton type="submit" 
+          [label]="loading ? 'Creating Account...' : 'Create Account'" 
+          [loading]="loading"
+          class="submit-button"></button>
+
+  <div class="login-link">
+    <p>Already have an account? <a routerLink="/login" class="link">Sign in</a></p>
+  </div>
+
+</form>

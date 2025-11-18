@@ -1,0 +1,88 @@
+.payment-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .payment-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 2rem;
+
+    .payment-form {
+      h1 {
+        color: var(--text-color);
+        margin-bottom: 2rem;
+      }
+
+      .order-summary {
+        margin-bottom: 2rem;
+
+        .summary-content {
+          h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+          }
+
+          .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+          }
+
+          .features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+              padding: 0.25rem 0;
+              color: var(--text-color-secondary);
+
+              &::before {
+                content: "✓";
+                color: var(--primary-color);
+                font-weight: bold;
+                margin-right: 0.5rem;
+              }
+            }
+          }
+        }
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        .form-field {
+          display: flex;
+          flex-direction: column;
+
+          &.full-width {
+            grid-column: 1 / -1;
+          }
+
+          label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+          }
+
+          .p-message {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-page {
+    .payment-container {
+      grid-template-columns: 1fr;
+    }
+  }
+}

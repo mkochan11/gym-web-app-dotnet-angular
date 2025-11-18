@@ -25,6 +25,24 @@ export class AuthService {
       );
   }
 
+  register(userData: { 
+    firstName: string; 
+    lastName: string; 
+    email: string; 
+    password: string; 
+  }): Observable<any> {
+    return this.httpService.post<any>('Auth/register', userData)
+      .pipe(
+        tap(resp => {
+          const tokenString = resp?.token?.result;
+          if (tokenString){
+            this.setToken(tokenString);
+            this.cacheRoleFromToken();
+          }
+        })
+      );
+  }
+
   setToken(token: string) {
     try {
       localStorage.setItem(TOKEN_KEY, token);

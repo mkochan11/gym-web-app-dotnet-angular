@@ -2,20 +2,30 @@
 
   <h2>Sign in</h2>
 
-  <div class="p-field">
+  <div class="form-field">
     <label for="email">Email</label>
-    <input id="email" type="email" pInputText formControlName="email" class="w-full" />
+    <input id="email" type="email" pInputText formControlName="email" class="w-full input-field" />
     <p-message *ngIf="form.controls['email'].touched && form.controls['email'].invalid"
                severity="error" text="Valid email is required."></p-message>
   </div>
 
-  <div class="p-field">
+  <div class="form-field">
     <label for="password">Password</label>
-    <p-password id="password" formControlName="password" [feedback]="false" class="w-full" inputStyleClass="w-full"></p-password>
+    <p-password id="password" formControlName="password" [feedback]="false" 
+                [toggleMask]="true" class="w-full password-field" 
+                inputStyleClass="w-full input-field">
+    </p-password>
     <p-message *ngIf="form.controls['password'].touched && form.controls['password'].invalid"
                severity="error" text="Password is required."></p-message>
   </div>
 
-  <button pButton type="submit" [label]="loading ? 'Signing in...' : 'Sign in'" [loading]="loading"></button>
+  <button pButton type="submit" 
+          [label]="loading ? 'Signing in...' : 'Sign in'" 
+          [loading]="loading"
+          class="submit-button"></button>
+
+    <div class="signup-link">
+      <p>Don't have an account? <a routerLink="/register" class="link">Sign up</a></p>
+    </div>
 
 </form>

@@ -1,0 +1,107 @@
+.membership-selection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    h1 {
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-color-secondary);
+      font-size: 1.1rem;
+    }
+  }
+
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+
+    .plan-card {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+
+      &:hover {
+        transform: translateY(-5px);
+      }
+
+      &.selected {
+        border: 2px solid var(--primary-color);
+        border-radius: 12px;
+      }
+
+      &.popular {
+        transform: scale(1.05);
+        
+        &:hover {
+          transform: scale(1.05) translateY(-5px);
+        }
+      }
+
+      .card-content {
+        text-align: center;
+
+        .price {
+          margin-bottom: 1rem;
+
+          .amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+          }
+
+          .period {
+            color: var(--text-color-secondary);
+            font-size: 1rem;
+          }
+        }
+
+        .description {
+          color: var(--text-color-secondary);
+          margin-bottom: 1.5rem;
+        }
+
+        .features {
+          list-style: none;
+          padding: 0;
+          margin-bottom: 1.5rem;
+          text-align: left;
+
+          li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--surface-200);
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            &::before {
+              content: "✓";
+              color: var(--primary-color);
+              font-weight: bold;
+              margin-right: 0.5rem;
+            }
+          }
+        }
+
+        .popular-badge {
+          position: absolute;
+          top: -10px;
+          right: 20px;
+        }
+      }
+    }
+  }
+
+  .actions {
+    text-align: center;
+  }
+}

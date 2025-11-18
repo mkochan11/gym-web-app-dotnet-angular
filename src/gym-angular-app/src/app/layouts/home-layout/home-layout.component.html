@@ -7,13 +7,11 @@
 
   <ng-template pTemplate="end">
     <ng-container *ngFor="let item of itemsRight">
-      <a
-        pButton
-        href="{{item.routerLink}}"
-        [ngClass]="item.styleClass"
-        class="ml-2">
-        {{ item.label }}
-      </a>
+      <p-button
+        [label]="item.label"
+        [routerLink]="item.routerLink"
+        [styleClass]="item.styleClass + ' ml-2'">
+      </p-button>
     </ng-container>
   </ng-template>
 </p-menubar>

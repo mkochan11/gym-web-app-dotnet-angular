@@ -8,6 +8,7 @@ import { MenubarModule } from 'primeng/menubar';
 import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { BadgeModule } from 'primeng/badge';
+import { CheckboxModule } from 'primeng/checkbox';
 
 export const primeNgModules = [
   SidebarModule,
@@ -19,5 +20,6 @@ export const primeNgModules = [
   MenubarModule,
   MessageModule,
   PasswordModule,
-  BadgeModule
+  BadgeModule,
+  CheckboxModule
 ];

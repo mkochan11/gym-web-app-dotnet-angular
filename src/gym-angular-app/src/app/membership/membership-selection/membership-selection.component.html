@@ -1,0 +1,50 @@
+<div class="membership-selection">
+  <div class="header">
+    <h1>Choose Your Membership Plan</h1>
+    <p>Select the plan that best fits your fitness goals</p>
+  </div>
+
+  <div class="plans-grid">
+    <div *ngFor="let plan of membershipPlans" 
+         class="plan-card" 
+         [class.selected]="selectedPlan?.id === plan.id"
+         [class.popular]="plan.popular"
+         (click)="selectPlan(plan)">
+      
+      <p-card [header]="plan.name">
+        <div class="card-content">
+          <div class="price">
+            <span class="amount">${{ plan.price }}</span>
+            <span class="period">/month</span>
+          </div>
+          
+          <p class="description">{{ plan.description }}</p>
+          
+          <ul class="features">
+            <li *ngFor="let feature of plan.features">{{ feature }}</li>
+          </ul>
+
+          <div class="popular-badge" *ngIf="plan.popular">
+            <p-tag value="MOST POPULAR" severity="success"></p-tag>
+          </div>
+        </div>
+        
+        <ng-template pTemplate="footer">
+          <p-button 
+            label="Select Plan" 
+            [outlined]="selectedPlan?.id !== plan.id"
+            (onClick)="selectPlan(plan)">
+          </p-button>
+        </ng-template>
+      </p-card>
+    </div>
+  </div>
+
+  <div class="actions" *ngIf="selectedPlan">
+    <p-button 
+      label="Continue to Payment" 
+      icon="pi pi-arrow-right"
+      (onClick)="continueToPayment()">
+    </p-button>
+  </div>
+</div>

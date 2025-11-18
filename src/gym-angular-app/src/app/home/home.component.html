@@ -8,8 +8,52 @@
     </p>
 
     <div class="actions">
-      <a pButton label="Get Started" routerLink="/login" class="mr-2"></a>
-      <a pButton label="Learn More" styleClass="p-button-outlined" href="/#features"></a>
+      <p-button label="Get Started" routerLink="/login" styleClass="mr-2"></p-button>
+      <p-button label="Learn More" styleClass="p-button-outlined" (onClick)="scrollToFeatures()"></p-button>
     </div>
   </div>
 </main>
+
+<section id="features" class="features-section">
+  <div class="features-container">
+    <h2>Our Features</h2>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">👤</div>
+        <h3>Individual Training</h3>
+        <p>Book personalized one-on-one sessions with certified trainers for focused attention and customized guidance.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Group Classes</h3>
+        <p>Join dynamic group training sessions - from yoga to HIIT - and train together with like-minded fitness enthusiasts.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>Easy Reservations</h3>
+        <p>Seamlessly book individual or group sessions through our intuitive reservation system with real-time availability.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>Personalized Plans</h3>
+        <p>Get custom training plans tailored to your goals, fitness level, and preferences, updated regularly by experts.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Progress Tracking</h3>
+        <p>Monitor your journey by completing scheduled sessions, tracking performance metrics, and celebrating milestones.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3>Flexible Memberships</h3>
+        <p>Choose from various plans - from basic access to premium packages - designed to fit every budget and goal.</p>
+      </div>
+    </div>
+  </div>
+</section>
