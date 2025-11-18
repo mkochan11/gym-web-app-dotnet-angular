@@ -1,11 +1,13 @@
-<header>
-  <h2>Client Dashboard</h2>
-  <nav>
-    <a routerLink="/client/products">Products</a>
-    <a routerLink="/client/settings">Settings</a>
-    <a (click)="logout()">Logout</a>
-  </nav>
-</header>
+<p-menubar [model]="menuItems">
+  <ng-template pTemplate="end">
+    <button pButton
+            label="Logout"
+            icon="pi pi-sign-out"
+            class="p-button-danger"
+            (click)="logout()">
+    </button>
+  </ng-template>
+</p-menubar>
 
 <div class="content">
   <router-outlet></router-outlet>

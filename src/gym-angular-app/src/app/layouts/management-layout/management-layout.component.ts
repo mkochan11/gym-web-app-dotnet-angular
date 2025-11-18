@@ -1,27 +1,24 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { AuthService } from '../../shared/services/auth.service';
-import { ToastService } from '../../shared/services/toast.service';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { TopbarComponent } from './topbar/topbar.component';
+import { AuthService } from '../../shared/services';
 
 @Component({
   selector: 'app-management-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet],
+  imports: [RouterOutlet, SidebarComponent, TopbarComponent],
   templateUrl: './management-layout.component.html',
   styleUrls: ['./management-layout.component.scss']
 })
 export class ManagementLayoutComponent {
+  private auth = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private auth: AuthService,
-    private router: Router,
-    private toastService: ToastService
-  ) {}
-
-  logout() {
-    this.auth.logout();
-    this.toastService.show('You\'ve been logged out', 'success');
-    this.router.navigate(['/']);
+  ngOnInit(){
+    const role = this.auth.getRole()?.toLowerCase();
+    if (role) {
+      this.router.navigate([`/management/${role}`]);
+    }
   }
 }

@@ -1,16 +1,20 @@
-header {
-  background: #e0f7fa;
-  padding: 16px;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
 
-  nav a {
-    margin-right: 16px;
-    color: #00796b;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-  }
+p-menubar {
+  border-radius: 0;
+  border: none;
 }
 
 .content {
-  padding: 20px;
+  flex: 1;
+  padding: 1.5rem;
+  background: var(--surface-ground);
+}
+
+button.p-button-danger {
+  margin-left: 1rem;
 }

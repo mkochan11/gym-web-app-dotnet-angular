@@ -1,0 +1,23 @@
+<p-menubar>
+  <ng-template pTemplate="start">
+    <div class="flex items-center gap-2">
+      <span class="font-bold text-lg">🏋️ Gym Web App</span>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <ng-container *ngFor="let item of itemsRight">
+      <a
+        pButton
+        href="{{item.routerLink}}"
+        [ngClass]="item.styleClass"
+        class="ml-2">
+        {{ item.label }}
+      </a>
+    </ng-container>
+  </ng-template>
+</p-menubar>
+
+<div class="content">
+  <router-outlet></router-outlet>
+</div>

@@ -1,21 +1,22 @@
-header {
-  background: #263238;
-  color: white;
-  padding: 16px;
-
-  h2 {
-    margin: 0 0 10px 0;
-  }
-
-  nav a {
-    margin-right: 20px;
-    color: #90caf9;
-    text-decoration: none;
-    font-weight: 600;
-    cursor: pointer;
-  }
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--surface-ground);
 }
 
-.content {
-  padding: 24px;
+.layout-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  margin-top: 1rem;
+  
+  padding: 0 1rem;
+}
+
+.layout-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background: var(--surface-ground);
 }

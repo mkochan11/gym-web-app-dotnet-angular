@@ -18,7 +18,7 @@ export class AppComponent {
   constructor(private router: Router) {
     router.events.subscribe(() => {
       const url = this.router.url;
-      this.hideLayout = url.startsWith('/login') || url.startsWith('/register');
+      this.hideLayout = url.startsWith('/login') || url.startsWith('/register') || url.startsWith('/management') || url.startsWith('/client');
     });
   }
 }

@@ -1,0 +1,11 @@
+<p-menubar styleClass="custom-menubar">
+  <ng-template pTemplate="start">
+    <div class="menubar-content">
+      <span class="start-content"> <h3>{{ panelTitle }}</h3></span>
+      <span class="center-content">{{ pageTitle }}</span>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="end">
+    <app-user-menu></app-user-menu>
+  </ng-template>
+</p-menubar>

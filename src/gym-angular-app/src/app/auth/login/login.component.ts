@@ -1,20 +1,23 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService, ToastService } from '../../shared/services';
+import { primeNgModules } from '../../shared/primeng';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterLink,
+    ...primeNgModules
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnDestroy{
+export class LoginComponent implements OnDestroy {
 
   form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -23,7 +26,7 @@ export class LoginComponent implements OnDestroy{
 
   loading = false;
   error = '';
-  returnUrl: string | null = null; 
+  returnUrl: string | null = null;
 
   constructor(
     private auth: AuthService,
@@ -47,22 +50,15 @@ export class LoginComponent implements OnDestroy{
     this.auth.login(this.form.value as { email: string; password: string }).subscribe({
       next: () => {
         this.loading = false;
-        const role = this.auth.getRole();
-        const managementRoles = ['manager', 'admin', 'trainer', 'receptionist', 'owner'];
+        const role = this.auth.getRole()?.toLowerCase();
+        const managementRoles = ['admin', 'manager', 'owner', 'trainer', ];
 
-        if (this.returnUrl) {
-          this.router.navigateByUrl(this.returnUrl);
-        }
-
-        if (role) {
-          const rolesArray = Array.isArray(role) ? role.map(r => r.toLowerCase()) : [role.toLowerCase()];
-
-          if (rolesArray.includes('client')) {
+        if (role && role === 'client') 
             this.router.navigate(['/client']);
-          } else if (rolesArray.some(r => managementRoles.includes(r))) {
-            this.router.navigate(['/management']);
+        else if (role && managementRoles.includes(role)) {
+            this.router.navigate([`/management/${role}`]);
           }
-        }
+
         this.toastService.show('Logged in successfully', 'success');
       },
       error: (err) => {

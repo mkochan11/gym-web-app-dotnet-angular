@@ -1,15 +1,11 @@
-<header>
-  <h2>Management Panel</h2>
+<div class="layout-wrapper">
+  <app-topbar></app-topbar>
 
-  <nav>
-    <a routerLink="/management/users">Users</a>
-    <a routerLink="/management/equipment">Equipment</a>
-    <a routerLink="/management/reports">Reports</a>
-    <a routerLink="/management/settings">Settings</a>
-    <a (click)="logout()">Logout</a>
-  </nav>
-</header>
+  <div class="layout-container">
+    <app-sidebar></app-sidebar>
 
-<div class="content">
-  <router-outlet></router-outlet>
+    <main class="layout-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

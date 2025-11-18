@@ -3,15 +3,21 @@ import { RouterLink, RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { primeNgModules } from '../../shared/primeng';
 
 @Component({
   selector: 'app-client-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterOutlet, ...primeNgModules],
   templateUrl: './client-layout.component.html',
   styleUrls: ['./client-layout.component.scss']
 })
 export class ClientLayoutComponent {
+
+  menuItems = [
+    { label: 'Products', routerLink: '/client/products' },
+    { label: 'Settings', routerLink: '/client/settings' }
+  ];
 
   constructor(
     private auth: AuthService,

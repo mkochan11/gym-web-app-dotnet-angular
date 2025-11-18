@@ -1,27 +1,21 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+
   <h2>Sign in</h2>
 
-  <label>
-    Email
-    <input formControlName="email" type="email" />
-  </label>
-  <div *ngIf="form.controls['email'].touched && form.controls['email'].invalid" class="error">
-    Valid email is required.
+  <div class="p-field">
+    <label for="email">Email</label>
+    <input id="email" type="email" pInputText formControlName="email" class="w-full" />
+    <p-message *ngIf="form.controls['email'].touched && form.controls['email'].invalid"
+               severity="error" text="Valid email is required."></p-message>
   </div>
 
-  <label>
-    Password
-    <input formControlName="password" type="password" />
-  </label>
-  <div *ngIf="form.controls['password'].touched && form.controls['password'].invalid" class="error">
-    Password is required.
+  <div class="p-field">
+    <label for="password">Password</label>
+    <p-password id="password" formControlName="password" [feedback]="false" class="w-full" inputStyleClass="w-full"></p-password>
+    <p-message *ngIf="form.controls['password'].touched && form.controls['password'].invalid"
+               severity="error" text="Password is required."></p-message>
   </div>
 
-  <div *ngIf="error" class="error">
-    {{ error }}
-  </div>
+  <button pButton type="submit" [label]="loading ? 'Signing in...' : 'Sign in'" [loading]="loading"></button>
 
-  <button type="submit" [disabled]="loading">
-    {{ loading ? 'Signing in...' : 'Sign in' }}
-  </button>
 </form>

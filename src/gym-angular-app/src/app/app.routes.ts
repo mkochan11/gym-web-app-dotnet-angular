@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { HomeLayoutComponent } from './layouts/home-layout/home-layout.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { ClientLayoutComponent } from './layouts/client-layout/client-layout.component';
 import { ManagementLayoutComponent } from './layouts/management-layout/management-layout.component';
@@ -10,7 +10,7 @@ export const routes: Routes = [
 
   {
     path: '',
-    component: MainLayoutComponent,
+    component: HomeLayoutComponent,
     children: [
       {
         path: '',
@@ -54,9 +54,37 @@ export const routes: Routes = [
     data: { roles: ['Admin','Manager','Trainer','Receptionist','Owner'] },
     children: [
       {
-        path: '',
-        loadComponent: () => import('./management/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      }
+        path: 'admin',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Admin'] },
+        loadComponent: () => import('./management/admin/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'manager',
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['Manager'] },
+        loadComponent: () => import('./management/manager/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        children: [
+          {
+            path: 'trainers',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin','Manager','Owner'] },
+            loadComponent: () => import('./shared/components/manage-users/trainers/trainers.component').then(m => m.TrainersComponent)
+          },
+          {
+            path: 'receptionists',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin','Manager','Owner'] },
+            loadComponent: () => import('./shared/components/manage-users/receptionists/receptionists.component').then(m => m.ReceptionistsComponent)
+          },
+          {
+            path: 'clients',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin','Manager','Owner'] },
+            loadComponent: () => import('./shared/components/manage-users/clients/clients.component').then(m => m.ClientsComponent)
+          }
+        ]
+      },
     ]
   },
 

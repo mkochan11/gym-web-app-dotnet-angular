@@ -1,0 +1,17 @@
+.custom-menubar ::ng-deep .p-menubar-start {
+  width: 100%;
+}
+
+.menubar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.center-content {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+}
