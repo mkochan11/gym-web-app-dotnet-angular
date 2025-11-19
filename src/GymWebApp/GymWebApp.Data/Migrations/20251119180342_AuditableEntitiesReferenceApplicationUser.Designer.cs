@@ -4,6 +4,7 @@ using GymWebApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymWebApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251119180342_AuditableEntitiesReferenceApplicationUser")]
+    partial class AuditableEntitiesReferenceApplicationUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -366,7 +369,7 @@ namespace GymWebApp.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("HourlyRate")
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(3, 2)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -667,7 +670,7 @@ namespace GymWebApp.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(6, 2)");
+                        .HasColumnType("decimal(4, 2)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -691,7 +694,7 @@ namespace GymWebApp.Data.Migrations
                     b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(6, 2)");
+                        .HasColumnType("decimal(4, 2)");
 
                     b.Property<string>("FailureReason")
                         .HasMaxLength(500)

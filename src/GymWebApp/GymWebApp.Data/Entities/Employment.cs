@@ -17,6 +17,6 @@ public class Employment : AuditableEntity
     
     public DateTime? EndDate { get; set; }
     
-    [Column(TypeName = "decimal(3, 2)")]
+    [Column(TypeName = "decimal(5, 2)")]
     public decimal? HourlyRate { get; set; }
 }

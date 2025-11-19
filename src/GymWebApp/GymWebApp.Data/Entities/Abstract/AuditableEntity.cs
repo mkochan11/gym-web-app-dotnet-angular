@@ -8,13 +8,13 @@ public abstract class AuditableEntity : BaseEntity
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int CreatedById { get; set; }
-    
-    public int? UpdatedById { get; set; }
+    public string CreatedById { get; set; } = string.Empty;
+
+    public string? UpdatedById { get; set; }
 
     [ForeignKey(nameof(CreatedById))]
-    public BaseUserEntity CreatedBy { get; set; } = null!;
+    public ApplicationUser CreatedBy { get; set; } = null!;
 
     [ForeignKey(nameof(UpdatedById))]
-    public BaseUserEntity? UpdatedBy { get; set; }
+    public ApplicationUser? UpdatedBy { get; set; }
 }

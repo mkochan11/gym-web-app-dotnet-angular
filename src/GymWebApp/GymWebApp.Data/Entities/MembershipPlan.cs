@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GymWebApp.Data.Entities.Abstract;
 
-
 namespace GymWebApp.Data.Entities;
 
 public class MembershipPlan : AuditableEntity
@@ -15,7 +14,7 @@ public class MembershipPlan : AuditableEntity
     public string Description { get; set; } = string.Empty;
     
     [Required]
-    [Column(TypeName = "decimal(4, 2)")]
+    [Column(TypeName = "decimal(6, 2)")]
     public decimal Price { get; set; }
     
     [Required]

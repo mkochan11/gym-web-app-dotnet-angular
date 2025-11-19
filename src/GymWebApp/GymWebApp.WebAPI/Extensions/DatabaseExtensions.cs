@@ -2,6 +2,7 @@ using GymWebApp.Data;
 using GymWebApp.Data.Entities;
 using GymWebApp.Data.Enums;
 using GymWebApp.Data.Helpers;
+using GymWebApp.Data.Seeding;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -26,6 +27,7 @@ namespace GymWebApp.WebAPI.Extensions
                 
                 await CreateRolesAsync(services);
                 await CreateUsersAsync(services);
+                await SeedDataAsync(services);
 
                 Log.Information("Database initialized successfully");
             }
@@ -78,8 +80,26 @@ namespace GymWebApp.WebAPI.Extensions
             await dbContext.SaveChangesAsync();
 
             await CreateAdminAsync(userManager);
+            await dbContext.SaveChangesAsync();
         }
 
+        private static async Task SeedDataAsync(IServiceProvider services)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+
+            if (await context.MembershipPlans.AnyAsync())
+            {
+                Log.Information("Database already contains data. Skipping seeding.");
+                return;
+            }
+
+            Log.Information("Starting database seeding...");
+
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            await DataSeeder.SeedAsync(context, userManager, roleManager);
+        }
 
         private static async Task CreateUserWithEntityAsync(
             UserManager<ApplicationUser> userManager,

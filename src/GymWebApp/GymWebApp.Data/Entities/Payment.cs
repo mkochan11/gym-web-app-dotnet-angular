@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GymWebApp.Data.Entities.Abstract;
 
-
 namespace GymWebApp.Data.Entities;
 
 public class Payment : AuditableEntity
@@ -21,7 +20,7 @@ public class Payment : AuditableEntity
     public PaymentMethod PaymentMethod { get; set; }
     
     [Required]
-    [Column(TypeName = "decimal(4, 2)")]
+    [Column(TypeName = "decimal(6, 2)")]
     public decimal Amount { get; set; }
     
     [MaxLength(100)]
