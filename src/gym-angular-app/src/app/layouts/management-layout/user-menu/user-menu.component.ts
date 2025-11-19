@@ -29,7 +29,7 @@ export class UserMenuComponent {
 
     logout() {
     this.auth.logout();
-    this.toastService.show('Logged out successfully', 'success');
+    this.toastService.show('Logged out successfully', 'success', 3000);
     this.router.navigate(['/']);
   }
 }
