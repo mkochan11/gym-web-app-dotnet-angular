@@ -1,0 +1,133 @@
+<div class="event-details" *ngIf="event">
+  <div class="details-header">
+    <h3>Event Details</h3>
+    <button pButton 
+            icon="pi pi-times" 
+            class="p-button-text p-button-rounded"
+            (click)="closeDetails()">
+    </button>
+  </div>
+
+  <div class="details-content">
+    <p-card>
+      <div class="status-section">
+        <p-badge [value]="getStatusText()" [severity]="getStatusBadgeSeverity()"></p-badge>
+      </div>
+    </p-card>
+
+    <p-card header="Basic Information">
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Title:</label>
+          <span class="value">{{ event.title }}</span>
+        </div>
+        <div class="info-item">
+          <label>Type:</label>
+          <span class="value">
+            <p-badge [value]="eventType!" [severity]="eventType === 'group' ? 'success' : eventType === 'individual' ? 'info' : 'warning'"></p-badge>
+          </span>
+        </div>
+        <div class="info-item">
+          <label>Start:</label>
+          <span class="value">{{ event.start | date:'medium' }}</span>
+        </div>
+        <div class="info-item">
+          <label>End:</label>
+          <span class="value">{{ event.end | date:'medium' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Duration:</label>
+          <span class="value">{{ getDuration() }}</span>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card *ngIf="eventType === 'group'" header="Training Details">
+      <div class="info-grid">
+        <div class="info-item" *ngIf="event.trainingType">
+          <label>Training Type:</label>
+          <span class="value">{{ event.trainingType }}</span>
+        </div>
+        <div class="info-item" *ngIf="event.description">
+          <label>Description:</label>
+          <span class="value">{{ event.description }}</span>
+        </div>
+        <div class="info-item" *ngIf="event.difficultyLevel !== undefined">
+          <label>Difficulty:</label>
+          <span class="value difficulty-stars">
+            {{ getDifficultyStars(event.difficultyLevel) }}
+            <span class="difficulty-text">(Level {{ event.difficultyLevel }})</span>
+          </span>
+        </div>
+        <div class="info-item" *ngIf="event.trainer">
+          <label>Trainer:</label>
+          <span class="value">{{ event.trainer }}</span>
+        </div>
+        <div class="info-item" *ngIf="event.capacity !== undefined">
+          <label>Participants:</label>
+          <span class="value">
+            {{ event.enrolled }}/{{ event.capacity }}
+            <p-progressBar 
+              [value]="(event.enrolled! / event.capacity!) * 100" 
+              [showValue]="false"
+              styleClass="capacity-bar">
+            </p-progressBar>
+          </span>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card *ngIf="eventType === 'individual'" header="Session Details">
+      <div class="info-grid">
+        <div class="info-item" *ngIf="event.trainer">
+          <label>Trainer:</label>
+          <span class="value">{{ event.trainer }}</span>
+        </div>
+        <div class="info-item" *ngIf="event.client">
+          <label>Client:</label>
+          <span class="value">{{ event.client }}</span>
+        </div>
+        <div class="info-item" *ngIf="event.location">
+          <label>Location:</label>
+          <span class="value">{{ event.location }}</span>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card *ngIf="eventType === 'shift'" header="Shift Details">
+      <div class="info-grid">
+        <div class="info-item" *ngIf="event.trainer">
+          <label>Staff:</label>
+          <span class="value">{{ event.trainer }}</span>
+        </div>
+        <div class="info-item" *ngIf="event.location">
+          <label>Position:</label>
+          <span class="value">{{ event.location }}</span>
+        </div>
+      </div>
+    </p-card>
+
+    <div class="actions">
+      <button pButton 
+              label="Edit Event" 
+              icon="pi pi-pencil"
+              class="p-button-outlined"
+              (click)="editEvent()">
+      </button>
+      <button pButton 
+              *ngIf="eventType === 'group' && !event.isCancelled && !event.isCompleted"
+              label="Cancel Training" 
+              icon="pi pi-times"
+              class="p-button-danger"
+              (click)="cancelEvent()">
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="no-event" *ngIf="!event">
+  <div class="placeholder">
+    <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
+    <p>Click on an event to view details</p>
+  </div>
+</div>

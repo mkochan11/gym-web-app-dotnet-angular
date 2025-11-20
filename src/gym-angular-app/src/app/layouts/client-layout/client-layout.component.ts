@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../shared/services/auth.service';
-import { ToastService } from '../../shared/services/toast.service';
+import { AuthService } from '../../core/api-services';
+import { ToastService } from '../../core/services/toast.service';
 import { primeNgModules } from '../../shared/primeng';
 
 @Component({

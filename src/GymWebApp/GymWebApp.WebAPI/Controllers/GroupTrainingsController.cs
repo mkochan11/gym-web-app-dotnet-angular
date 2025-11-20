@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/group-trainings")]
 [ApiController]
 public class GroupTrainingsController : ControllerBase
 {

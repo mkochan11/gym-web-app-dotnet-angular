@@ -9,7 +9,8 @@ import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
-import { MembershipService, MembershipPlan, PaymentData, ToastService } from '../../shared/services';
+import { MembershipService, MembershipPlan, PaymentData } from '../../core/api-services';
+import { ToastService } from '../../core/services';
 
 @Component({
   selector: 'app-payment',

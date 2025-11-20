@@ -2,7 +2,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthService, ToastService } from '../../shared/services';
+import { AuthService } from '../../core/api-services';
+import { ToastService } from '../../core/services';
 import { primeNgModules } from '../../shared/primeng';
 
 @Component({

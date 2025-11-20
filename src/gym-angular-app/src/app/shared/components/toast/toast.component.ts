@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { CommonModule, NgIf, AsyncPipe } from '@angular/common';
-import { ToastService, ToastMessage } from '../../services';
+import { ToastService, ToastMessage } from '../../../core/services';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
@@ -33,7 +33,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 export class ToastComponent {
   toast$;
 
-  constructor(private toastService: ToastService) {
+  constructor(@Inject(ToastService) private toastService: ToastService) {
     this.toast$ = this.toastService.toast$;
   }
 }

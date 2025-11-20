@@ -3,7 +3,8 @@ import { primeNgModules } from '../../shared/primeng';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService, ToastService } from '../../shared/services';
+import { ToastService } from '../../core/services';
+import { AuthService } from '../../core/api-services';
 
 @Component({
   selector: 'app-register',

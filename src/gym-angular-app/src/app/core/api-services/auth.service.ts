@@ -13,7 +13,7 @@ export class AuthService {
   constructor(private httpService: HttpService) {}
 
   login(credentials: { email: string; password: string }): Observable<any> {
-    return this.httpService.post<any>('Auth/login', credentials)
+    return this.httpService.post<any>('auth/login', credentials)
       .pipe(
         tap(resp => {
           const tokenString = resp?.token?.result;
@@ -31,7 +31,7 @@ export class AuthService {
     email: string; 
     password: string; 
   }): Observable<any> {
-    return this.httpService.post<any>('Auth/register', userData)
+    return this.httpService.post<any>('auth/register', userData)
       .pipe(
         tap(resp => {
           const tokenString = resp?.token?.result;

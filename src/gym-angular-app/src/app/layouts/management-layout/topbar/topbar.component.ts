@@ -39,6 +39,8 @@ export class TopbarComponent implements OnInit{
       this.pageTitle = 'Manage Receptionists';
     } else if (url.includes('/management/manager/clients')) {
       this.pageTitle = 'Manage Clients';
+    } else if (url.includes('/management/manager/calendar')) {
+      this.pageTitle = 'Calendar';
     } else if (url.includes('/management/manager')) {
       this.pageTitle = 'Dashboard';
     } else {

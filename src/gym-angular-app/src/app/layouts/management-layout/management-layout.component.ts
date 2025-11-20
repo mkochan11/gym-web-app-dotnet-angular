@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { TopbarComponent } from './topbar/topbar.component';
-import { AuthService } from '../../shared/services';
+import { AuthService } from '../../core/api-services';
 
 @Component({
   selector: 'app-management-layout',

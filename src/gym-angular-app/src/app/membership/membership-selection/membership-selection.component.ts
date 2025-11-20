@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 
-import { MembershipService, MembershipPlan } from '../../shared/services/membership.service';
+import { MembershipService, MembershipPlan } from '../../core/api-services';
 
 @Component({
   selector: 'app-membership-selection',

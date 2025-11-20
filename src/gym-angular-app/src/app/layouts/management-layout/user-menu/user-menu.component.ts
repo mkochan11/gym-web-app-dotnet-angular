@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { primeNgModules } from '../../../shared/primeng';
 import { MenuItem } from 'primeng/api';
 import { CommonModule } from '@angular/common';
-import { AuthService, ToastService } from '../../../shared/services';
+import { AuthService } from '../../../core/api-services/';
+import { ToastService } from '../../../core/services';
 import { Router } from '@angular/router';
 
 @Component({

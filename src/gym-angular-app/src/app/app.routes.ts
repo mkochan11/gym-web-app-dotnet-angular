@@ -5,6 +5,7 @@ import { ClientLayoutComponent } from './layouts/client-layout/client-layout.com
 import { ManagementLayoutComponent } from './layouts/management-layout/management-layout.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { roleGuard } from './shared/guards/role.guard';
+import { Calendar } from '@fullcalendar/core/index.js';
 
 export const routes: Routes = [
 
@@ -83,6 +84,12 @@ export const routes: Routes = [
         data: { roles: ['Manager'] },
         loadComponent: () => import('./management/manager/dashboard/dashboard.component').then(m => m.DashboardComponent),
         children: [
+          {
+            path: 'calendar',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Manager'] },
+            loadComponent: () => import('./management/manager/manager-calendar/manager-calendar.component').then(m => m.ManagerCalendarComponent)
+          },
           {
             path: 'trainers',
             canActivate: [authGuard, roleGuard],

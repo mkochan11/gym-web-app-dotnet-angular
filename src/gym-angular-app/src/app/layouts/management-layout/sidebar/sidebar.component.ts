@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { MenuItem } from 'primeng/api';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../../shared/services';
+import { AuthService } from '../../../core/api-services/';
 
 @Component({
   selector: 'app-sidebar',
@@ -18,6 +18,8 @@ export class SidebarComponent {
   constructor(private authService: AuthService) {}
 
   managerSidebarItems: MenuItem[] = [
+    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/management/manager'] },
+    { label: 'Calendar', icon: 'pi pi-calendar', routerLink: ['/management/manager/calendar'] },
     { label: 'Employees', icon: 'pi pi-users', items: [
       { label: 'Trainers', icon: 'pi pi-user-edit', routerLink: ['/management/manager/trainers'] },
       { label: 'Receptionists', icon: 'pi pi-user-edit', routerLink: ['/management/manager/receptionists'] },
