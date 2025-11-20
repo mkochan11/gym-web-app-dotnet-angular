@@ -22,48 +22,6 @@ namespace GymWebApp.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("GymWebApp.Data.Entities.Abstract.AuditableEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("nvarchar(34)");
-
-                    b.Property<bool>("Removed")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("UpdatedById");
-
-                    b.ToTable("AuditableEntity");
-
-                    b.HasDiscriminator().HasValue("AuditableEntity");
-
-                    b.UseTphMappingStrategy();
-                });
-
             modelBuilder.Entity("GymWebApp.Data.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -222,6 +180,720 @@ namespace GymWebApp.Data.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("GymWebApp.Data.Entities.Employment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("HourlyRate")
+                        .HasColumnType("decimal(5, 2)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("Employments");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.Exercise", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MuscleGroup")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RepetitionsNumber")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("RestTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("SeriesNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrainingPlanSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("TrainingPlanSessionId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("Exercises");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.GroupTraining", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("DifficultyLevel")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaxParticipantNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TrainerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrainingTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("TrainerId");
+
+                    b.HasIndex("TrainingTypeId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("GroupTrainings");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.GroupTrainingParticipation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("GroupTrainingId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("GroupTrainingId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("GroupTrainingParticipations");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.GymMembership", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MembershipPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("MembershipPlanId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("GymMemberships");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.IndividualTraining", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TrainerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("TrainerId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("IndividualTrainings");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.MembershipPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CanAccessGroupTraining")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanAccessPersonalTraining")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanReceiveTrainingPlans")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanReserveTrainings")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("DurationInMonths")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DurationTime")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxTrainingsPerMonth")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(6, 2)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("MembershipPlans");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(6, 2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("GymMembershipId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSuccessful")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ProcessedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("GymMembershipId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.Shift", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("Shifts");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.TrainingPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TrainerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("TrainerId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("TrainingPlans");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.TrainingPlanSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("SessionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TrainingPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("TrainingPlanId");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("TrainingPlanSessions");
+                });
+
+            modelBuilder.Entity("GymWebApp.Data.Entities.TrainingType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("DifficultyLevel")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("UpdatedById");
+
+                    b.ToTable("TrainingTypes");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -357,526 +1029,322 @@ namespace GymWebApp.Data.Migrations
 
             modelBuilder.Entity("GymWebApp.Data.Entities.Employment", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.Employee", "Employee")
+                        .WithMany("Employments")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<decimal?>("HourlyRate")
-                        .HasColumnType("decimal(5, 2)");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Navigation("Employee");
 
-                    b.HasIndex("EmployeeId");
-
-                    b.HasDiscriminator().HasValue("Employment");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.Exercise", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.HasOne("GymWebApp.Data.Entities.TrainingPlanSession", "TrainingPlanSession")
+                        .WithMany("Exercises")
+                        .HasForeignKey("TrainingPlanSessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("Instructions")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<string>("MuscleGroup")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Navigation("TrainingPlanSession");
 
-                    b.Property<int?>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RepetitionsNumber")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("RestTime")
-                        .HasColumnType("time");
-
-                    b.Property<int>("SeriesNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TrainingPlanSessionId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("TrainingPlanSessionId");
-
-                    b.HasDiscriminator().HasValue("Exercise");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.GroupTraining", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("CancellationReason")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.HasOne("GymWebApp.Data.Entities.Employee", "Trainer")
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("CancelledAt")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.TrainingType", "TrainingType")
+                        .WithMany()
+                        .HasForeignKey("TrainingTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime>("Date")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<int>("DifficultyLevel")
-                        .HasColumnType("int");
+                    b.Navigation("Trainer");
 
-                    b.Property<TimeSpan>("Duration")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("time");
+                    b.Navigation("TrainingType");
 
-                    b.Property<bool>("IsCancelled")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsCompleted")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bit");
-
-                    b.Property<int>("MaxParticipantNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("TrainerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TrainingTypeId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("TrainerId");
-
-                    b.HasIndex("TrainingTypeId");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("Description")
-                                .HasColumnName("GroupTraining_Description");
-                        });
-
-                    b.HasDiscriminator().HasValue("GroupTraining");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.GroupTrainingParticipation", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
+                        .WithMany("GroupTrainingsParticipations")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.GroupTraining", "GroupTraining")
+                        .WithMany("Participations")
+                        .HasForeignKey("GroupTrainingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int>("GroupTrainingId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<bool>("IsCancelled")
-                        .HasColumnType("bit");
+                    b.Navigation("Client");
 
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
+                    b.Navigation("CreatedBy");
 
-                    b.HasIndex("ClientId");
+                    b.Navigation("GroupTraining");
 
-                    b.HasIndex("GroupTrainingId");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("CancelledAt")
-                                .HasColumnName("GroupTrainingParticipation_CancelledAt");
-
-                            t.Property("IsCancelled")
-                                .HasColumnName("GroupTrainingParticipation_IsCancelled");
-                        });
-
-                    b.HasDiscriminator().HasValue("GroupTrainingParticipation");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.GymMembership", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
+                        .WithMany("GymMemberships")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.MembershipPlan", "MembershipPlan")
+                        .WithMany("GymMemberships")
+                        .HasForeignKey("MembershipPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                    b.Navigation("Client");
 
-                    b.Property<bool>("IsCancelled")
-                        .HasColumnType("bit");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<int>("MembershipPlanId")
-                        .HasColumnType("int");
+                    b.Navigation("MembershipPlan");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("MembershipPlanId");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("CancelledAt")
-                                .HasColumnName("GymMembership_CancelledAt");
-
-                            t.Property("ClientId")
-                                .HasColumnName("GymMembership_ClientId");
-
-                            t.Property("EndDate")
-                                .HasColumnName("GymMembership_EndDate");
-
-                            t.Property("IsCancelled")
-                                .HasColumnName("GymMembership_IsCancelled");
-
-                            t.Property("StartDate")
-                                .HasColumnName("GymMembership_StartDate");
-                        });
-
-                    b.HasDiscriminator().HasValue("GymMembership");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.IndividualTraining", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
+                        .WithMany("IndividualTrainings")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<string>("CancellationReason")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("CancelledAt")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.Employee", "Trainer")
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<DateTime>("Date")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("datetime2");
+                    b.Navigation("Client");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<TimeSpan>("Duration")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("time");
+                    b.Navigation("Trainer");
 
-                    b.Property<bool>("IsCancelled")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsCompleted")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Notes")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("TrainerId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("TrainerId");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("ClientId")
-                                .HasColumnName("IndividualTraining_ClientId");
-
-                            t.Property("Description")
-                                .HasColumnName("IndividualTraining_Description");
-
-                            t.Property("TrainerId")
-                                .HasColumnName("IndividualTraining_TrainerId");
-                        });
-
-                    b.HasDiscriminator().HasValue("IndividualTraining");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.MembershipPlan", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<bool>("CanAccessGroupTraining")
-                        .HasColumnType("bit");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<bool>("CanAccessPersonalTraining")
-                        .HasColumnType("bit");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<bool>("CanReceiveTrainingPlans")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanReserveTrainings")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("DurationInMonths")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DurationTime")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("MaxTrainingsPerMonth")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(6, 2)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("Description")
-                                .HasColumnName("MembershipPlan_Description");
-
-                            t.Property("IsActive")
-                                .HasColumnName("MembershipPlan_IsActive");
-                        });
-
-                    b.HasDiscriminator().HasValue("MembershipPlan");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.Payment", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(6, 2)");
+                    b.HasOne("GymWebApp.Data.Entities.GymMembership", "GymMembership")
+                        .WithMany("Payments")
+                        .HasForeignKey("GymMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("FailureReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<int>("GymMembershipId")
-                        .HasColumnType("int");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<bool>("IsSuccessful")
-                        .HasColumnType("bit");
+                    b.Navigation("GymMembership");
 
-                    b.Property<DateTime>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ProcessedBy")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("ReferenceNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TransactionId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasIndex("GymMembershipId");
-
-                    b.HasDiscriminator().HasValue("Payment");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.Shift", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
+                    b.Navigation("CreatedBy");
 
-                    b.HasIndex("EmployeeId");
+                    b.Navigation("Employee");
 
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("EmployeeId")
-                                .HasColumnName("Shift_EmployeeId");
-                        });
-
-                    b.HasDiscriminator().HasValue("Shift");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.TrainingPlan", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
+                        .WithMany("TrainingPlans")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.HasOne("GymWebApp.Data.Entities.Employee", "Trainer")
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                    b.Navigation("Client");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Navigation("CreatedBy");
 
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Navigation("Trainer");
 
-                    b.Property<int>("TrainerId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("TrainerId");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("ClientId")
-                                .HasColumnName("TrainingPlan_ClientId");
-
-                            t.Property("Description")
-                                .HasColumnName("TrainingPlan_Description");
-
-                            t.Property("EndDate")
-                                .HasColumnName("TrainingPlan_EndDate");
-
-                            t.Property("IsActive")
-                                .HasColumnName("TrainingPlan_IsActive");
-
-                            t.Property("Name")
-                                .HasColumnName("TrainingPlan_Name");
-
-                            t.Property("StartDate")
-                                .HasColumnName("TrainingPlan_StartDate");
-
-                            t.Property("TrainerId")
-                                .HasColumnName("TrainingPlan_TrainerId");
-                        });
-
-                    b.HasDiscriminator().HasValue("TrainingPlan");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.TrainingPlanSession", b =>
                 {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("GymWebApp.Data.Entities.TrainingPlan", "TrainingPlan")
+                        .WithMany("Sessions")
+                        .HasForeignKey("TrainingPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime>("SessionDate")
-                        .HasColumnType("datetime2");
+                    b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<int>("TrainingPlanId")
-                        .HasColumnType("int");
+                    b.Navigation("CreatedBy");
 
-                    b.HasIndex("TrainingPlanId");
+                    b.Navigation("TrainingPlan");
 
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("Notes")
-                                .HasColumnName("TrainingPlanSession_Notes");
-                        });
-
-                    b.HasDiscriminator().HasValue("TrainingPlanSession");
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.TrainingType", b =>
-                {
-                    b.HasBaseType("GymWebApp.Data.Entities.Abstract.AuditableEntity");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int?>("DifficultyLevel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.ToTable("AuditableEntity", t =>
-                        {
-                            t.Property("Description")
-                                .HasColumnName("TrainingType_Description");
-
-                            t.Property("DifficultyLevel")
-                                .HasColumnName("TrainingType_DifficultyLevel");
-
-                            t.Property("IsActive")
-                                .HasColumnName("TrainingType_IsActive");
-
-                            t.Property("Name")
-                                .HasColumnName("TrainingType_Name");
-                        });
-
-                    b.HasDiscriminator().HasValue("TrainingType");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.Abstract.AuditableEntity", b =>
                 {
                     b.HasOne("GymWebApp.Data.Entities.ApplicationUser", "CreatedBy")
                         .WithMany()
@@ -943,155 +1411,6 @@ namespace GymWebApp.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.Employment", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Employee", "Employee")
-                        .WithMany("Employments")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.Exercise", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.TrainingPlanSession", "TrainingPlanSession")
-                        .WithMany("Exercises")
-                        .HasForeignKey("TrainingPlanSessionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("TrainingPlanSession");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.GroupTraining", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Employee", "Trainer")
-                        .WithMany()
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("GymWebApp.Data.Entities.TrainingType", "TrainingType")
-                        .WithMany()
-                        .HasForeignKey("TrainingTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Trainer");
-
-                    b.Navigation("TrainingType");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.GroupTrainingParticipation", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
-                        .WithMany("GroupTrainingsParticipations")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("GymWebApp.Data.Entities.GroupTraining", "GroupTraining")
-                        .WithMany("Participations")
-                        .HasForeignKey("GroupTrainingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("GroupTraining");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.GymMembership", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
-                        .WithMany("GymMemberships")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("GymWebApp.Data.Entities.MembershipPlan", "MembershipPlan")
-                        .WithMany("GymMemberships")
-                        .HasForeignKey("MembershipPlanId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("MembershipPlan");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.IndividualTraining", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
-                        .WithMany("IndividualTrainings")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("GymWebApp.Data.Entities.Employee", "Trainer")
-                        .WithMany()
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Trainer");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.Payment", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.GymMembership", "GymMembership")
-                        .WithMany("Payments")
-                        .HasForeignKey("GymMembershipId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("GymMembership");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.Shift", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.TrainingPlan", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.Client", "Client")
-                        .WithMany("TrainingPlans")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("GymWebApp.Data.Entities.Employee", "Trainer")
-                        .WithMany()
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Trainer");
-                });
-
-            modelBuilder.Entity("GymWebApp.Data.Entities.TrainingPlanSession", b =>
-                {
-                    b.HasOne("GymWebApp.Data.Entities.TrainingPlan", "TrainingPlan")
-                        .WithMany("Sessions")
-                        .HasForeignKey("TrainingPlanId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("TrainingPlan");
                 });
 
             modelBuilder.Entity("GymWebApp.Data.Entities.Client", b =>

@@ -1,6 +1,4 @@
-﻿using System.Reflection.Emit;
-using GymWebApp.Data.Entities;
-using GymWebApp.Data.Entities.Abstract;
+﻿using GymWebApp.Data.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,18 +39,6 @@ namespace GymWebApp.Data
             {
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
             }
-
-            builder.Entity<AuditableEntity>()
-                .HasOne(a => a.CreatedBy)
-                .WithMany()
-                .HasForeignKey(a => a.CreatedById)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<AuditableEntity>()
-                .HasOne(a => a.UpdatedBy)
-                .WithMany()
-                .HasForeignKey(a => a.UpdatedById)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
