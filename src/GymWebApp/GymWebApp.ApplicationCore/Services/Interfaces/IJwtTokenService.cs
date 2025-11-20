@@ -1,6 +1,6 @@
 ﻿using GymWebApp.Data.Entities;
 
-namespace GymWebApp.ApplicationCore.Interfaces;
+namespace GymWebApp.ApplicationCore.Services.Interfaces;
 
 public interface IJwtTokenService
 {

@@ -1,4 +1,4 @@
-﻿using GymWebApp.ApplicationCore.Interfaces;
+﻿using GymWebApp.ApplicationCore.Services.Interfaces;
 using GymWebApp.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;

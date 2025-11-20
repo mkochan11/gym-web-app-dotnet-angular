@@ -6,7 +6,7 @@ namespace GymWebApp.Data.Repositories;
 
 public class Repository<T> : IRepository<T> where T : BaseEntity
 {
-    private readonly ApplicationDbContext _context;
+    protected readonly ApplicationDbContext _context;
     private readonly DbSet<T> _dbSet;
 
     public Repository(ApplicationDbContext context)

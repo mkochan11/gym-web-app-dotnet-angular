@@ -1,13 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymWebApp.WebAPI", "GymWebApp.WebAPI\GymWebApp.WebAPI.csproj", "{8DEA7667-6267-4A0C-B7FE-F536715DBF9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GymWebApp.WebAPI", "GymWebApp.WebAPI\GymWebApp.WebAPI.csproj", "{8DEA7667-6267-4A0C-B7FE-F536715DBF9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymWebApp.Data", "GymWebApp.Data\GymWebApp.Data.csproj", "{92CA3046-A684-44CA-B55C-A24163D91578}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GymWebApp.Data", "GymWebApp.Data\GymWebApp.Data.csproj", "{92CA3046-A684-44CA-B55C-A24163D91578}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymWebApp.ApplicationCore", "GymWebApp.ApplicationCore\GymWebApp.ApplicationCore.csproj", "{C1DE2B13-6B3C-4C5E-98E9-087149DC9543}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GymWebApp.ApplicationCore", "GymWebApp.ApplicationCore\GymWebApp.ApplicationCore.csproj", "{C1DE2B13-6B3C-4C5E-98E9-087149DC9543}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9736BFD7-886A-4BB8-93D4-23BD734042B5}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

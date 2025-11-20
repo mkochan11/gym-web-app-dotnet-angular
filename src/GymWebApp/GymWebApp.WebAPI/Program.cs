@@ -1,16 +1,20 @@
-using GymWebApp.ApplicationCore.Interfaces;
+using FluentValidation;
+using GymWebApp.ApplicationCore.Common;
 using GymWebApp.ApplicationCore.Services;
+using GymWebApp.ApplicationCore.Services.Interfaces;
 using GymWebApp.Data;
 using GymWebApp.Data.Entities;
 using GymWebApp.Data.Repositories;
 using GymWebApp.Data.Repositories.Interfaces;
 using GymWebApp.WebAPI.Extensions;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System.Reflection;
 using System.Text;
 
 Log.Logger = new LoggerConfiguration()
@@ -64,7 +68,11 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         });
     });
 
+    services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+    services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidatorBase<,>));
+
     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+    services.AddScoped(typeof(IGroupTrainingRepository), typeof(GroupTrainingRepository));
 
     services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
