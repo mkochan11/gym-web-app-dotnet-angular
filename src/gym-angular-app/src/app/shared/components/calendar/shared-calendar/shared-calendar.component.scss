@@ -27,12 +27,14 @@
   opacity: 0;
   transition: all 0.3s ease;
   overflow: hidden;
+  margin-left: 1rem;
   
   &.visible {
     flex: 0 0 30%;
     min-width: 350px;
     max-width: 400px;
     opacity: 1;
+    height: 100%;
   }
 }
 
@@ -129,6 +131,11 @@
 }
 
 :host ::ng-deep {
+  .event-details {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
   .fc {
     width: 100% !important;
     max-width: 100% !important;
@@ -147,7 +154,6 @@
       height: 100% !important;
     }
 
-    // Header toolbar
     .fc-toolbar {
       padding: 1rem;
       background: var(--surface-50);
@@ -195,9 +201,22 @@
       }
     }
 
-    // Time grid views
     .fc-timegrid {
       width: 100% !important;
+
+      table{ width: 100% !important; }
+
+      .fc-timegrid-col {
+        width: 100% !important;
+      }
+
+      .fc-timegrid-col-frame {
+        width: 100% !important;
+      }
+
+      .fc-timegrid-col-events {
+        width: 100% !important;
+      }
       
       .fc-timegrid-axis {
         background: #f8f9fa !important;
@@ -232,7 +251,10 @@
       }
     }
 
-    // Column headers
+    .fc-scrollgrid {
+      width: 100% !important;
+    }
+
     .fc-col-header {
       background: #f8f9fa !important;
       border-radius: 8px 8px 0 0;
@@ -261,8 +283,8 @@
       }
     }
 
-    // Rest of your FullCalendar styles remain the same...
     .fc-timegrid-body {
+      width: 100% !important;
       .fc-day-today {
         background-color: #dbeafe !important;
         
@@ -270,6 +292,64 @@
           background: #dbeafe !important;
         }
       }
+    }
+
+    .fc-daygrid-day {
+      width: 100% !important;
+    }
+
+    .fc-daygrid-day-frame {
+      width: 100% !important;
+    }
+    
+    .fc-daygrid-day-events {
+      width: 100% !important;
+    }
+    
+    .fc-daygrid-event {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    .fc-daygrid-day-top {
+      width: 100% !important;
+    }
+
+    .fc-daygrid {
+      table {
+        width: 100% !important;
+      }
+      
+      .fc-daygrid-day-frame {
+        width: 100% !important;
+      }
+      
+      .fc-daygrid-day-events {
+        width: 100% !important;
+      }
+    }
+
+        .fc-daygrid-body {
+      width: 100% !important;
+    }
+    
+    .fc-daygrid-table {
+      width: 100% !important;
+    }
+    
+    .fc-scrollgrid-sync-table {
+      width: 100% !important;
+    }
+    
+    .fc-scrollgrid-section > td {
+      width: 100% !important;
+    }
+
+    .fc-daygrid-event {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .fc-daygrid-day.fc-day-today {
@@ -291,6 +371,8 @@
       margin: 1px 2px !important;
       color: white !important;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      max-width: 100%;
+      box-sizing: border-box;
 
       &:hover {
         opacity: 0.9 !important;
@@ -336,7 +418,6 @@
   }
 }
 
-// Responsive design
 @media (max-width: 1024px) {
   .calendar-layout {
     flex-direction: column;
@@ -380,7 +461,6 @@
   }
 }
 
-// Fix the duplicate media query - replace your existing one with this:
 @media (max-width: 768px) {
   .calendar-container {
     padding: 0.75rem;
