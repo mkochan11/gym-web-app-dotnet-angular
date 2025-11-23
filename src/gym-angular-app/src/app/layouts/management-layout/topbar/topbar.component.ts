@@ -54,7 +54,7 @@ export class TopbarComponent implements OnInit{
     } else if (url.includes('/management/owner')) {
       this.panelTitle = 'Owner Panel';
     } else if (url.includes('/management/manager')) {
-      this.panelTitle = 'Manager Panel';
+      this.panelTitle = '🛠 Manager Panel';
     } else if (url.includes('/management/trainer')) {
       this.panelTitle = 'Trainer Panel';
     } else if (url.includes('/management/receptionist')) {
