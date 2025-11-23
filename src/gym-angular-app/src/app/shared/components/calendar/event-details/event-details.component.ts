@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
@@ -16,10 +16,26 @@ import { CalendarEvent } from '../../../../core/models/calendar-event';
 export class EventDetailsComponent {
   @Input() event: CalendarEvent | null = null;
   @Input() eventType: 'group' | 'individual' | 'shift' | null = null;
+  @Input() permissions: any = {};
+  @Output() close = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+  @Output() delete = new EventEmitter<void>();
 
   closeDetails() {
-    this.event = null;
-    this.eventType = null;
+    this.close.emit();
+  }
+
+  editEvent() {
+    this.edit.emit();
+  }
+
+  cancelEvent() {
+    this.cancel.emit();
+  }
+
+  deleteEvent() {
+    this.delete.emit();
   }
 
   getDifficultyStars(difficulty: number): string {
@@ -40,5 +56,27 @@ export class EventDetailsComponent {
     if (this.event.isCancelled) return 'Cancelled';
     if (this.event.isCompleted) return 'Completed';
     return 'Scheduled';
+  }
+
+  getDuration(): string {
+    if (!this.event) return '';
+    const duration = this.event.end.getTime() - this.event.start.getTime();
+    const hours = Math.floor(duration / (1000 * 60 * 60));
+    const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`;
+    }
+    return `${minutes}m`;
+  }
+
+  getAvailabilityPercentage(): number {
+    if (!this.event || !this.event.capacity || !this.event.enrolled) return 0;
+    return (this.event.enrolled / this.event.capacity) * 100;
+  }
+
+  isTrainingFull(): boolean {
+    if (!this.event || !this.event.capacity || !this.event.enrolled) return false;
+    return this.event.enrolled >= this.event.capacity;
   }
 }

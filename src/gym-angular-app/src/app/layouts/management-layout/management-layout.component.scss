@@ -1,22 +1,37 @@
+// management-layout.component.scss
 .layout-wrapper {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: var(--surface-ground);
 }
 
 .layout-container {
   flex: 1;
   display: flex;
   overflow: hidden;
-  margin-top: 1rem;
-  
-  padding: 0 1rem;
+  min-height: 0;
+}
+
+.layout-sidebar {
+  height: 100%;
 }
 
 .layout-main {
   flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-  background: var(--surface-ground);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative; // Add this for better child positioning
+}
+
+// Force the router outlet content to take full available space
+.layout-main ::ng-deep > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
 }

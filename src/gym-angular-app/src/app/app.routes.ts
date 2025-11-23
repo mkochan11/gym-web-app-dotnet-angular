@@ -6,6 +6,7 @@ import { ManagementLayoutComponent } from './layouts/management-layout/managemen
 import { authGuard } from './shared/guards/auth.guard';
 import { roleGuard } from './shared/guards/role.guard';
 import { Calendar } from '@fullcalendar/core/index.js';
+import { ManagerLayoutComponent } from './layouts/management-layout/manager-layout/manager-layout.component';
 
 export const routes: Routes = [
 
@@ -80,10 +81,14 @@ export const routes: Routes = [
       },
       {
         path: 'manager',
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['Manager'] },
-        loadComponent: () => import('./management/manager/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        component: ManagerLayoutComponent,
         children: [
+          {
+            path: '',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Manager'] },
+            loadComponent: () => import('./management/manager/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
           {
             path: 'calendar',
             canActivate: [authGuard, roleGuard],

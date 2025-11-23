@@ -7,35 +7,39 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 import { CalendarConfig, CALENDAR_CONFIGS } from '../../../../core/configurations/calendar-config';
-import { GroupTrainingService, IndividualTrainingService, ShiftService } from '../../../../core/api-services';
+import { GroupTrainingService } from '../../../../core/api-services';
 import { CalendarEvent } from '../../../../core/models/calendar-event';
 import { EventDetailsComponent } from '../event-details/event-details.component';
+import { ProgressSpinnerModule } from "primeng/progressspinner";
+import { Button } from "primeng/button";
 
 @Component({
   selector: 'app-shared-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, EventDetailsComponent],
+  imports: [CommonModule, FullCalendarModule, EventDetailsComponent, ProgressSpinnerModule, Button],
   templateUrl: './shared-calendar.component.html',
   styleUrls: ['./shared-calendar.component.scss']
 })
 export class SharedCalendarComponent implements OnInit {
   private groupTrainingService = inject(GroupTrainingService);
-  private individualTrainingService = inject(IndividualTrainingService);
-  private shiftService = inject(ShiftService);
 
   @Input() role: string = 'RECEPTIONIST';
   @Output() eventClick = new EventEmitter<CalendarEvent>();
   @Output() eventCreate = new EventEmitter<any>();
+  @Output() eventEdit = new EventEmitter<CalendarEvent>();
+  @Output() eventCancel = new EventEmitter<CalendarEvent>();
+  @Output() eventDelete = new EventEmitter<CalendarEvent>();
 
   config!: CalendarConfig;
   calendarOptions!: CalendarOptions;
   
   selectedEvent: CalendarEvent | null = null;
+  selectedEventType: 'group' | 'individual' | 'shift' | null = null;
   showDetailsPanel = false;
   isLoading = false;
 
   ngOnInit() {
-    this.config = CALENDAR_CONFIGS[this.role] || CALENDAR_CONFIGS.RECEPTIONIST;
+    this.config = CALENDAR_CONFIGS[this.role] || CALENDAR_CONFIGS['RECEPTIONIST'];
     this.initializeCalendar();
     this.loadEvents();
   }
@@ -60,7 +64,7 @@ export class SharedCalendarComponent implements OnInit {
       eventColor: this.getEventColor(this),
       eventDisplay: 'block',
       
-      slotMinTime: '06:00:00',
+      slotMinTime: '07:00:00',
       slotMaxTime: '22:00:00',
       allDaySlot: false,
       slotLabelFormat: {
@@ -88,96 +92,51 @@ export class SharedCalendarComponent implements OnInit {
            this.config.canCreateShifts;
   }
 
-  private async loadEvents() {
+  private loadEvents() {
     this.isLoading = true;
     
-    try {
-      const events: EventInput[] = [];
-      
-      if (this.config.canViewGroupTrainings) {
-        const groupTrainings = await this.groupTrainingService.getAllGroupTrainings().toPromise();
-        events.push(...this.transformGroupTrainingsToEvents(groupTrainings || []));
+    this.groupTrainingService.getAllGroupTrainings().subscribe({
+      next: (trainings) => {
+        const events = this.transformGroupTrainingsToEvents(trainings);
+        this.calendarOptions.events = events;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading events:', error);
+        this.isLoading = false;
       }
-
-      // if (this.config.canViewIndividualTrainings) {
-      //   const individualTrainings = await this.individualTrainingService.getUpcomingIndividualTrainings().toPromise();
-      //   events.push(...this.transformIndividualTrainingsToEvents(individualTrainings || []));
-      // }
-
-      // // Load shifts if permitted
-      // if (this.config.canViewShifts) {
-      //   const shifts = await this.shiftService.getUpcomingShifts().toPromise();
-      //   events.push(...this.transformShiftsToEvents(shifts || []));
-      // }
-
-      this.calendarOptions.events = events;
-    } catch (error) {
-      console.error('Error loading events:', error);
-    } finally {
-      this.isLoading = false;
-    }
+    });
   }
 
   private transformGroupTrainingsToEvents(trainings: any[]): EventInput[] {
-    return trainings.map(training => ({
-      id: `group-${training.id}`,
-      title: `${training.trainingType?.name || 'Group Training'} - ${training.trainer?.firstName} ${training.trainer?.lastName}`,
-      start: new Date(training.date),
-      end: new Date(new Date(training.date).getTime() + this.parseDuration(training.duration)),
-      backgroundColor: '#10B981',
-      borderColor: '#10B981',
-      extendedProps: {
-        type: 'group',
-        trainer: `${training.trainer?.firstName} ${training.trainer?.lastName}`,
-        trainingType: training.trainingType?.name,
-        description: training.description,
-        difficultyLevel: training.difficultyLevel,
-        capacity: training.maxParticipantNumber,
-        enrolled: training.currentParticipantNumber,
-        isCompleted: training.isCompleted,
-        isCancelled: training.isCancelled,
-        originalData: training
-      }
-    }));
-  }
-
-  private transformIndividualTrainingsToEvents(trainings: any[]): EventInput[] {
-    return trainings.map(training => ({
-      id: `individual-${training.id}`,
-      title: `PT - ${training.client?.firstName} ${training.client?.lastName}`,
-      start: new Date(training.date),
-      end: new Date(new Date(training.date).getTime() + this.parseDuration(training.duration)),
-      backgroundColor: '#3B82F6',
-      borderColor: '#3B82F6',
-      extendedProps: {
-        type: 'individual',
-        trainer: `${training.trainer?.firstName} ${training.trainer?.lastName}`,
-        client: `${training.client?.firstName} ${training.client?.lastName}`,
-        location: training.location,
-        description: training.notes,
-        isCompleted: training.isCompleted,
-        isCancelled: training.isCancelled,
-        originalData: training
-      }
-    }));
-  }
-
-  private transformShiftsToEvents(shifts: any[]): EventInput[] {
-    return shifts.map(shift => ({
-      id: `shift-${shift.id}`,
-      title: `Shift - ${shift.employee?.firstName} ${shift.employee?.lastName}`,
-      start: new Date(shift.startTime),
-      end: new Date(shift.endTime),
-      backgroundColor: '#F59E0B',
-      borderColor: '#F59E0B',
-      extendedProps: {
-        type: 'shift',
-        trainer: `${shift.employee?.firstName} ${shift.employee?.lastName}`,
-        location: shift.position,
-        description: shift.notes,
-        originalData: shift
-      }
-    }));
+    return trainings.map(training => {
+      const startDate = new Date(training.date);
+      const duration = this.parseDuration(training.duration);
+      const endDate = new Date(startDate.getTime() + duration);
+      
+      const trainerName = `${training.trainer.firstName} ${training.trainer.lastName}`;
+      
+      return {
+        id: `group-${training.id}`,
+        title: `${training.trainingType.name} - ${trainerName}`,
+        start: startDate,
+        end: endDate,
+        backgroundColor: this.getEventColor({ type: 'group' }),
+        borderColor: this.getEventColor({ type: 'group' }),
+        extendedProps: {
+          type: 'group',
+          trainer: trainerName,
+          trainingType: training.trainingType.name,
+          description: training.description,
+          difficultyLevel: training.difficultyLevel,
+          capacity: training.maxParticipantNumber,
+          enrolled: training.currentParticipantNumber,
+          isCompleted: training.isCompleted,
+          isCancelled: training.isCancelled,
+          originalData: training
+        }
+      };
+    });
   }
 
   private parseDuration(duration: string): number {
@@ -208,7 +167,6 @@ export class SharedCalendarComponent implements OnInit {
       type: extendedProps['type'],
       trainer: extendedProps['trainer'],
       client: extendedProps['client'],
-      location: extendedProps['location'],
       capacity: extendedProps['capacity'],
       enrolled: extendedProps['enrolled'],
       description: extendedProps['description'],
@@ -220,6 +178,7 @@ export class SharedCalendarComponent implements OnInit {
     };
 
     this.selectedEvent = calendarEvent;
+    this.selectedEventType = extendedProps['type'];
     this.showDetailsPanel = true;
     this.eventClick.emit(calendarEvent);
   }
@@ -237,9 +196,38 @@ export class SharedCalendarComponent implements OnInit {
   closeDetailsPanel() {
     this.showDetailsPanel = false;
     this.selectedEvent = null;
+    this.selectedEventType = null;
+  }
+
+  onEditEvent() {
+    if (this.selectedEvent) {
+      this.eventEdit.emit(this.selectedEvent);
+    }
+  }
+
+  onCancelEvent() {
+    if (this.selectedEvent) {
+      this.eventCancel.emit(this.selectedEvent);
+    }
+  }
+
+  onDeleteEvent() {
+    if (this.selectedEvent) {
+      this.eventDelete.emit(this.selectedEvent);
+    }
   }
 
   refreshCalendar() {
     this.loadEvents();
+  }
+
+  getPermissionsForEvent(): any {
+    if (!this.selectedEventType) return {};
+    
+    return {
+      canEdit: this.config[`canEdit${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
+      canCancel: this.config[`canEdit${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
+      canDelete: this.config[`canDelete${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
+    };
   }
 }

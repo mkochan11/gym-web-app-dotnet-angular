@@ -87,10 +87,6 @@
           <label>Client:</label>
           <span class="value">{{ event.client }}</span>
         </div>
-        <div class="info-item" *ngIf="event.location">
-          <label>Location:</label>
-          <span class="value">{{ event.location }}</span>
-        </div>
       </div>
     </p-card>
 
@@ -100,26 +96,30 @@
           <label>Staff:</label>
           <span class="value">{{ event.trainer }}</span>
         </div>
-        <div class="info-item" *ngIf="event.location">
-          <label>Position:</label>
-          <span class="value">{{ event.location }}</span>
-        </div>
       </div>
     </p-card>
 
-    <div class="actions">
+    <div class="actions" *ngIf="permissions">
       <button pButton 
+              *ngIf="permissions.canEdit"
               label="Edit Event" 
               icon="pi pi-pencil"
               class="p-button-outlined"
               (click)="editEvent()">
       </button>
       <button pButton 
-              *ngIf="eventType === 'group' && !event.isCancelled && !event.isCompleted"
-              label="Cancel Training" 
+              *ngIf="permissions.canCancel && !event.isCancelled && !event.isCompleted"
+              label="Cancel Event" 
               icon="pi pi-times"
               class="p-button-danger"
               (click)="cancelEvent()">
+      </button>
+      <button pButton 
+              *ngIf="permissions.canDelete"
+              label="Delete Event" 
+              icon="pi pi-trash"
+              class="p-button-danger p-button-outlined"
+              (click)="deleteEvent()">
       </button>
     </div>
   </div>

@@ -6,7 +6,6 @@ export interface CalendarEvent {
     type: 'individual' | 'group' | 'shift';
     trainer?: string;
     client?: string;
-    location?: string;
     capacity?: number;
     enrolled?: number;
     description?: string;

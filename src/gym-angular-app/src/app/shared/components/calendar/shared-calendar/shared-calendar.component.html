@@ -1,1 +1,53 @@
-<p>shared-calendar works!</p>
+<div class="calendar-layout">
+  <div class="calendar-main" [class.with-details]="showDetailsPanel">
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <h2>Gym Schedule</h2>
+        <div class="calendar-actions">
+          <p-button 
+            icon="pi pi-refresh" 
+            label="Refresh" 
+            styleClass="p-button-outlined p-button-sm"
+            (click)="refreshCalendar()"
+            [loading]="isLoading">
+          </p-button>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item" *ngIf="config.canViewGroupTrainings">
+          <span class="color-indicator group"></span>
+          <span>Group Training</span>
+        </div>
+        <div class="legend-item" *ngIf="config.canViewIndividualTrainings">
+          <span class="color-indicator individual"></span>
+          <span>Individual Training</span>
+        </div>
+        <div class="legend-item" *ngIf="config.canViewShifts">
+          <span class="color-indicator shift"></span>
+          <span>Staff Shift</span>
+        </div>
+      </div>
+
+      <div class="loading-spinner" *ngIf="isLoading">
+        <p-progressSpinner></p-progressSpinner>
+        <span>Loading events...</span>
+      </div>
+
+      <full-calendar [options]="calendarOptions" *ngIf="!isLoading"></full-calendar>
+    </div>
+  </div>
+
+  <!-- Details Panel -->
+  <div class="details-panel" [class.visible]="showDetailsPanel">
+    <app-event-details
+      [event]="selectedEvent"
+      [eventType]="selectedEventType"
+      [permissions]="getPermissionsForEvent()"
+      (close)="closeDetailsPanel()"
+      (edit)="onEditEvent()"
+      (cancel)="onCancelEvent()"
+      (delete)="onDeleteEvent()">
+    </app-event-details>
+  </div>
+</div>
