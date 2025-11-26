@@ -1,5 +1,6 @@
 using FluentValidation;
 using GymWebApp.ApplicationCore.Common;
+using GymWebApp.ApplicationCore.CQRS.GroupTraining;
 using GymWebApp.ApplicationCore.Services;
 using GymWebApp.ApplicationCore.Services.Interfaces;
 using GymWebApp.Data;
@@ -68,11 +69,16 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         });
     });
 
+    services.AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssembly(typeof(GetGroupTrainingsFilteredQueryHandler).Assembly));
+
     services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
     services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidatorBase<,>));
 
     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
     services.AddScoped(typeof(IGroupTrainingRepository), typeof(GroupTrainingRepository));
+    services.AddScoped(typeof(IIndividualTrainingRepository), typeof(IndividualTrainingRepository));
+    services.AddScoped(typeof(IShiftRepository), typeof(ShiftRepository));
 
     services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
