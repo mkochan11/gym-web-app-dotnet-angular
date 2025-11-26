@@ -39,7 +39,8 @@ export class SidebarComponent {
     { label: 'Users', icon: 'pi pi-users', routerLink: ['/management/users'] },
     { label: 'Equipment', icon: 'pi pi-box', routerLink: ['/management/equipment'] },
     { label: 'Reports', icon: 'pi pi-chart-line', routerLink: ['/management/reports'] },
-    { label: 'Settings', icon: 'pi pi-cog', routerLink: ['/management/settings'] }
+    { label: 'Settings', icon: 'pi pi-cog', routerLink: ['/management/settings'] },
+    { label: 'Manager Panel', icon: 'pi pi-fw pi-home', routerLink: ['/management/manager'] },
   ]
 
   ownerSidebarItems: MenuItem[] = [

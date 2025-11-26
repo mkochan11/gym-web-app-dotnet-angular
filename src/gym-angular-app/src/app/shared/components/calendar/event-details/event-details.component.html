@@ -92,9 +92,9 @@
 
     <p-card *ngIf="eventType === 'shift'" header="Shift Details">
       <div class="info-grid">
-        <div class="info-item" *ngIf="event.trainer">
+        <div class="info-item" *ngIf="event.employee">
           <label>Staff:</label>
-          <span class="value">{{ event.trainer }}</span>
+          <span class="value">{{ event.employee }}</span>
         </div>
       </div>
     </p-card>

@@ -15,16 +15,16 @@
       </div>
 
       <div class="legend">
-        <div class="legend-item" *ngIf="config.canViewGroupTrainings">
-          <span class="color-indicator group"></span>
+        <div class="legend-item" *ngIf="config.canViewGroupTrainings" (click)="toggleEventVisibility('group')">
+          <span class="color-indicator group" [class.off]="!visibleEvents.group"></span>
           <span>Group Training</span>
         </div>
-        <div class="legend-item" *ngIf="config.canViewIndividualTrainings">
-          <span class="color-indicator individual"></span>
+        <div class="legend-item" *ngIf="config.canViewIndividualTrainings" (click)="toggleEventVisibility('individual')">
+          <span class="color-indicator individual" [class.off]="!visibleEvents.individual"></span>
           <span>Individual Training</span>
         </div>
-        <div class="legend-item" *ngIf="config.canViewShifts">
-          <span class="color-indicator shift"></span>
+        <div class="legend-item" *ngIf="config.canViewShifts" (click)="toggleEventVisibility('shift')">
+          <span class="color-indicator shift" [class.off]="!visibleEvents.shift"></span>
           <span>Staff Shift</span>
         </div>
       </div>

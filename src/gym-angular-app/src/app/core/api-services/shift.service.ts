@@ -1,9 +1,47 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { HttpService } from './http.service';
+import { Observable } from 'rxjs';
+import { Shift } from '../models/shift';
+import { CalendarFilters } from '../models/shared-calendar/calendar-filters';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShiftService {
+  private httpService = inject(HttpService);
 
-  constructor() { }
+  getAllShifts(): Observable<Shift[]> {
+    return this.httpService.get<Shift[]>('shifts');
+  }
+
+  getShiftsFiltered(filters?: CalendarFilters): Observable<Shift[]> {
+    let url = 'shifts/filtered';
+    const params = this.buildFilterParams(filters);
+    
+    if (params) {
+      url += `?${params}`;
+    }
+    
+    return this.httpService.get<Shift[]>(url);
+  }
+
+  private buildFilterParams(filters?: CalendarFilters): string {
+    if (!filters) return '';
+
+    const params: string[] = [];
+
+    if (filters.startDate) {
+      params.push(`StartDate=${filters.startDate.toISOString()}`);
+    }
+
+    if (filters.endDate) {
+      params.push(`EndDate=${filters.endDate.toISOString()}`);
+    }
+
+    if (filters.employeeIds?.length) {
+      params.push(`EmployeeIds=${filters.employeeIds.join(',')}`);
+    }
+
+    return params.join('&');
+  }
 }

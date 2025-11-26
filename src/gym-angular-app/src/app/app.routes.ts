@@ -86,13 +86,13 @@ export const routes: Routes = [
           {
             path: '',
             canActivate: [authGuard, roleGuard],
-            data: { roles: ['Manager'] },
+            data: { roles: ['Manager', 'Admin'] },
             loadComponent: () => import('./management/manager/dashboard/dashboard.component').then(m => m.DashboardComponent)
           },
           {
             path: 'calendar',
             canActivate: [authGuard, roleGuard],
-            data: { roles: ['Manager'] },
+            data: { roles: ['Manager', 'Admin'] },
             loadComponent: () => import('./management/manager/manager-calendar/manager-calendar.component').then(m => m.ManagerCalendarComponent)
           },
           {

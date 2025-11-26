@@ -4,7 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { CalendarEvent } from '../../../../core/models/calendar-event';
+import { CalendarEvent } from '../../../../core/models/shared-calendar/calendar-event';
 
 @Component({
   selector: 'app-event-details',

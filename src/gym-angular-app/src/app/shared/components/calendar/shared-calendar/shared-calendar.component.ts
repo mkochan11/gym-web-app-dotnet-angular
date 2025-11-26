@@ -1,17 +1,23 @@
-import { Component, Input, OnInit, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { Observable, Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 
 import { CalendarConfig, CALENDAR_CONFIGS } from '../../../../core/configurations/calendar-config';
-import { GroupTrainingService } from '../../../../core/api-services';
-import { CalendarEvent } from '../../../../core/models/calendar-event';
+import { AuthService, GroupTrainingService, IndividualTrainingService, ShiftService } from '../../../../core/api-services';
+import { CalendarEvent } from '../../../../core/models/shared-calendar/calendar-event';
 import { EventDetailsComponent } from '../event-details/event-details.component';
 import { ProgressSpinnerModule } from "primeng/progressspinner";
 import { Button } from "primeng/button";
+import { Shift } from '../../../../core/models/shift';
+import { IndividualTraining } from '../../../../core/models/individual-training';
+import { GroupTraining } from '../../../../core/models/group-training';
+import { CalendarFilters } from '../../../../core/models/shared-calendar/calendar-filters';
 
 @Component({
   selector: 'app-shared-calendar',
@@ -20,8 +26,12 @@ import { Button } from "primeng/button";
   templateUrl: './shared-calendar.component.html',
   styleUrls: ['./shared-calendar.component.scss']
 })
-export class SharedCalendarComponent implements OnInit {
+export class SharedCalendarComponent implements OnInit, OnDestroy {
   private groupTrainingService = inject(GroupTrainingService);
+  private individualTrainingService = inject(IndividualTrainingService);
+  private shiftService = inject(ShiftService);
+  private authService = inject(AuthService);
+  private destroy$ = new Subject<void>();
 
   @Input() role: string = 'RECEPTIONIST';
   @Output() eventClick = new EventEmitter<CalendarEvent>();
@@ -38,10 +48,47 @@ export class SharedCalendarComponent implements OnInit {
   showDetailsPanel = false;
   isLoading = false;
 
+  visibleEvents = {
+    group: true,
+    individual: true,
+    shift: true
+  }
+
+  allEvents: EventInput[] = [];
+  filteredEvents: EventInput[] = [];
+
+  currentFilters: CalendarFilters = {
+    eventTypes: ['group', 'individual', 'shift']
+  };
+
+  filterSubject = new Subject<CalendarFilters>();
+
   ngOnInit() {
+    this.role = this.authService.getRole()?.toUpperCase() ?? 'RECEPTIONIST';
     this.config = CALENDAR_CONFIGS[this.role] || CALENDAR_CONFIGS['RECEPTIONIST'];
+    this.currentFilters = this.getInitialFilters();
+    this.visibleEvents = {
+      group: this.config.canViewGroupTrainings,
+      individual: this.config.canViewIndividualTrainings,
+      shift: this.config.canViewShifts
+    };
     this.initializeCalendar();
+    this.setupFilterSubscription();
     this.loadEvents();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private setupFilterSubscription() {
+    this.filterSubject.pipe(
+      debounceTime(300),
+      takeUntil(this.destroy$)
+    ).subscribe(filters => {
+      this.loadEvents(filters);
+    });
   }
 
   private initializeCalendar() {
@@ -56,14 +103,18 @@ export class SharedCalendarComponent implements OnInit {
       editable: this.hasEditPermissions(),
       selectable: this.hasCreatePermissions(),
       selectMirror: true,
-      dayMaxEvents: true,
+      dayMaxEvents: 2,
+      eventMaxStack: 2,
+      moreLinkClick: 'popover',
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       events: [],
       eventClick: this.handleEventClick.bind(this),
       select: this.handleDateSelect.bind(this),
       eventColor: this.getEventColor(this),
       eventDisplay: 'block',
-      
+
+      moreLinkText: (num) => `+${num} more`,
+
       slotMinTime: '07:00:00',
       slotMaxTime: '22:00:00',
       allDaySlot: false,
@@ -80,6 +131,57 @@ export class SharedCalendarComponent implements OnInit {
     };
   }
 
+  updateFilters(newFilters: Partial<CalendarFilters>) {
+    this.currentFilters = { ...this.currentFilters, ...newFilters };
+    this.filterSubject.next(this.currentFilters);
+  }
+
+  setDateRange(startDate: Date, endDate: Date) {
+    this.updateFilters({ startDate, endDate });
+  }
+
+  setEmployeeFilter(employeeIds: number[]) {
+    this.updateFilters({ employeeIds });
+  }
+
+  setClientFilter(clientIds: number[]) {
+    this.updateFilters({ clientIds });
+  }
+
+  setTrainingTypeFilter(trainingTypeIds: number[]) {
+    this.updateFilters({ trainingTypeIds });
+  }
+
+  setEventTypeFilter(eventTypes: ('group' | 'individual' | 'shift')[]) {
+    this.updateFilters({ eventTypes });
+  }
+
+  clearFilters() {
+    this.currentFilters = {
+      eventTypes: ['group', 'individual', 'shift']
+    };
+    this.visibleEvents = {
+      group: true,
+      individual: true,
+      shift: true
+    };
+    this.filterSubject.next(this.currentFilters);
+  }
+
+  toggleEventVisibility(eventType: 'group' | 'individual' | 'shift') {
+    this.visibleEvents[eventType] = !this.visibleEvents[eventType];
+    this.applyEventFilter();
+  }
+
+  private applyEventFilter() {
+    this.filteredEvents = this.allEvents.filter(event => {
+      const eventType = event.extendedProps?.['type'];
+      return this.visibleEvents[eventType as keyof typeof this.visibleEvents];
+    });
+    
+    this.calendarOptions.events = this.filteredEvents;
+  }
+
   private hasEditPermissions(): boolean {
     return this.config.canEditIndividualTrainings || 
            this.config.canEditGroupTrainings || 
@@ -92,23 +194,100 @@ export class SharedCalendarComponent implements OnInit {
            this.config.canCreateShifts;
   }
 
-  private loadEvents() {
-    this.isLoading = true;
-    
-    this.groupTrainingService.getAllGroupTrainings().subscribe({
-      next: (trainings) => {
-        const events = this.transformGroupTrainingsToEvents(trainings);
-        this.calendarOptions.events = events;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading events:', error);
-        this.isLoading = false;
-      }
-    });
+  private loadEvents(filters?: CalendarFilters) {
+  this.isLoading = true;
+  
+  this.allEvents = [];
+  
+  const requests: Observable<any>[] = [];
+  const eventTypesToLoad: ('group' | 'individual' | 'shift')[] = [];
+
+  if (this.shouldLoadEventType('group', filters)) {
+    eventTypesToLoad.push('group');
+    requests.push(this.groupTrainingService.getGroupTrainingsFiltered(filters));
   }
 
-  private transformGroupTrainingsToEvents(trainings: any[]): EventInput[] {
+  if (this.shouldLoadEventType('individual', filters)) {
+    eventTypesToLoad.push('individual');
+    requests.push(this.individualTrainingService.getIndividualTrainingsFiltered(filters));
+  }
+
+  if (this.shouldLoadEventType('shift', filters)) {
+    eventTypesToLoad.push('shift');
+    requests.push(this.shiftService.getShiftsFiltered(filters));
+  }
+
+  if (requests.length === 0) {
+    this.allEvents = [];
+    this.applyEventFilter();
+    this.isLoading = false;
+    return;
+  }
+
+  let completedRequests = 0;
+  const totalRequests = requests.length;
+  const loadedEvents: EventInput[] = [];
+
+  requests.forEach((request, index) => {
+    const eventType = eventTypesToLoad[index];
+    
+    request.subscribe({
+      next: (data: any) => {
+        let events: EventInput[] = [];
+        
+        switch (eventType) {
+          case 'group':
+            events = this.transformGroupTrainingsToEvents(data as GroupTraining[]);
+            break;
+          case 'individual':
+            events = this.transformIndividualTrainingsToEvents(data as IndividualTraining[]);
+            break;
+          case 'shift':
+            events = this.transformShiftsToEvents(data as Shift[]);
+            break;
+        }
+        
+        loadedEvents.push(...events);
+        completedRequests++;
+
+        if (completedRequests === totalRequests) {
+          this.allEvents = loadedEvents;
+          this.applyEventFilter();
+          this.isLoading = false;
+        }
+      },
+      error: (error) => {
+        console.error(`Error loading ${eventType} events:`, error);
+        completedRequests++;
+
+        if (completedRequests === totalRequests) {
+          this.allEvents = loadedEvents;
+          this.applyEventFilter();
+          this.isLoading = false;
+        }
+      }
+    });
+  });
+}
+
+  private shouldLoadEventType(eventType: 'group' | 'individual' | 'shift', filters?: CalendarFilters): boolean {
+    switch (eventType) {
+      case 'group':
+        if (!this.config.canViewGroupTrainings) return false;
+        break;
+      case 'individual':
+        if (!this.config.canViewIndividualTrainings) return false;
+        break;
+      case 'shift':
+        if (!this.config.canViewShifts) return false;
+        break;
+    }
+
+    if (!filters?.eventTypes) return true;
+    return filters.eventTypes.includes(eventType);
+  }
+
+  private transformGroupTrainingsToEvents(trainings: GroupTraining[]): EventInput[] {
     return trainings.map(training => {
       const startDate = new Date(training.date);
       const duration = this.parseDuration(training.duration);
@@ -126,7 +305,9 @@ export class SharedCalendarComponent implements OnInit {
         extendedProps: {
           type: 'group',
           trainer: trainerName,
+          trainerId: training.trainer.id,
           trainingType: training.trainingType.name,
+          trainingTypeId: training.trainingType.id,
           description: training.description,
           difficultyLevel: training.difficultyLevel,
           capacity: training.maxParticipantNumber,
@@ -134,6 +315,61 @@ export class SharedCalendarComponent implements OnInit {
           isCompleted: training.isCompleted,
           isCancelled: training.isCancelled,
           originalData: training
+        }
+      };
+    });
+  }
+
+  private transformIndividualTrainingsToEvents(trainings: IndividualTraining[]): EventInput[] {
+    return trainings.map(training => {
+      const startDate = new Date(training.date);
+      const duration = this.parseDuration(training.duration);
+      const endDate = new Date(startDate.getTime() + duration);
+      
+      const trainerName = `${training.trainer.firstName} ${training.trainer.lastName}`;
+      const clientName = `${training.client.firstName} ${training.client.lastName}`;
+      
+      return {
+        id: `individual-${training.id}`,
+        title: `PT - ${clientName}`,
+        start: startDate,
+        end: endDate,
+        backgroundColor: this.getEventColor({ type: 'individual' }),
+        borderColor: this.getEventColor({ type: 'individual' }),
+        extendedProps: {
+          type: 'individual',
+          trainer: trainerName,
+          trainerId: training.trainer.id,
+          client: clientName,
+          clientId: training.client.id,
+          description: training.description,
+          isCompleted: training.isCompleted,
+          isCancelled: training.isCancelled,
+          originalData: training
+        }
+      };
+    });
+  }
+
+  private transformShiftsToEvents(shifts: Shift[]): EventInput[] {
+    return shifts.map(shift => {
+      const startDate = new Date(shift.startDate);
+      const endDate = new Date(shift.endDate);
+      
+      const employeeName = `${shift.employee.firstName} ${shift.employee.lastName}`;
+      
+      return {
+        id: `shift-${shift.id}`,
+        title: `Shift - ${employeeName}`,
+        start: startDate,
+        end: endDate,
+        backgroundColor: this.getEventColor({ type: 'shift' }),
+        borderColor: this.getEventColor({ type: 'shift' }),
+        extendedProps: {
+          type: 'shift',
+          employee: employeeName,
+          employeeId: shift.employee.id,
+          originalData: shift
         }
       };
     });
@@ -218,7 +454,7 @@ export class SharedCalendarComponent implements OnInit {
   }
 
   refreshCalendar() {
-    this.loadEvents();
+    this.loadEvents(this.currentFilters);
   }
 
   getPermissionsForEvent(): any {
@@ -229,5 +465,25 @@ export class SharedCalendarComponent implements OnInit {
       canCancel: this.config[`canEdit${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
       canDelete: this.config[`canDelete${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
     };
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.currentFilters.startDate ||
+      this.currentFilters.endDate ||
+      this.currentFilters.employeeIds?.length ||
+      this.currentFilters.clientIds?.length ||
+      this.currentFilters.trainingTypeIds?.length
+    );
+  }
+
+  private getInitialFilters(): CalendarFilters {
+    const eventTypes: ('group' | 'individual' | 'shift')[] = [];
+    
+    if (this.config.canViewGroupTrainings) eventTypes.push('group');
+    if (this.config.canViewIndividualTrainings) eventTypes.push('individual');
+    if (this.config.canViewShifts) eventTypes.push('shift');
+    
+    return { eventTypes };
   }
 }

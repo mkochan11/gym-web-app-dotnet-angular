@@ -111,5 +111,22 @@ export const CALENDAR_CONFIGS: { [role: string]: CalendarConfig } = {
     
     canReserveTrainings: true,
     canCancelReservations: true
+  },
+  ADMIN: {
+    canViewIndividualTrainings: true,
+    canViewGroupTrainings: true,
+    canViewShifts: true,
+    canEditIndividualTrainings: true,
+    canEditGroupTrainings: true,
+    canEditShifts: true,
+    canCreateIndividualTrainings: true,
+    canCreateGroupTrainings: true,
+    canCreateShifts: true,
+    canDeleteIndividualTrainings: true,
+    canDeleteGroupTrainings: true,
+    canDeleteShifts: true,
+    showCreateButton: true,
+    allowedViews: ['timeGridWeek', 'timeGridDay', 'dayGridMonth'],
+    defaultView: 'timeGridWeek'
   }
 };
