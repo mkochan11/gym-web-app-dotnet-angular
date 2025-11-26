@@ -4,3 +4,6 @@ export * from './membership.service';
 export * from './group-training.service';
 export * from './individual-training.service';
 export * from './shift.service';
+export * from './employee.service';
+export * from './training-type.service';
+export * from './client.service'

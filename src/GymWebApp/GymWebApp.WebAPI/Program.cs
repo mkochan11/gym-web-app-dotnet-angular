@@ -79,6 +79,9 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddScoped(typeof(IGroupTrainingRepository), typeof(GroupTrainingRepository));
     services.AddScoped(typeof(IIndividualTrainingRepository), typeof(IndividualTrainingRepository));
     services.AddScoped(typeof(IShiftRepository), typeof(ShiftRepository));
+    services.AddScoped(typeof(IClientRepository), typeof(ClientRepository));
+    services.AddScoped(typeof(IEmployeeRepository), typeof(EmployeeRepository));
+    services.AddScoped(typeof(ITrainingTypeRepository), typeof(TrainingTypeRepository));
 
     services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));

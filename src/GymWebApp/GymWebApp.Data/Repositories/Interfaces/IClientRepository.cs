@@ -1,0 +1,7 @@
+﻿using GymWebApp.Data.Entities;
+
+namespace GymWebApp.Data.Repositories.Interfaces;
+
+public interface IClientRepository : IRepository<Client>
+{
+}

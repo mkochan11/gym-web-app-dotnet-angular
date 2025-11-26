@@ -7,9 +7,11 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { FormsModule } from '@angular/forms';
 
 import { CalendarConfig, CALENDAR_CONFIGS } from '../../../../core/configurations/calendar-config';
-import { AuthService, GroupTrainingService, IndividualTrainingService, ShiftService } from '../../../../core/api-services';
+import { AuthService, GroupTrainingService, IndividualTrainingService, ShiftService, EmployeeService, TrainingTypeService, ClientService } from '../../../../core/api-services';
 import { CalendarEvent } from '../../../../core/models/shared-calendar/calendar-event';
 import { EventDetailsComponent } from '../event-details/event-details.component';
 import { ProgressSpinnerModule } from "primeng/progressspinner";
@@ -18,11 +20,14 @@ import { Shift } from '../../../../core/models/shift';
 import { IndividualTraining } from '../../../../core/models/individual-training';
 import { GroupTraining } from '../../../../core/models/group-training';
 import { CalendarFilters } from '../../../../core/models/shared-calendar/calendar-filters';
+import { Employee } from '../../../../core/models/employee';
+import { TrainingType } from '../../../../core/models/training-type';
+import { Client } from '../../../../core/models/client';
 
 @Component({
   selector: 'app-shared-calendar',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, EventDetailsComponent, ProgressSpinnerModule, Button],
+  imports: [CommonModule, FullCalendarModule, EventDetailsComponent, ProgressSpinnerModule, Button, MultiSelectModule, FormsModule],
   templateUrl: './shared-calendar.component.html',
   styleUrls: ['./shared-calendar.component.scss']
 })
@@ -31,6 +36,10 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   private individualTrainingService = inject(IndividualTrainingService);
   private shiftService = inject(ShiftService);
   private authService = inject(AuthService);
+  private employeeService = inject(EmployeeService);
+  private trainingTypeService = inject(TrainingTypeService);
+  private clientService = inject(ClientService);
+
   private destroy$ = new Subject<void>();
 
   @Input() role: string = 'RECEPTIONIST';
@@ -47,6 +56,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   selectedEventType: 'group' | 'individual' | 'shift' | null = null;
   showDetailsPanel = false;
   isLoading = false;
+  showFilters = true;
 
   visibleEvents = {
     group: true,
@@ -56,6 +66,14 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
 
   allEvents: EventInput[] = [];
   filteredEvents: EventInput[] = [];
+
+  employeeOptions: any[] = [];
+  trainingTypeOptions: any[] = [];
+  clientOptions: any[] = [];
+  
+  selectedEmployees: number[] = [];
+  selectedTrainingTypes: number[] = [];
+  selectedClients: number[] = [];
 
   currentFilters: CalendarFilters = {
     eventTypes: ['group', 'individual', 'shift']
@@ -74,6 +92,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     };
     this.initializeCalendar();
     this.setupFilterSubscription();
+    this.loadFilterData();
     this.loadEvents();
   }
 
@@ -157,14 +176,18 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   }
 
   clearFilters() {
-    this.currentFilters = {
-      eventTypes: ['group', 'individual', 'shift']
-    };
+    this.currentFilters = this.getInitialFilters();
+
     this.visibleEvents = {
       group: true,
       individual: true,
       shift: true
     };
+
+    this.selectedEmployees = [];
+    this.selectedTrainingTypes = [];
+    this.selectedClients = [];
+    
     this.filterSubject.next(this.currentFilters);
   }
 
@@ -485,5 +508,63 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     if (this.config.canViewShifts) eventTypes.push('shift');
     
     return { eventTypes };
+  }
+
+  private loadFilterData() {
+    this.employeeService.getAllEmployees().subscribe({
+      next: (employees: Employee[]) => {
+        this.employeeOptions = employees.map(emp => ({
+          id: emp.id,
+          name: `${emp.firstName} ${emp.lastName}`
+        }));
+      },
+      error: (error) => console.error('Error loading employees:', error)
+    });
+
+    if (this.config.canViewGroupTrainings) {
+      this.trainingTypeService.getAllTrainingTypes().subscribe({
+        next: (trainingTypes: TrainingType[]) => {
+          this.trainingTypeOptions = trainingTypes.map(tt => ({
+            id: tt.id,
+            name: tt.name
+          }));
+        },
+        error: (error) => console.error('Error loading training types:', error)
+      });
+    }
+
+    if (this.config.canViewIndividualTrainings) {
+      this.clientService.getAllClients().subscribe({
+        next: (clients: Client[]) => {
+          this.clientOptions = clients.map(client => ({
+            id: client.id,
+            name: `${client.firstName} ${client.lastName}`
+          }));
+        },
+        error: (error) => console.error('Error loading clients:', error)
+      });
+    }
+  }
+
+  onEmployeeFilterChange() {
+    this.updateFilters({ 
+      employeeIds: this.selectedEmployees.length > 0 ? this.selectedEmployees : undefined 
+    });
+  }
+
+  onTrainingTypeFilterChange() {
+    this.updateFilters({ 
+      trainingTypeIds: this.selectedTrainingTypes.length > 0 ? this.selectedTrainingTypes : undefined 
+    });
+  }
+
+  onClientFilterChange() {
+    this.updateFilters({ 
+      clientIds: this.selectedClients.length > 0 ? this.selectedClients : undefined 
+    });
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
   }
 }

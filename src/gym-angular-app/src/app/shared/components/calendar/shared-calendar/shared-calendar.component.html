@@ -5,12 +5,53 @@
         <h2>Gym Schedule</h2>
         <div class="calendar-actions">
           <p-button 
+            icon="pi pi-filter" 
+            label="Clear Filters" 
+            styleClass="p-button-outlined p-button-sm"
+            (click)="clearFilters()"
+            [disabled]="!hasActiveFilters()">
+          </p-button>
+          <p-button 
             icon="pi pi-refresh" 
             label="Refresh" 
             styleClass="p-button-outlined p-button-sm"
             (click)="refreshCalendar()"
             [loading]="isLoading">
           </p-button>
+        </div>
+      </div>
+
+      <div class="filters-panel" *ngIf="showFilters">
+        <div class="filter-group">
+          <p-multiSelect 
+            [options]="employeeOptions"
+            [(ngModel)]="selectedEmployees"
+            (onChange)="onEmployeeFilterChange()"
+            placeholder="Select employees"
+            optionLabel="name"
+            optionValue="id" />
+        </div>
+
+        <div class="filter-group" *ngIf="config.canViewGroupTrainings">
+          <p-multiSelect 
+            [options]="trainingTypeOptions"
+            [(ngModel)]="selectedTrainingTypes"
+            (onChange)="onTrainingTypeFilterChange()"
+            placeholder="Select training types"
+            optionLabel="name"
+            optionValue="id">
+          </p-multiSelect>
+        </div>
+
+        <div class="filter-group" *ngIf="config.canViewIndividualTrainings">
+          <p-multiSelect 
+            [options]="clientOptions"
+            [(ngModel)]="selectedClients"
+            (onChange)="onClientFilterChange()"
+            placeholder="Select clients"
+            optionLabel="name"
+            optionValue="id">
+          </p-multiSelect>
         </div>
       </div>
 
