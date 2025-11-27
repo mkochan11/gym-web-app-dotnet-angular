@@ -4,5 +4,6 @@ export interface Shift {
     id: number;
     startDate: string;
     endDate: string;
-    employee: Employee
+    employee: Employee;
+    status: string;
 }

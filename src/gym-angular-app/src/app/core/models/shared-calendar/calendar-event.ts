@@ -12,7 +12,6 @@ export interface CalendarEvent {
     description?: string;
     difficultyLevel?: number;
     trainingType?: string;
-    isCompleted?: boolean;
-    isCancelled?: boolean;
+    status?: string;
     originalData: any;
 }

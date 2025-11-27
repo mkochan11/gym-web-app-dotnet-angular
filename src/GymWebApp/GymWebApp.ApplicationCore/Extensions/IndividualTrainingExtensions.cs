@@ -15,8 +15,7 @@ public static class IndividualTrainingExtensions
             Description = individualTraining.Description,
             Date = individualTraining.Date,
             Duration = individualTraining.Duration,
-            IsCompleted = individualTraining.IsCompleted,
-            IsCancelled = individualTraining.IsCancelled,
+            Status = individualTraining.GetTrainingStatus().ToString(),
             Trainer = individualTraining.Trainer.ToTrainerWebModel(),
             Client = individualTraining.Client?.ToClientWebModel(),
         };

@@ -24,6 +24,7 @@ public class IndividualTrainingRepository : Repository<IndividualTraining>, IInd
         var query = _context.IndividualTrainings
             .Include(it => it.Trainer)
             .Include(it => it.Client)
+            .Where(it => !it.Removed && !it.IsCancelled)
             .AsQueryable();
 
         if (filters.StartDate.HasValue)

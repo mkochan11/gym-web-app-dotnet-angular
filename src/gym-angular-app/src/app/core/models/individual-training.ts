@@ -6,8 +6,7 @@ export interface IndividualTraining {
     description: string;
     date: string;
     duration: string;
-    isCompleted: boolean;
-    isCancelled: boolean;
+    status: string;
     trainer: Trainer;
     client: Client;
 }

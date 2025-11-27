@@ -17,4 +17,11 @@ public class Shift : AuditableEntity
     
     [ForeignKey(nameof(EmployeeId))]
     public Employee Employee { get; set; } = null!;
+
+    public bool IsCancelled { get; set; } = false;
+
+    [MaxLength(500)]
+    public string? CancellationReason { get; set; }
+
+    public DateTime? CancelledAt { get; set; }
 }

@@ -21,6 +21,7 @@ public class ShiftRepository : Repository<Shift>, IShiftRepository
     {
         var query = _context.Shifts
             .Include(s => s.Employee)
+            .Where(s => !s.Removed && !s.IsCancelled)
             .AsQueryable();
 
         if (filters.StartDate.HasValue)

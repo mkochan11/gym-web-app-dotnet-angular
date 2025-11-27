@@ -335,8 +335,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
           difficultyLevel: training.difficultyLevel,
           capacity: training.maxParticipantNumber,
           enrolled: training.currentParticipantNumber,
-          isCompleted: training.isCompleted,
-          isCancelled: training.isCancelled,
+          status: training.status,
           originalData: training
         }
       };
@@ -366,8 +365,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
           client: clientName,
           clientId: training.client.id,
           description: training.description,
-          isCompleted: training.isCompleted,
-          isCancelled: training.isCancelled,
+          status: training.status,
           originalData: training
         }
       };
@@ -392,7 +390,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
           type: 'shift',
           employee: employeeName,
           employeeId: shift.employee.id,
-          originalData: shift
+          originalData: shift,
+          status: shift.status
         }
       };
     });
@@ -431,10 +430,9 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
       description: extendedProps['description'],
       difficultyLevel: extendedProps['difficultyLevel'],
       trainingType: extendedProps['trainingType'],
-      isCompleted: extendedProps['isCompleted'],
-      isCancelled: extendedProps['isCancelled'],
+      status: extendedProps['status'],
       originalData: extendedProps['originalData']
-    };
+    }; 
 
     this.selectedEvent = calendarEvent;
     this.selectedEventType = extendedProps['type'];

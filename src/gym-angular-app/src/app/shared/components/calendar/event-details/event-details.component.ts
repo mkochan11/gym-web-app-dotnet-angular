@@ -45,17 +45,15 @@ export class EventDetailsComponent {
   getStatusBadgeSeverity() {
     if (!this.event) return 'secondary';
     
-    if (this.event.isCancelled) return 'danger';
-    if (this.event.isCompleted) return 'success';
-    return 'info';
+    if (this.event.status === 'Ongoing') return 'info';
+    if (this.event.status === 'Completed') return 'success';
+    if (this.event.status === 'Scheduled') return 'secondary';
+    return 'secondary';
   }
 
-  getStatusText() {
+  getEventStatus() {
     if (!this.event) return '';
-    
-    if (this.event.isCancelled) return 'Cancelled';
-    if (this.event.isCompleted) return 'Completed';
-    return 'Scheduled';
+    return this.event.status;
   }
 
   getDuration(): string {

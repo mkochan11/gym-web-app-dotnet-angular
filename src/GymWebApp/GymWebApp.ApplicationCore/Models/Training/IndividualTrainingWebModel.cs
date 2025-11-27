@@ -1,5 +1,6 @@
 ﻿using GymWebApp.ApplicationCore.Models.Client;
 using GymWebApp.ApplicationCore.Models.Trainer;
+using GymWebApp.Data.Enums;
 
 namespace GymWebApp.ApplicationCore.Models.Training;
 
@@ -13,9 +14,7 @@ public class IndividualTrainingWebModel
 
     public TimeSpan Duration { get; set; }
 
-    public bool IsCompleted { get; set; }
-
-    public bool IsCancelled { get; set; }
+    public string Status { get; set; } = null!;
 
     public TrainerWebModel Trainer { get; set; } = null!;
 

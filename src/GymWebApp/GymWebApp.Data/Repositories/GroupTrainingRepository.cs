@@ -24,6 +24,7 @@ public class GroupTrainingRepository : Repository<GroupTraining>, IGroupTraining
         var query = _context.GroupTrainings
             .Include(gt => gt.Trainer)
             .Include(gt => gt.TrainingType)
+            .Where(gt => !gt.Removed && !gt.IsCancelled)
             .AsQueryable();
 
         if (filters.StartDate.HasValue)

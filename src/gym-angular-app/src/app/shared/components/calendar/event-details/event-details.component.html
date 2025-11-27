@@ -11,7 +11,7 @@
   <div class="details-content">
     <p-card>
       <div class="status-section">
-        <p-badge [value]="getStatusText()" [severity]="getStatusBadgeSeverity()"></p-badge>
+        <p-badge [value]="getEventStatus()" [severity]="getStatusBadgeSeverity()"></p-badge>
       </div>
     </p-card>
 
@@ -101,21 +101,21 @@
 
     <div class="actions" *ngIf="permissions">
       <button pButton 
-              *ngIf="permissions.canEdit"
+              *ngIf="permissions.canEdit && event.status !== 'Completed' && event.status !== 'Ongoing'"
               label="Edit Event" 
               icon="pi pi-pencil"
               class="p-button-outlined"
               (click)="editEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canCancel && !event.isCancelled && !event.isCompleted"
+              *ngIf="permissions.canCancel && event.status !== 'Completed' && event.status !== 'Ongoing'"
               label="Cancel Event" 
               icon="pi pi-times"
               class="p-button-danger"
               (click)="cancelEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canDelete"
+              *ngIf="permissions.canDelete && event.status !== 'Ongoing'"
               label="Delete Event" 
               icon="pi pi-trash"
               class="p-button-danger p-button-outlined"
