@@ -4,7 +4,7 @@ using GymWebApp.Data.DTOs;
 using GymWebApp.Data.Repositories.Interfaces;
 using MediatR;
 
-namespace GymWebApp.ApplicationCore.CQRS.GroupTraining;
+namespace GymWebApp.ApplicationCore.CQRS.GroupTrainings;
 
 public class GetGroupTrainingsFilteredQueryHandler : IRequestHandler<GetGroupTrainingsFilteredQuery, IEnumerable<GroupTrainingWebModel>>
 {

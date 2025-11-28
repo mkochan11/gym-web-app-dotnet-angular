@@ -14,4 +14,6 @@ export interface CalendarEvent {
     trainingType?: string;
     status?: string;
     originalData: any;
+    oldStart: Date;
+    oldEnd: Date;
 }

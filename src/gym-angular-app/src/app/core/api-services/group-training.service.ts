@@ -14,6 +14,13 @@ export class GroupTrainingService {
     return this.httpService.get<GroupTraining[]>('trainings/group');
   }
 
+  cancelGroupTraining(trainingId: number, reason: string): Observable<any> {
+    const cancelDto = {
+      cancellationReason: reason
+    };
+    return this.httpService.post<any>(`trainings/group/${trainingId}/cancel`, cancelDto);
+  }
+
   getGroupTrainingsFiltered(filters?: CalendarFilters): Observable<GroupTraining[]> {
     let url = 'trainings/group/filtered';
     const params = this.buildFilterParams(filters);

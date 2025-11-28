@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using GymWebApp.ApplicationCore.Extensions;
 using GymWebApp.ApplicationCore.CQRS.Shift;
 using GymWebApp.Data.DTOs;
+using GymWebApp.ApplicationCore.Requests;
+using MediatR;
 
 namespace GymWebApp.WebAPI.Controllers;
 
@@ -10,11 +12,14 @@ namespace GymWebApp.WebAPI.Controllers;
 public class ShiftsController : ControllerBase
 {
     private readonly IShiftRepository _shiftRepository;
+    private readonly IMediator _mediator;
 
     public ShiftsController(
-        IShiftRepository shiftRepository)
+        IShiftRepository shiftRepository,
+        IMediator mediator)
     {
         _shiftRepository = shiftRepository;
+        _mediator = mediator;
     }
 
     [HttpGet]
@@ -40,5 +45,18 @@ public class ShiftsController : ControllerBase
         var shiftWebModels = shifts.Select(s => s.ToShiftWebModel()).ToList();
 
         return Ok(shiftWebModels);
+    }
+
+    [HttpPost("{id}/cancel")]
+    public async Task<ActionResult> CancelShiftTraining(int id, [FromBody] CancelEventRequest request)
+    {
+        var command = new CancelShiftCommand
+        {
+            Id = id,
+            CancellationReason = request.CancellationReason
+        };
+
+        await _mediator.Send(command);
+        return Ok();
     }
 }

@@ -8,6 +8,8 @@ public static class BaseTrainingEntityExtensions
 {
     public static EventStatus GetTrainingStatus(this BaseTrainingEntity training)
     {
+        if (training.IsCancelled) return EventStatus.Cancelled;
+
         if (training.Date > DateTime.UtcNow.AddHours(1))
         {
             return EventStatus.Scheduled;

@@ -14,6 +14,13 @@ export class ShiftService {
     return this.httpService.get<Shift[]>('shifts');
   }
 
+  cancelShift(shiftId: number, reason: string): Observable<any> {
+    const cancelDto = {
+      cancellationReason: reason
+    };
+    return this.httpService.post<any>(`shifts/${shiftId}/cancel`, cancelDto);
+  }
+
   getShiftsFiltered(filters?: CalendarFilters): Observable<Shift[]> {
     let url = 'shifts/filtered';
     const params = this.buildFilterParams(filters);

@@ -1,7 +1,8 @@
-﻿using GymWebApp.ApplicationCore.CQRS.GroupTraining;
+﻿using GymWebApp.ApplicationCore.CQRS.GroupTrainings;
 using GymWebApp.ApplicationCore.CQRS.IndividualTraining;
 using GymWebApp.ApplicationCore.Extensions;
 using GymWebApp.ApplicationCore.Models.Training;
+using GymWebApp.ApplicationCore.Requests;
 using GymWebApp.Data.Repositories.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,19 @@ public class TrainingsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("group/{id}/cancel")]
+    public async Task<ActionResult> CancelGroupTraining(int id, [FromBody] CancelEventRequest request)
+    {
+        var command = new CancelGroupTrainingCommand
+        {
+            Id = id,
+            CancellationReason = request.CancellationReason
+        };
+
+        await _mediator.Send(command);
+        return Ok();
+    }
+
     [HttpGet("individual")]
     public async Task<ActionResult<IEnumerable<GroupTrainingWebModel>>> GetIndividualTrainingsAsync()
     {
@@ -56,5 +70,18 @@ public class TrainingsController : ControllerBase
     {
         var result = await _mediator.Send(query);
         return Ok(result);
+    }
+
+    [HttpPost("individual/{id}/cancel")]
+    public async Task<ActionResult> CancelIndiviudalTraining(int id, [FromBody] CancelEventRequest request)
+    {
+        var command = new CancelIndividualTrainingCommand
+        {
+            Id = id,
+            CancellationReason = request.CancellationReason
+        };
+
+        await _mediator.Send(command);
+        return Ok();
     }
 }
