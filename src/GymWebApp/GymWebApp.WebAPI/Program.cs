@@ -1,6 +1,6 @@
 using FluentValidation;
-using GymWebApp.ApplicationCore.Common;
-using GymWebApp.ApplicationCore.CQRS.GroupTraining;
+using GymWebApp.ApplicationCore.CQRS;
+using GymWebApp.ApplicationCore.CQRS.GroupTrainings;
 using GymWebApp.ApplicationCore.Services;
 using GymWebApp.ApplicationCore.Services.Interfaces;
 using GymWebApp.Data;
@@ -8,6 +8,7 @@ using GymWebApp.Data.Entities;
 using GymWebApp.Data.Repositories;
 using GymWebApp.Data.Repositories.Interfaces;
 using GymWebApp.WebAPI.Extensions;
+using GymWebApp.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -69,11 +70,13 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         });
     });
 
-    services.AddMediatR(cfg =>
-        cfg.RegisterServicesFromAssembly(typeof(GetGroupTrainingsFilteredQueryHandler).Assembly));
+    services.AddMediatR(config =>
+    {
+        config.RegisterServicesFromAssembly(typeof(CancelGroupTrainingCommand).Assembly);
+        config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    });
 
-    services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-    services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidatorBase<,>));
+    services.AddValidatorsFromAssembly(typeof(CancelGroupTrainingCommand).Assembly);
 
     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
     services.AddScoped(typeof(IGroupTrainingRepository), typeof(GroupTrainingRepository));
@@ -156,6 +159,8 @@ static void ConfigurePipeline(WebApplication app)
             diagnosticContext.Set("RemoteIP", httpContext.Connection.RemoteIpAddress?.ToString());
         };
     });
+
+    app.UseMiddleware<ExceptionMiddleware>();
 
     app.UseHttpsRedirection();
     app.UseCors("AllowAngularDevClient");

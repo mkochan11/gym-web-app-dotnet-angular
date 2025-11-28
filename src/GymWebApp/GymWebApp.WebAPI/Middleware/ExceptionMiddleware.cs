@@ -42,21 +42,38 @@ public class ExceptionMiddleware
 
         switch (exception)
         {
+            case ValidationException validationException:
+                context.Response.StatusCode = validationException.StatusCode;
+                response.Error.Code = validationException.ErrorCode;
+                response.Error.Message = validationException.Message;
+                response.Error.Details = validationException.Errors;
+                break;
+
+            case NotFoundException notFoundException:
+                context.Response.StatusCode = notFoundException.StatusCode;
+                response.Error.Code = notFoundException.ErrorCode;
+                response.Error.Message = notFoundException.Message;
+                break;
+
+            case UnauthorizedException unauthorizedException:
+                context.Response.StatusCode = unauthorizedException.StatusCode;
+                response.Error.Code = unauthorizedException.ErrorCode;
+                response.Error.Message = unauthorizedException.Message;
+                break;
+
             case AppException appException:
                 context.Response.StatusCode = appException.StatusCode;
                 response.Error.Code = appException.ErrorCode;
                 response.Error.Message = appException.Message;
-
-                if (appException is ValidationException validationException)
-                {
-                    response.Error.Details = validationException.Errors;
-                }
                 break;
 
             default:
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.Error.Code = "INTERNAL_ERROR";
                 response.Error.Message = "An internal server error has occurred";
+
+                var logger = context.RequestServices.GetRequiredService<ILogger<ExceptionMiddleware>>();
+                logger.LogError(exception, "An unexpected error occurred");
                 break;
         }
 
