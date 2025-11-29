@@ -221,15 +221,32 @@
     display: flex;
     flex-direction: column;
     
+    .fc-scroller-harness {
+      overflow: hidden !important;
+      height: 100% !important;
+    }
+
+    .fc-scroller {
+      overflow: hidden !important;
+      height: 100% !important;
+    }
+    
     .fc-view-harness {
       width: 100% !important;
       height: 100% !important;
       flex: 1;
+      overflow: visible !important;
     }
     
     .fc-view-harness-active {
       width: 100% !important;
       height: 100% !important;
+    }
+
+    .fc-timegrid-body {
+      overflow: visible !important;
+      height: 100% !important;
+      max-height: none !important;
     }
 
     .fc-toolbar {
@@ -284,11 +301,13 @@
 
     .fc-timegrid {
       width: 100% !important;
+      height: 100% !important;
 
-      table{ width: 100% !important; }
+      table{ width: 100% !important; height: 100%;}
 
       .fc-timegrid-col {
         width: 100% !important;
+        height: 100% !important;
       }
 
       .fc-timegrid-col-frame {

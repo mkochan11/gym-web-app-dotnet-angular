@@ -6,6 +6,9 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { GroupTrainingService, IndividualTrainingService, ShiftService } from '../../../core/api-services';
+import { DialogModule } from 'primeng/dialog';
+import { DialogService } from 'primeng/dynamicdialog';
+import { EventAddModalComponent } from '../../../shared/components/calendar/event-add-modal/event-add-modal.component';
 
 @Component({
   selector: 'app-manager-calendar',
@@ -14,9 +17,11 @@ import { GroupTrainingService, IndividualTrainingService, ShiftService } from '.
     CommonModule, 
     SharedCalendarComponent, 
     EventCancellationDialogComponent,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    DialogModule,
+    EventAddModalComponent
   ],
-  providers: [ConfirmationService, MessageService],
+  providers: [ConfirmationService, MessageService, DialogService],
   template: `
     <p-confirmDialog 
       [style]="{width: '450px'}"
@@ -30,6 +35,15 @@ import { GroupTrainingService, IndividualTrainingService, ShiftService } from '.
       (confirmed)="onCancellationConfirmed($event)"
       (cancelled)="onCancellationCancelled()">
     </app-event-cancellation-dialog>
+
+    <app-event-add-modal
+      [(visible)]="showEventModal"
+      [startTime]="creationStartTime"
+      [endTime]="creationEndTime"
+      [availableEventTypes]="availableEventTypes"
+      (eventCreated)="onEventCreated($event)"
+      (cancelled)="onEventCreationCancelled()">
+    </app-event-add-modal>
 
     <app-shared-calendar 
       [role]="'MANAGER'"
@@ -54,11 +68,63 @@ export class ManagerCalendarComponent implements AfterViewInit {
   selectedEvent: any = null;
   isCancelling = false;
 
+  showEventModal = false;
+  creationStartTime!: Date;
+  creationEndTime!: Date;
+  availableEventTypes: any[] = [];
+
   ngAfterViewInit(): void {}
 
-  onEventCreate(createInfo: any) {
-    console.log('Manager: Create event', createInfo);
-    this.toastService.show('Create event functionality would open here', 'info');
+  async onEventCreate(createInfo: any) {
+    try {
+      this.creationStartTime = new Date(createInfo.start);
+      this.creationEndTime = new Date(createInfo.end);
+      this.availableEventTypes = this.buildAvailableEventTypes();
+
+      setTimeout(() => {
+        this.showEventModal = true;
+    }, 0);
+      
+    } catch (error: any) {
+      this.toastService.show('Failed to start event creation. Please try again.', 'error');
+    }
+  }
+
+  onEventCreated(eventData: any) {
+    console.log('Event created:', eventData);
+    this.createEvent(eventData);
+    this.showEventModal = false;
+  }
+
+  onEventCreationCancelled() {
+    console.log('Event creation cancelled by user');
+    this.showEventModal = false;
+  }
+
+  private buildAvailableEventTypes(): any[] {
+    return [
+      {
+        value: 'group',
+        label: 'Group Training',
+        description: 'Training session for multiple participants',
+        color: '#10B981',
+        icon: 'pi pi-users'
+      },
+      {
+        value: 'individual',
+        label: 'Individual Training',
+        description: 'One-on-one personal training session',
+        color: '#3B82F6',
+        icon: 'pi pi-user'
+      },
+      {
+        value: 'shift',
+        label: 'Staff Shift',
+        description: 'Employee work schedule',
+        color: '#F59E0B',
+        icon: 'pi pi-briefcase'
+      }
+    ];
   }
 
   onEventEdit(event: any) {
@@ -100,6 +166,47 @@ export class ManagerCalendarComponent implements AfterViewInit {
   onCancellationCancelled() {
     console.log('Cancellation was cancelled by user');
     this.resetCancellationState();
+  }
+
+  private createEvent(eventData: any) {
+    let creationObservable;
+
+    console.log(`Create Event with`, eventData)
+    switch (eventData.type) {
+      case 'group':
+        creationObservable = this.groupTrainingService.createGroupTraining(eventData);
+        break;
+      // case 'individual':
+      //   cancellationObservable = this.individualTrainingService.cancelIndividualTraining(
+      //     this.extractId(event.id), 
+      //     reason
+      //   );
+      //   break;
+      // case 'shift':
+      //   cancellationObservable = this.shiftService.cancelShift(
+      //     this.extractId(event.id), 
+      //     reason
+      //   );
+      //   break;
+      default:
+        this.toastService.show('Unknown event type', 'error');
+        this.showEventModal = false;
+        return;
+    }
+
+    creationObservable.subscribe({
+      next: (response) => {
+        this.toastService.show(`Event has been created successfully`, 'success');
+        this.showCancelDialog = false;
+        this.resetCancellationState();
+
+        this.sharedCalendar.refreshCalendar();
+      },
+      error: (error) => {
+        this.toastService.show(`Failed to create event. "${error}"`, 'error');
+        this.isCancelling = false;
+      }
+    });
   }
 
   private resetCancellationState() {

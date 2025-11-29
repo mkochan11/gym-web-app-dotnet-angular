@@ -13,7 +13,7 @@ public static class IndividualTrainingExtensions
         {
             Id = individualTraining.Id,
             Description = individualTraining.Description,
-            Date = individualTraining.Date,
+            Date = individualTraining.Date.ToLocalTime(),
             Duration = individualTraining.Duration,
             Status = individualTraining.GetTrainingStatus().ToString(),
             Trainer = individualTraining.Trainer.ToTrainerWebModel(),

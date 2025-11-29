@@ -5,13 +5,14 @@ using GymWebApp.ApplicationCore.Models.Training;
 using GymWebApp.ApplicationCore.Requests;
 using GymWebApp.Data.Repositories.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;
 
 [Route("api/trainings")]
 [ApiController]
-public class TrainingsController : ControllerBase
+public class TrainingsController : BaseController
 {
     private readonly IGroupTrainingRepository _groupTrainingRepository;
     private readonly IIndividualTrainingRepository _individualTrainingRepository;
@@ -36,6 +37,15 @@ public class TrainingsController : ControllerBase
         return Ok(trainingWebModels);
     }
 
+    [HttpPost("group")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult<int>> CreateGroupTrainingAsync([FromBody] CreateGroupTrainingCommand command)
+    {
+        command.CreatedById = CurrentUserId;
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
     [HttpGet("group/filtered")]
     public async Task<ActionResult<IEnumerable<GroupTrainingWebModel>>> GetFilteredGroupTrainingsAsync([FromQuery] GetGroupTrainingsFilteredQuery query)
     {
@@ -44,7 +54,7 @@ public class TrainingsController : ControllerBase
     }
 
     [HttpPost("group/{id}/cancel")]
-    public async Task<ActionResult> CancelGroupTraining(int id, [FromBody] CancelEventRequest request)
+    public async Task<ActionResult> CancelGroupTrainingAsync(int id, [FromBody] CancelEventRequest request)
     {
         var command = new CancelGroupTrainingCommand
         {

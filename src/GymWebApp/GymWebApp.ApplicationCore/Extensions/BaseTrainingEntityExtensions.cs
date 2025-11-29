@@ -1,5 +1,4 @@
-﻿using GymWebApp.Data.Entities;
-using GymWebApp.Data.Entities.Abstract;
+﻿using GymWebApp.Data.Entities.Abstract;
 using GymWebApp.Data.Enums;
 
 namespace GymWebApp.ApplicationCore.Extensions;
@@ -10,11 +9,11 @@ public static class BaseTrainingEntityExtensions
     {
         if (training.IsCancelled) return EventStatus.Cancelled;
 
-        if (training.Date > DateTime.UtcNow.AddHours(1))
+        if (training.Date > DateTime.UtcNow)
         {
             return EventStatus.Scheduled;
         }
-        else if (training.Date <= DateTime.UtcNow.AddHours(1) && training.Date.Add(training.Duration) >= DateTime.UtcNow.AddHours(1))
+        else if (training.Date <= DateTime.UtcNow && training.Date.Add(training.Duration) >= DateTime.UtcNow)
         {
             return EventStatus.Ongoing;
         }

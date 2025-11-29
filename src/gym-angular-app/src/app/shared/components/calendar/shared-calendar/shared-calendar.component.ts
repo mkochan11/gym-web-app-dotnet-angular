@@ -262,7 +262,6 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     this.eventCreate.emit({
       start: selectInfo.start,
       end: selectInfo.end,
-      allDay: selectInfo.allDay
     });
   }
 

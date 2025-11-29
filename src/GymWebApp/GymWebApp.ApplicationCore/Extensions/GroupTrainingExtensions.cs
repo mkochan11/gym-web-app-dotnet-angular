@@ -13,7 +13,7 @@ public static class GroupTrainingExtensions
         {
             Id = groupTraining.Id,
             Description = groupTraining.Description,
-            Date = groupTraining.Date,
+            Date = groupTraining.Date.ToLocalTime(),
             Duration = groupTraining.Duration,
             Status = groupTraining.GetTrainingStatus().ToString(),
             Trainer = groupTraining.Trainer.ToTrainerWebModel(),

@@ -1,5 +1,5 @@
 .layout-wrapper {
-  height: 100vh;
+  height: auto;
   display: flex;
   flex-direction: column;
 }
@@ -25,6 +25,7 @@
   min-height: 0;
   overflow: hidden;
   position: relative;
+  height: 1420px;
 }
 
 .layout-main ::ng-deep router-outlet + * {
