@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using GymWebApp.Data.Repositories.Interfaces;
 
-namespace GymWebApp.ApplicationCore.CQRS.Shift
+namespace GymWebApp.ApplicationCore.CQRS.Shifts
 {
     public class ShiftRequestValidatorBase<T> : AbstractValidator<T> where T : class
     {

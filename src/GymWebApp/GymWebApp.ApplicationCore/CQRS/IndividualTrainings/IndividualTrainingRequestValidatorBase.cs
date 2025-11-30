@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using GymWebApp.Data.Repositories.Interfaces;
 
-namespace GymWebApp.ApplicationCore.CQRS.IndividualTraining
+namespace GymWebApp.ApplicationCore.CQRS.IndividualTrainings
 {
     public class IndividualTrainingRequestValidatorBase<T> : AbstractValidator<T> where T : class
     {

@@ -4,7 +4,7 @@ using GymWebApp.Data.DTOs;
 using GymWebApp.Data.Repositories.Interfaces;
 using MediatR;
 
-namespace GymWebApp.ApplicationCore.CQRS.Shift;
+namespace GymWebApp.ApplicationCore.CQRS.Shifts;
 
 public class GetShiftsFilteredQueryHandler : IRequestHandler<GetShiftsFilteredQuery, IEnumerable<ShiftWebModel>>
 {

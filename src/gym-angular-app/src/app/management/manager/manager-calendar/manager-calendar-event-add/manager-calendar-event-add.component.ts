@@ -19,7 +19,7 @@ interface EventTypeOption {
 }
 
 @Component({
-  selector: 'app-event-add-modal',
+  selector: 'app-manager-calendar-event-add-modal',
   standalone: true,
   imports: [
     CommonModule,
@@ -113,6 +113,9 @@ interface EventTypeOption {
                     [showTime]="true"
                     [showIcon]="true"
                     [required]="true"
+                    [minDate]="minDate"
+                    [timeOnly]="false"
+                    (onSelect)="onTimeChange()"
                     [class]="{'invalid': submitted && !formData.startTime}">
                   </p-calendar>
                   <small class="error-message" *ngIf="submitted && !formData.startTime">
@@ -129,6 +132,9 @@ interface EventTypeOption {
                     [showTime]="true"
                     [showIcon]="true"
                     [required]="true"
+                    [minDate]="minDate"
+                    [timeOnly]="false"
+                    (onSelect)="onTimeChange()"
                     [class]="{'invalid': submitted && !formData.endTime}">
                   </p-calendar>
                   <small class="error-message" *ngIf="submitted && !formData.endTime">
@@ -206,7 +212,7 @@ interface EventTypeOption {
                 <p-dropdown
                   id="employee"
                   [(ngModel)]="formData.employeeId"
-                  [options]="employeeOptions"
+                  [options]="receptionistOptions"
                   name="employee"
                   optionLabel="name"
                   optionValue="id"
@@ -246,7 +252,7 @@ interface EventTypeOption {
               </div>
             </div>
 
-            <div class="form-section">
+            <div class="form-section" *ngIf="selectedEventType === 'group' || selectedEventType === 'individual'">
               <div class="form-group">
                 <label for="description">Description</label>
                 <textarea
@@ -301,13 +307,12 @@ interface EventTypeOption {
       </div>
     </div>
   `,
-  styleUrls: ['./event-add-modal.component.scss']
+  styleUrls: ['./manager-calendar-event-add.component.scss']
 })
-export class EventAddModalComponent implements OnInit, OnChanges {
+export class ManagerCalendarEventAddModalComponent implements OnInit, OnChanges {
   @Input() visible = false;
   @Input() startTime!: Date;
   @Input() endTime!: Date;
-  @Input() availableEventTypes: EventTypeOption[] = [];
   
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() eventCreated = new EventEmitter<any>();
@@ -322,8 +327,14 @@ export class EventAddModalComponent implements OnInit, OnChanges {
   submitted = false;
   loading = false;
 
+  minDate: Date = new Date();
+  timeConstraints = {
+    hourMin: 8,
+    hourMax: 22
+  };
+
   trainerOptions: any[] = [];
-  employeeOptions: any[] = [];
+  receptionistOptions: any[] = [];
   trainingTypeOptions: any[] = [];
   difficultyLevels = [
     { label: 'Level 1 - Beginner', value: 1 },
@@ -333,15 +344,46 @@ export class EventAddModalComponent implements OnInit, OnChanges {
     { label: 'Level 5 - Expert', value: 5 }
   ];
 
+  availableEventTypes: EventTypeOption[] = [
+      {
+        value: 'group',
+        label: 'Group Training',
+        description: 'Training session for multiple participants',
+        color: '#10B981',
+        icon: 'pi pi-users'
+      },
+      {
+        value: 'individual',
+        label: 'Individual Training',
+        description: 'One-on-one personal training session',
+        color: '#3B82F6',
+        icon: 'pi pi-user'
+      },
+      {
+        value: 'shift',
+        label: 'Staff Shift',
+        description: 'Employee work schedule',
+        color: '#F59E0B',
+        icon: 'pi pi-briefcase'
+      }
+    ];
+
   ngOnChanges(changes: SimpleChanges) {
     if ((changes['visible'] && this.visible) || 
         ((changes['startTime'] || changes['endTime']) && this.visible)) {
       this.initializeFormData();
+      this.setMinDate();
     }
   }
 
   ngOnInit() {
     this.loadDropdownData();
+    this.setMinDate();
+  }
+
+  private setMinDate() {
+    this.minDate = new Date();
+    this.minDate.setMinutes(0, 0, 0);
   }
 
   private initializeFormData() {
@@ -368,12 +410,19 @@ export class EventAddModalComponent implements OnInit, OnChanges {
   private loadDropdownData() {
     this.employeeService.getAllEmployees().subscribe({
       next: (employees: Employee[]) => {
-        this.employeeOptions = employees.map(emp => ({
+        this.receptionistOptions = employees
+        .filter(emp => emp.role === 'Receptionist')
+        .map(emp => ({
           id: emp.id,
           name: `${emp.firstName} ${emp.lastName}`
         }));
 
-        this.trainerOptions = this.employeeOptions;
+        this.trainerOptions = employees
+        .filter(emp => emp.role === 'Trainer')
+        .map(emp => ({
+          id: emp.id,
+          name: `${emp.firstName} ${emp.lastName}`
+        }));
       }
     });
 
@@ -441,6 +490,34 @@ export class EventAddModalComponent implements OnInit, OnChanges {
       default:
         return false;
     }
+  }
+
+  private validateTimeRange(): void {
+    if (this.formData.startTime && this.formData.endTime) {
+      const start = new Date(this.formData.startTime);
+      const end = new Date(this.formData.endTime);
+      
+      if (start.getHours() < 8) {
+        start.setHours(8, 0, 0, 0);
+        this.formData.startTime = start;
+      }
+      
+      if (end.getHours() >= 22) {
+        if (end.getHours() > 22 || (end.getHours() === 22 && end.getMinutes() > 0)) {
+          end.setHours(22, 0, 0, 0);
+          this.formData.endTime = end;
+        }
+      }
+      
+      if (end <= start) {
+        end.setTime(start.getTime() + 60 * 60 * 1000);
+        this.formData.endTime = end;
+      }
+    }
+  }
+
+  onTimeChange() {
+    this.validateTimeRange();
   }
 
   getEventTypeLabel(): string {

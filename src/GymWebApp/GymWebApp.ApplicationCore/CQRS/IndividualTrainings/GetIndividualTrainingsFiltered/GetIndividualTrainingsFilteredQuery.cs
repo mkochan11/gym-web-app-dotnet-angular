@@ -1,7 +1,7 @@
 ﻿using GymWebApp.ApplicationCore.Models.Training;
 using MediatR;
 
-namespace GymWebApp.ApplicationCore.CQRS.IndividualTraining;
+namespace GymWebApp.ApplicationCore.CQRS.IndividualTrainings;
 
 public class GetIndividualTrainingsFilteredQuery : IRequest<IEnumerable<IndividualTrainingWebModel>>
 {

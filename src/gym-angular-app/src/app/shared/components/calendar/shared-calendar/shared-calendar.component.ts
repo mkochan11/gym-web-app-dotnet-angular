@@ -40,7 +40,6 @@ import { Client } from '../../../../core/models/client';
   styleUrls: ['./shared-calendar.component.scss']
 })
 export class SharedCalendarComponent implements OnInit, OnDestroy {
-  // Services
   private groupTrainingService = inject(GroupTrainingService);
   private individualTrainingService = inject(IndividualTrainingService);
   private shiftService = inject(ShiftService);
@@ -50,7 +49,6 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   private clientService = inject(ClientService);
   private destroy$ = new Subject<void>();
 
-  // Inputs and Outputs
   @Input() role: string = 'RECEPTIONIST';
   @Output() eventClick = new EventEmitter<CalendarEvent>();
   @Output() eventCreate = new EventEmitter<any>();
@@ -58,7 +56,6 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   @Output() eventCancel = new EventEmitter<CalendarEvent>();
   @Output() eventDelete = new EventEmitter<CalendarEvent>();
 
-  // Component State
   config!: CalendarConfig;
   calendarOptions!: CalendarOptions;
   
@@ -77,7 +74,6 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   allEvents: EventInput[] = [];
   filteredEvents: EventInput[] = [];
 
-  // Filter Data
   employeeOptions: any[] = [];
   trainingTypeOptions: any[] = [];
   clientOptions: any[] = [];
@@ -89,6 +85,9 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   currentFilters: CalendarFilters = {
     eventTypes: ['group', 'individual', 'shift']
   };
+
+  currentView: string = 'timeGridWeek';
+  currentDateRange: { start: Date; end: Date } | null = null;
 
   filterSubject = new Subject<CalendarFilters>();
 
@@ -210,6 +209,28 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
 
       moreLinkText: (num) => `+${num} more`,
 
+      selectAllow: (selectInfo) => {
+        const now = new Date();
+        const currentHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
+        return selectInfo.start >= currentHour;
+      },
+
+      eventAllow: (dropInfo, draggedEvent) => {
+      const now = new Date();
+      const eventStart = dropInfo.start;
+      
+      if (eventStart < now) {
+        return false;
+      }
+      
+      const originalEvent = draggedEvent?.extendedProps?.['originalData'];
+      if (originalEvent && this.isEventCompletedOrOngoing(originalEvent)) {
+        return false;
+      }
+      
+      return true;
+    },
+
       slotMinTime: '07:00:00',
       slotMaxTime: '22:00:00',
       allDaySlot: false,
@@ -269,6 +290,12 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     const event = dropInfo.event;
     const extendedProps = event.extendedProps;
     const originalData = extendedProps['originalData'];
+    const now = new Date();
+
+    if (event.start! < now) {
+      dropInfo.revert();
+      return;
+    }
     
     if (this.isEventCompletedOrOngoing(originalData)) {
       dropInfo.revert();
@@ -286,7 +313,13 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     const event = resizeInfo.event;
     const extendedProps = event.extendedProps;
     const originalData = extendedProps['originalData'];
+    const now = new Date();
     
+      if (event.start! < now) {
+      resizeInfo.revert();
+      return;
+    }
+
     if (this.isEventCompletedOrOngoing(originalData)) {
       resizeInfo.revert();
       return;
@@ -333,7 +366,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   private loadEvents(filters?: CalendarFilters) {
     this.isLoading = true;
     this.allEvents = [];
-    
+
     const requests: Observable<any>[] = [];
     const eventTypesToLoad: ('group' | 'individual' | 'shift')[] = [];
 
@@ -554,7 +587,6 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ... existing transform methods and parseDuration ...
   private transformGroupTrainingsToEvents(trainings: GroupTraining[]): EventInput[] {
     return trainings.map(training => {
       const startDate = new Date(training.date);
@@ -594,11 +626,13 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
       const endDate = new Date(startDate.getTime() + duration);
       
       const trainerName = `${training.trainer.firstName} ${training.trainer.lastName}`;
-      const clientName = `${training.client.firstName} ${training.client.lastName}`;
+      const clientName = training.client 
+      ? `${training.client.firstName} ${training.client.lastName}`
+      : 'No client';
       
       return {
         id: `individual-${training.id}`,
-        title: `PT - ${clientName}`,
+        title: `PT - ${trainerName}`,
         start: startDate,
         end: endDate,
         backgroundColor: this.getEventColor({ type: 'individual' }),
@@ -608,7 +642,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
           trainer: trainerName,
           trainerId: training.trainer.id,
           client: clientName,
-          clientId: training.client.id,
+          clientId: training.client?.id || null,
           description: training.description,
           status: training.status,
           originalData: training

@@ -8,7 +8,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { GroupTrainingService, IndividualTrainingService, ShiftService } from '../../../core/api-services';
 import { DialogModule } from 'primeng/dialog';
 import { DialogService } from 'primeng/dynamicdialog';
-import { EventAddModalComponent } from '../../../shared/components/calendar/event-add-modal/event-add-modal.component';
+import { ManagerCalendarEventAddModalComponent } from './manager-calendar-event-add/manager-calendar-event-add.component';
 
 @Component({
   selector: 'app-manager-calendar',
@@ -19,7 +19,7 @@ import { EventAddModalComponent } from '../../../shared/components/calendar/even
     EventCancellationDialogComponent,
     ConfirmDialogModule,
     DialogModule,
-    EventAddModalComponent
+    ManagerCalendarEventAddModalComponent
   ],
   providers: [ConfirmationService, MessageService, DialogService],
   template: `
@@ -36,14 +36,13 @@ import { EventAddModalComponent } from '../../../shared/components/calendar/even
       (cancelled)="onCancellationCancelled()">
     </app-event-cancellation-dialog>
 
-    <app-event-add-modal
+    <app-manager-calendar-event-add-modal
       [(visible)]="showEventModal"
       [startTime]="creationStartTime"
       [endTime]="creationEndTime"
-      [availableEventTypes]="availableEventTypes"
       (eventCreated)="onEventCreated($event)"
       (cancelled)="onEventCreationCancelled()">
-    </app-event-add-modal>
+    </app-manager-calendar-event-add-modal>
 
     <app-shared-calendar 
       [role]="'MANAGER'"
@@ -79,7 +78,6 @@ export class ManagerCalendarComponent implements AfterViewInit {
     try {
       this.creationStartTime = new Date(createInfo.start);
       this.creationEndTime = new Date(createInfo.end);
-      this.availableEventTypes = this.buildAvailableEventTypes();
 
       setTimeout(() => {
         this.showEventModal = true;
@@ -99,32 +97,6 @@ export class ManagerCalendarComponent implements AfterViewInit {
   onEventCreationCancelled() {
     console.log('Event creation cancelled by user');
     this.showEventModal = false;
-  }
-
-  private buildAvailableEventTypes(): any[] {
-    return [
-      {
-        value: 'group',
-        label: 'Group Training',
-        description: 'Training session for multiple participants',
-        color: '#10B981',
-        icon: 'pi pi-users'
-      },
-      {
-        value: 'individual',
-        label: 'Individual Training',
-        description: 'One-on-one personal training session',
-        color: '#3B82F6',
-        icon: 'pi pi-user'
-      },
-      {
-        value: 'shift',
-        label: 'Staff Shift',
-        description: 'Employee work schedule',
-        color: '#F59E0B',
-        icon: 'pi pi-briefcase'
-      }
-    ];
   }
 
   onEventEdit(event: any) {
@@ -176,18 +148,12 @@ export class ManagerCalendarComponent implements AfterViewInit {
       case 'group':
         creationObservable = this.groupTrainingService.createGroupTraining(eventData);
         break;
-      // case 'individual':
-      //   cancellationObservable = this.individualTrainingService.cancelIndividualTraining(
-      //     this.extractId(event.id), 
-      //     reason
-      //   );
-      //   break;
-      // case 'shift':
-      //   cancellationObservable = this.shiftService.cancelShift(
-      //     this.extractId(event.id), 
-      //     reason
-      //   );
-      //   break;
+      case 'individual':
+        creationObservable = this.individualTrainingService.createIndividualTraining(eventData);
+        break;
+      case 'shift':
+        creationObservable = this.shiftService.createShift(eventData);
+        break;
       default:
         this.toastService.show('Unknown event type', 'error');
         this.showEventModal = false;

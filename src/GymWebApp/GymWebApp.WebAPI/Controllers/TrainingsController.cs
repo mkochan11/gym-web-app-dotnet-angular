@@ -1,5 +1,5 @@
 ﻿using GymWebApp.ApplicationCore.CQRS.GroupTrainings;
-using GymWebApp.ApplicationCore.CQRS.IndividualTraining;
+using GymWebApp.ApplicationCore.CQRS.IndividualTrainings;
 using GymWebApp.ApplicationCore.Extensions;
 using GymWebApp.ApplicationCore.Models.Training;
 using GymWebApp.ApplicationCore.Requests;
@@ -73,6 +73,15 @@ public class TrainingsController : BaseController
         var trainingWebModels = trainings.Select(it => it.ToIndividualTrainingWebModel()).ToList();
 
         return Ok(trainingWebModels);
+    }
+
+    [HttpPost("individual")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult<int>> CreateIndividualTrainingAsync([FromBody] CreateIndividualTrainingCommand command)
+    {
+        command.CreatedById = CurrentUserId;
+        var result = await _mediator.Send(command);
+        return Ok(result);
     }
 
     [HttpGet("individual/filtered")]

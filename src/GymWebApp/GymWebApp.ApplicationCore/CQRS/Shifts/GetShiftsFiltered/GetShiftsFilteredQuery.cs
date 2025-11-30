@@ -1,7 +1,7 @@
 ﻿using GymWebApp.ApplicationCore.Models.Shift;
 using MediatR;
 
-namespace GymWebApp.ApplicationCore.CQRS.Shift;
+namespace GymWebApp.ApplicationCore.CQRS.Shifts;
 
 public class GetShiftsFilteredQuery : IRequest<IEnumerable<ShiftWebModel>>
 {

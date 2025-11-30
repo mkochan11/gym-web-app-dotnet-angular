@@ -1,7 +1,7 @@
 ﻿using GymWebApp.Data.Repositories.Interfaces;
 using MediatR;
 
-namespace GymWebApp.ApplicationCore.CQRS.IndividualTraining
+namespace GymWebApp.ApplicationCore.CQRS.IndividualTrainings
 {
     public class CancelIndividualTrainingCommandHandler : IRequestHandler<CancelIndividualTrainingCommand>
     {
