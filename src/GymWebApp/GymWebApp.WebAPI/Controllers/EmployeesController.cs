@@ -1,5 +1,5 @@
-﻿using GymWebApp.ApplicationCore.Extensions;
-using GymWebApp.Data.Repositories.Interfaces;
+﻿using GymWebApp.Application.Extensions;
+using GymWebApp.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;
@@ -21,5 +21,15 @@ public class EmployeesController : ControllerBase
         var employees = await _employeeRepository.GetAllAsync();
         var employeesWebModels = employees.Select(e => e.ToEmployeeWebModel()).ToList();
         return Ok(employeesWebModels);
+    }
+
+    [HttpGet("{id}/employments")]
+    public async Task<ActionResult>GetEmployeeEmploymentsAsync(int id)
+    {
+        var employee = await _employeeRepository.GetByIdWithEmploymentsAsync(id);
+        if (employee == null)
+            return NotFound();
+
+        return Ok(employee);
     }
 }

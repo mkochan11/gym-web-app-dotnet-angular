@@ -1,5 +1,5 @@
-﻿using GymWebApp.ApplicationCore.Extensions;
-using GymWebApp.Data.Repositories.Interfaces;
+﻿using GymWebApp.Application.Extensions;
+using GymWebApp.Application.Interfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;

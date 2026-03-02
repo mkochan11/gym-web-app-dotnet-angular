@@ -1,5 +1,6 @@
-﻿using GymWebApp.ApplicationCore.Services.Interfaces;
-using GymWebApp.Data.Entities;
+﻿using GymWebApp.Application.DTOs;
+using GymWebApp.Application.Interfaces;
+using GymWebApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,7 +57,14 @@ namespace GymWebApp.WebAPI.Controllers
             if (!result.Succeeded)
                 return Unauthorized("Invalid credentials");
 
-            var token = _jwtTokenService.GenerateToken(user);
+            var userData = new JwtUserData
+            {
+                Id = user.Id,
+                UserName = user.UserName!,
+                Roles = (await _userManager.GetRolesAsync(user)).ToList()
+            };
+
+            var token = _jwtTokenService.GenerateToken(userData);
 
             return Ok(new { token });
         }

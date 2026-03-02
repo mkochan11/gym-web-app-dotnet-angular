@@ -4,8 +4,9 @@ WORKDIR /src
 
 # Copy project files
 COPY ["GymWebApp.WebAPI/GymWebApp.WebAPI.csproj", "GymWebApp.WebAPI/"]
-COPY ["GymWebApp.ApplicationCore/GymWebApp.ApplicationCore.csproj", "GymWebApp.ApplicationCore/"]
-COPY ["GymWebApp.Data/GymWebApp.Data.csproj", "GymWebApp.Data/"]
+COPY ["GymWebApp.Application/GymWebApp.Application.csproj", "GymWebApp.Application/"]
+COPY ["GymWebApp.Infrastructure/GymWebApp.Infrastructure.csproj", "GymWebApp.Infrastructure/"]
+COPY ["GymWebApp.Domain/GymWebApp.Domain.csproj", "GymWebApp.Domain/"]
 
 # Restore dependencies
 RUN dotnet restore "GymWebApp.WebAPI/GymWebApp.WebAPI.csproj"

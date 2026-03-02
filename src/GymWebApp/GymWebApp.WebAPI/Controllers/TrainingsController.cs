@@ -1,9 +1,9 @@
-﻿using GymWebApp.ApplicationCore.CQRS.GroupTrainings;
-using GymWebApp.ApplicationCore.CQRS.IndividualTrainings;
-using GymWebApp.ApplicationCore.Extensions;
-using GymWebApp.ApplicationCore.Models.Training;
-using GymWebApp.ApplicationCore.Requests;
-using GymWebApp.Data.Repositories.Interfaces;
+﻿using GymWebApp.Application.CQRS.GroupTrainings;
+using GymWebApp.Application.CQRS.IndividualTrainings;
+using GymWebApp.Application.DTOs.Events;
+using GymWebApp.Application.Extensions;
+using GymWebApp.Application.Interfaces.Repositories;
+using GymWebApp.Application.WebModels.Training;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,14 +54,26 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("group/{id}/cancel")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
     public async Task<ActionResult> CancelGroupTrainingAsync(int id, [FromBody] CancelEventRequest request)
     {
-        var command = new CancelGroupTrainingCommand
-        {
-            Id = id,
-            CancellationReason = request.CancellationReason
-        };
+        var command = new CancelGroupCommand(
+            id,
+            request.CancellationReason,
+            CurrentUserId);
 
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpPost("group/{id}/restore")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult> RestoreGroupTrainingAsync(int id)
+    {
+        var command = new RestoreGroupTrainingCommand(
+            id,
+            CurrentUserId
+        );
         await _mediator.Send(command);
         return Ok();
     }
@@ -92,13 +104,26 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("individual/{id}/cancel")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
     public async Task<ActionResult> CancelIndiviudalTraining(int id, [FromBody] CancelEventRequest request)
     {
-        var command = new CancelIndividualTrainingCommand
-        {
-            Id = id,
-            CancellationReason = request.CancellationReason
-        };
+        var command = new CancelIndividualTrainingCommand(
+            id,
+            request.CancellationReason,
+            CurrentUserId);
+
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpPost("individual/{id}/restore")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult> RestoreIndividualTrainingAsync(int id)
+    {
+        var command = new RestoreIndividualTrainingCommand(
+            id,
+            CurrentUserId
+        );
 
         await _mediator.Send(command);
         return Ok();
