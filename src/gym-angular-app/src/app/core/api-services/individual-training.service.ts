@@ -21,6 +21,14 @@ export class IndividualTrainingService {
     return this.httpService.post<any>(`trainings/individual/${trainingId}/cancel`, cancelDto);
   }
 
+  deleteIndividualTraining(trainingId: number): Observable<any> {
+    return this.httpService.delete<any>(`trainings/individual/${trainingId}`);
+  }
+
+  restoreIndividualTraining(trainingId: number): Observable<any> {
+    return this.httpService.post<any>(`trainings/individual/${trainingId}/restore`, {});
+  }
+
   createIndividualTraining(trainingData: any): Observable<any>{
     const createDto = {
       trainerId: trainingData.formData.trainerId,

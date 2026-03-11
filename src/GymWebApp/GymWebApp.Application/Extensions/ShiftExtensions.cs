@@ -22,6 +22,8 @@ public static class ShiftExtensions
 
     private static EventStatus GetShiftStatus(this Shift shift)
     {
+        if (shift.IsCancelled) return EventStatus.Cancelled;
+
         if (shift.StartTime > DateTime.Now)
         {
             return EventStatus.Scheduled;
@@ -47,6 +49,12 @@ public static class ShiftExtensions
     {
         shift.IsCancelled = false;
         shift.CancellationReason = null;
+        shift.SetModificationAuditInfo(updatedById);
+    }
+
+    public static void SetRemovedTrue(this Shift shift, string updatedById)
+    {
+        shift.Removed = true;
         shift.SetModificationAuditInfo(updatedById);
     }
 }

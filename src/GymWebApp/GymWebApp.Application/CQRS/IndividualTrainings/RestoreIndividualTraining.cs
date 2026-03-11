@@ -21,14 +21,12 @@ public static class RestoreIndividualTraining
         {
             var training = await _individualTrainingRepository.GetByIdAsync(command.Id) ?? throw new NotFoundException("Group training not found");
 
-            if (training.IsCancelled)
+            if (!training.IsCancelled)
             {
-                throw new BusinessRuleViolationException("Training is already cancelled");
+                throw new BusinessRuleViolationException("Training has not been cancelled");
             }
-            else
-            {
-                training.SetCancelledFalse(command.UpdatedById);
-            }
+
+            training.SetCancelledFalse(command.UpdatedById);
 
             //TODO: check if training is in the past and if so, don't allow to restore it
             //TODO: check if trainer is available at the time of training, if not, don't allow to restore it

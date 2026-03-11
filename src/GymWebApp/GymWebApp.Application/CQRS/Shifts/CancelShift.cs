@@ -41,9 +41,8 @@ public static class CancelShift
     }
 }
 
-public class CancelShiftCommand : IRequest
-{
-    public int Id { get; set; }
-    public string CancellationReason { get; set; } = string.Empty;
-    public string UpdatedById { get; set; } = string.Empty;
-}
+public record CancelShiftCommand(
+    int Id,
+    string CancellationReason,
+    string UpdatedById
+) : IRequest;

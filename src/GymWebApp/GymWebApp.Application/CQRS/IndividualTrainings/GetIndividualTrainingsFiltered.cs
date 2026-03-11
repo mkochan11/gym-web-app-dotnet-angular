@@ -8,14 +8,14 @@ namespace GymWebApp.Application.CQRS.IndividualTrainings;
 
 public static class GetIndividualTrainingsFiltered
 {
-    public class Handler : IRequestHandler<GetIndividualTrainingsFilteredQuery, IEnumerable<IndividualTrainingWebModel>>
+    public class Handler : IRequestHandler<GetIndividualTrainingsFilteredQuery, IEnumerable<CalendarIndividualTrainingWebModel>>
     {
         private readonly IIndividualTrainingRepository _individualTrainingRepository;
         public Handler(IIndividualTrainingRepository individualTrainingRepository)
         {
             _individualTrainingRepository = individualTrainingRepository;
         }
-        public async Task<IEnumerable<IndividualTrainingWebModel>> Handle(GetIndividualTrainingsFilteredQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CalendarIndividualTrainingWebModel>> Handle(GetIndividualTrainingsFilteredQuery request, CancellationToken cancellationToken)
         {
             var filtersDto = new IndividualTrainingFiltersDto
             {
@@ -26,7 +26,7 @@ public static class GetIndividualTrainingsFiltered
             };
             
             var trainings = await _individualTrainingRepository.GetFilteredIndividualTrainingsAsync(filtersDto);
-            return trainings.Select(it => it.ToIndividualTrainingWebModel()).ToList();
+            return trainings.Select(it => it.ToCalendarIndividualTrainingWebModel()).ToList();
         }
     }   
 }
@@ -36,4 +36,4 @@ public record GetIndividualTrainingsFilteredQuery(
     DateTime? EndDate,
     string? TrainerIds,
     string? ClientIds
-) : IRequest<IEnumerable<IndividualTrainingWebModel>>;
+) : IRequest<IEnumerable<CalendarIndividualTrainingWebModel>>;

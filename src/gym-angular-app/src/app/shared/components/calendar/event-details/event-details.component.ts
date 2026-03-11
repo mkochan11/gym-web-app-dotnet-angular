@@ -21,6 +21,7 @@ export class EventDetailsComponent {
   @Output() edit = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
+  @Output() restore = new EventEmitter<void>();
 
   closeDetails() {
     this.close.emit();
@@ -36,6 +37,10 @@ export class EventDetailsComponent {
 
   deleteEvent() {
     this.delete.emit();
+  }
+
+  restoreEvent() {
+    this.restore.emit();
   }
 
   getDifficultyStars(difficulty: number): string {

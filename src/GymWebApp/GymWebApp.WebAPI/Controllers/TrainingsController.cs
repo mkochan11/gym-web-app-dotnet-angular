@@ -29,9 +29,10 @@ public class TrainingsController : BaseController
     }
 
     [HttpGet("group")]
-    public async Task<ActionResult<IEnumerable<GroupTrainingWebModel>>> GetGroupTrainingsAsync()
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<CalendarGroupTrainingWebModel>>> GetGroupTrainingsAsync()
     {
-        var trainings = await _groupTrainingRepository.GetAllGroupTrainingsWithTrainersAsync();
+        var trainings = await _groupTrainingRepository.GetAllGroupTrainingsWithDetailsAsync();
         var trainingWebModels = trainings.Select(gt => gt.ToGroupTrainingWebModel()).ToList();
 
         return Ok(trainingWebModels);
@@ -47,7 +48,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpGet("group/filtered")]
-    public async Task<ActionResult<IEnumerable<GroupTrainingWebModel>>> GetFilteredGroupTrainingsAsync([FromQuery] GetGroupTrainingsFilteredQuery query)
+    public async Task<ActionResult<IEnumerable<CalendarGroupTrainingWebModel>>> GetFilteredGroupTrainingsAsync([FromQuery] GetGroupTrainingsFilteredQuery query)
     {
         var result = await _mediator.Send(query);
         return Ok(result);
@@ -78,10 +79,23 @@ public class TrainingsController : BaseController
         return Ok();
     }
 
-    [HttpGet("individual")]
-    public async Task<ActionResult<IEnumerable<GroupTrainingWebModel>>> GetIndividualTrainingsAsync()
+    [HttpDelete("group/{id}")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult> DeleteGroupTrainingAsync(int id)
     {
-        var trainings = await _individualTrainingRepository.GetAllIndividualTrainingsWithTrainersAsync();
+        var command = new DeleteGroupTrainingCommand(
+            id,
+            CurrentUserId
+        );
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpGet("individual")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<IndividualTrainingWebModel>>> GetAllIndividualTrainingsAsync()
+    {
+        var trainings = await _individualTrainingRepository.GetAllIndividualTrainingsWithDetailsAsync();
         var trainingWebModels = trainings.Select(it => it.ToIndividualTrainingWebModel()).ToList();
 
         return Ok(trainingWebModels);
@@ -97,7 +111,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpGet("individual/filtered")]
-    public async Task<ActionResult<IEnumerable<GroupTrainingWebModel>>> GetFilteredIndividualTrainingsAsync([FromQuery] GetIndividualTrainingsFilteredQuery query)
+    public async Task<ActionResult<IEnumerable<CalendarGroupTrainingWebModel>>> GetFilteredIndividualTrainingsAsync([FromQuery] GetIndividualTrainingsFilteredQuery query)
     {
         var result = await _mediator.Send(query);
         return Ok(result);
@@ -125,6 +139,18 @@ public class TrainingsController : BaseController
             CurrentUserId
         );
 
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpDelete("individual/{id}")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult> DeleteIndividualTrainingAsync(int id)
+    {
+        var command = new DeleteIndividualTrainingCommand(
+            id,
+            CurrentUserId
+        );
         await _mediator.Send(command);
         return Ok();
     }

@@ -5,11 +5,11 @@ namespace GymWebApp.Domain.Entities.Abstract;
 public abstract class BaseTrainingEntity : AuditableEntity
 {
     [Required]
-    public DateTime Date { get; set; }
-    
+    public DateTime StartTime { get; set; }
+
     [Required]
-    public TimeSpan Duration { get; set; }
-    
+    public DateTime EndTime { get; set; }
+
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
     

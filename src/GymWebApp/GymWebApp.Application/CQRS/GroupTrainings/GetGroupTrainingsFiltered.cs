@@ -8,7 +8,7 @@ namespace GymWebApp.Application.CQRS.GroupTrainings;
 
 public static class GetGroupTrainingsFiltered
 {
-    public class Handler : IRequestHandler<GetGroupTrainingsFilteredQuery, IEnumerable<GroupTrainingWebModel>>
+    public class Handler : IRequestHandler<GetGroupTrainingsFilteredQuery, IEnumerable<CalendarGroupTrainingWebModel>>
     {
         private readonly IGroupTrainingRepository _groupTrainingRepository;
 
@@ -17,7 +17,7 @@ public static class GetGroupTrainingsFiltered
             _groupTrainingRepository = groupTrainingRepository;
         }
 
-        public async Task<IEnumerable<GroupTrainingWebModel>> Handle(GetGroupTrainingsFilteredQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<CalendarGroupTrainingWebModel>> Handle(GetGroupTrainingsFilteredQuery request, CancellationToken cancellationToken)
         {
             var filtersDto = new GroupTrainingFiltersDto
             {
@@ -28,7 +28,7 @@ public static class GetGroupTrainingsFiltered
             };
 
             var trainings = await _groupTrainingRepository.GetFilteredGroupTrainingsAsync(filtersDto);
-            return trainings.Select(gt => gt.ToGroupTrainingWebModel()).ToList();
+            return trainings.Select(gt => gt.ToCalendarGroupTrainingWebModel()).ToList();
         }
     }
 }
@@ -38,4 +38,4 @@ public record GetGroupTrainingsFilteredQuery(
     DateTime? EndDate,
     string? TrainerIds,
     string? TrainingTypeIds
-) : IRequest<IEnumerable<GroupTrainingWebModel>>;
+) : IRequest<IEnumerable<CalendarGroupTrainingWebModel>>;

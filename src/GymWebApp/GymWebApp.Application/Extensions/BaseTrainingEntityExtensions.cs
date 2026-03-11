@@ -9,11 +9,11 @@ public static class BaseTrainingEntityExtensions
     {
         if (training.IsCancelled) return EventStatus.Cancelled;
 
-        if (training.Date > DateTime.UtcNow)
+        if (training.StartTime > DateTime.UtcNow)
         {
             return EventStatus.Scheduled;
         }
-        else if (training.Date <= DateTime.UtcNow && training.Date.Add(training.Duration) >= DateTime.UtcNow)
+        else if (training.StartTime <= DateTime.UtcNow && training.EndTime >= DateTime.UtcNow)
         {
             return EventStatus.Ongoing;
         }
@@ -27,6 +27,13 @@ public static class BaseTrainingEntityExtensions
     {
         training.IsCancelled = true;
         training.CancellationReason = cancellationReason;
+        training.CancelledAt = DateTime.UtcNow;
+        training.SetModificationAuditInfo(updatedById);
+    }
+
+    public static void SetRemovedTrue(this BaseTrainingEntity training, string updatedById)
+    {
+        training.Removed = true;
         training.SetModificationAuditInfo(updatedById);
     }
 
@@ -34,6 +41,7 @@ public static class BaseTrainingEntityExtensions
     {
         training.IsCancelled = false;
         training.CancellationReason = null;
+        training.CancelledAt = null;
         training.SetModificationAuditInfo(updatedById);
     }
 }

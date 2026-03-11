@@ -5,7 +5,6 @@ import { ClientLayoutComponent } from './layouts/client-layout/client-layout.com
 import { ManagementLayoutComponent } from './layouts/management-layout/management-layout.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { roleGuard } from './shared/guards/role.guard';
-import { Calendar } from '@fullcalendar/core/index.js';
 import { ManagerLayoutComponent } from './layouts/management-layout/manager-layout/manager-layout.component';
 
 export const routes: Routes = [

@@ -242,8 +242,8 @@ public class DomainDataSeeder : IDomainDataSeeder
             {
                 TrainerId = trainer.Id,
                 TrainingTypeId = trainingType.Id,
-                Date = trainingDate.AddHours(10 + (i % 6)),
-                Duration = TimeSpan.FromHours(1),
+                StartTime = trainingDate.AddHours(10 + (i % 6)),
+                EndTime = trainingDate.AddHours(11 + (i % 6)),
                 Description = $"{trainingType.Name} session with {trainer.Name}",
                 MaxParticipantNumber = 15,
                 DifficultyLevel = trainingType.DifficultyLevel ?? 3,
@@ -298,8 +298,8 @@ public class DomainDataSeeder : IDomainDataSeeder
             {
                 TrainerId = trainer.Id,
                 ClientId = client.Id,
-                Date = trainingDate.AddHours(14 + (i % 4)),
-                Duration = TimeSpan.FromMinutes(60),
+                StartTime = trainingDate.AddHours(14 + (i % 4)),
+                EndTime = trainingDate.AddHours(15 + (i % 4)),
                 Description = $"Personal training session with {trainer.Name}",
                 CreatedById = trainerId
             });

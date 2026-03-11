@@ -51,8 +51,8 @@ public static class CreateIndividualTraining
             var training = new IndividualTraining
             {
                 TrainerId = command.TrainerId,
-                Date = command.StartDate.ToUniversalTime(),
-                Duration = duration,
+                StartTime = command.StartDate.ToUniversalTime(),
+                EndTime = command.StartDate.ToUniversalTime(),
                 Description = command.Description ?? string.Empty,
                 Notes = command.Notes ?? string.Empty,
                 CreatedById = command.CreatedById,

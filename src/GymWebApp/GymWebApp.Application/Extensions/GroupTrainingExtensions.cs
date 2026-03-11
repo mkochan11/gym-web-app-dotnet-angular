@@ -5,6 +5,26 @@ namespace GymWebApp.Application.Extensions;
 
 public static class GroupTrainingExtensions
 {
+    public static CalendarGroupTrainingWebModel ToCalendarGroupTrainingWebModel(this GroupTraining groupTraining)
+    {
+        if (groupTraining == null) return null!;
+
+        return new CalendarGroupTrainingWebModel
+        {
+            Id = groupTraining.Id,
+            Description = groupTraining.Description,
+            Date = groupTraining.StartTime.ToLocalTime(),
+            Duration = groupTraining.EndTime.ToLocalTime() - groupTraining.StartTime.ToLocalTime(),
+            Status = groupTraining.GetTrainingStatus().ToString(),
+            Trainer = groupTraining.Trainer.ToTrainerWebModel(),
+            CurrentParticipantNumber = groupTraining.Participations?.Count ?? 0,
+            MaxParticipantNumber = groupTraining.MaxParticipantNumber,
+            DifficultyLevel = groupTraining.DifficultyLevel,
+            TrainingType = groupTraining.TrainingType.ToTrainingTypeWebModel(),
+            
+        };
+    }
+
     public static GroupTrainingWebModel ToGroupTrainingWebModel(this GroupTraining groupTraining)
     {
         if (groupTraining == null) return null!;
@@ -13,14 +33,19 @@ public static class GroupTrainingExtensions
         {
             Id = groupTraining.Id,
             Description = groupTraining.Description,
-            Date = groupTraining.Date.ToLocalTime(),
-            Duration = groupTraining.Duration,
+            StartTime = groupTraining.StartTime.ToLocalTime(),
+            Duration = groupTraining.EndTime.ToLocalTime() - groupTraining.StartTime.ToLocalTime(),
             Status = groupTraining.GetTrainingStatus().ToString(),
             Trainer = groupTraining.Trainer.ToTrainerWebModel(),
             CurrentParticipantNumber = groupTraining.Participations?.Count ?? 0,
             MaxParticipantNumber = groupTraining.MaxParticipantNumber,
             DifficultyLevel = groupTraining.DifficultyLevel,
-            TrainingType = groupTraining.TrainingType.ToTrainingTypeWebModel()
+            TrainingType = groupTraining.TrainingType.ToTrainingTypeWebModel(),
+            CancelledAt = groupTraining.CancelledAt?.ToLocalTime(),
+            CreatedAt = groupTraining.CreatedAt.ToLocalTime(),
+            UpdatedAt = groupTraining.CreatedAt.ToLocalTime(),
+            EndTime = groupTraining.EndTime.ToLocalTime(),
+            Removed = groupTraining.Removed
         };
     }
 }

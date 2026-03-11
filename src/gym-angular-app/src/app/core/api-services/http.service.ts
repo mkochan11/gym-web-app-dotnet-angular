@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -6,8 +6,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class HttpService {
   private baseUrl = environment.apiUrl;
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   get<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}/${endpoint}`)
@@ -31,6 +30,24 @@ export class HttpService {
 
   private handleError(error: any) {
     console.error('HTTP Error:', error);
-    return throwError(() => error);
+    
+    let errorMessage = 'An error occurred';
+    
+    // Check if error response has the expected structure
+    if (error.error) {
+      // If there are validation details, extract the first error message
+      if (error.error.details && typeof error.error.details === 'object') {
+        const firstKey = Object.keys(error.error.details)[0];
+        if (firstKey && Array.isArray(error.error.details[firstKey])) {
+          errorMessage = error.error.details[firstKey][0];
+        }
+      } 
+      // Otherwise use the message field if available
+      else if (error.error.message) {
+        errorMessage = error.error.message;
+      }
+    }
+    
+    return throwError(() => ({ message: errorMessage, originalError: error }));
   }
 }

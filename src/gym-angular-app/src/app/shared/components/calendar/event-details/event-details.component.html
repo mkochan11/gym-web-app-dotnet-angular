@@ -92,7 +92,7 @@
 
     <p-card *ngIf="eventType === 'shift'" header="Shift Details">
       <div class="info-grid">
-        <div class="info-item" *ngIf="event.employee">
+        <div class="info-item">
           <label>Staff:</label>
           <span class="value">{{ event.employee }}</span>
         </div>
@@ -108,18 +108,25 @@
               (click)="editEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canCancel && event.status !== 'Completed' && event.status !== 'Ongoing'"
+              *ngIf="permissions.canCancel && event.status !== 'Completed' && event.status !== 'Ongoing' && event.status !== 'Cancelled'"
               label="Cancel Event" 
               icon="pi pi-times"
               class="p-button-danger"
               (click)="cancelEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canDelete && event.status !== 'Ongoing'"
+              *ngIf="permissions.canDelete && event.status === 'Cancelled'"
               label="Delete Event" 
               icon="pi pi-trash"
               class="p-button-danger p-button-outlined"
               (click)="deleteEvent()">
+      </button>
+      <button pButton 
+              *ngIf="permissions.canEdit && event.status === 'Cancelled'"
+              label="Restore Event" 
+              icon="pi pi-history"
+              class="p-button-success p-button-outlined"
+              (click)="restoreEvent()">
       </button>
     </div>
   </div>

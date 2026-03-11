@@ -38,19 +38,19 @@ public static class CreateGroupTraining
                 MaxParticipantNumber = command.MaxParticipantNumber,
                 TrainingTypeId = command.TrainingTypeId,
                 DifficultyLevel = command.DifficultyLevel,
-                Date = command.StartDate.ToUniversalTime(),
-                Duration = TimeSpan.FromMinutes((command.EndDate - command.StartDate).TotalMinutes),
+                StartTime = command.StartDate.ToUniversalTime(),
+                EndTime = command.EndDate.ToUniversalTime(),
                 Description = command.Description ?? string.Empty,
                 Notes = command.Notes,
                 CreatedById = command.CreatedById,
                 CreatedAt = DateTime.UtcNow
             };
 
-            var trainer = await _employeeRepository.GetByIdAsync(command.TrainerId);
+            var trainer = await _employeeRepository.GetByIdWithEmploymentsAsync(command.TrainerId);
             if (trainer == null || trainer.Role != EmployeeRole.Trainer)
                 throw new NotFoundException("Trainer not found");
 
-            /*if (!trainer.IsEmployeeActive())
+            if (!trainer.IsEmployeeActive())
                 throw new ValidationException(new Dictionary<string, string[]>
                 {
                     { "TrainerId", new[] { "Trainer will not be active." } }
@@ -62,7 +62,7 @@ public static class CreateGroupTraining
                 throw new ValidationException(new Dictionary<string, string[]>
                 {
                     { "StartDate", new[] { "Trainer is not available in this time range." } }
-                });*/
+                });
 
             _ = await _trainingTypeRepository.GetByIdAsync(command.TrainingTypeId) ?? throw new NotFoundException("Training type not found");
 

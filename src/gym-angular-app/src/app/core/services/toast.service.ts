@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, timer } from 'rxjs';
 
 export interface ToastMessage {
   text: string;
@@ -15,8 +15,8 @@ export class ToastService {
   show(message: string, type: 'success' | 'error' | 'info' = 'info', duration = 3000) {
     this._toast$.next({ text: message, type, duration });
 
-    setTimeout(() => {
+    timer(duration).subscribe(() => {
       this._toast$.next(null);
-    }, duration);
+    });
   }
 }

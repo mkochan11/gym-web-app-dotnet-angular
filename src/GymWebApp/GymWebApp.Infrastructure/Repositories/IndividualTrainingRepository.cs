@@ -16,12 +16,13 @@ public class IndividualTrainingRepository(ApplicationDbContext context) : Reposi
             .Where(t =>
                 t.TrainerId == trainerId &&
                 !t.IsCancelled &&
-                start < t.Date.Add(t.Duration) &&
-                end > t.Date)
+                !t.Removed &&
+                start < t.EndTime &&
+                end > t.StartTime)
             .AnyAsync(ct);
     }
 
-    public async Task<IEnumerable<IndividualTraining>> GetAllIndividualTrainingsWithTrainersAsync() =>
+    public async Task<IEnumerable<IndividualTraining>> GetAllIndividualTrainingsWithDetailsAsync() =>
         await _context.IndividualTrainings
             .Include(it => it.Trainer)
             .Include(it => it.Client)
@@ -33,17 +34,17 @@ public class IndividualTrainingRepository(ApplicationDbContext context) : Reposi
         var query = _context.IndividualTrainings
             .Include(it => it.Trainer)
             .Include(it => it.Client)
-            .Where(it => !it.Removed && !it.IsCancelled)
+            .Where(it => !it.Removed)
             .AsQueryable();
 
         if (filters.StartDate.HasValue)
         {
-            query = query.Where(it => it.Date >= filters.StartDate.Value);
+            query = query.Where(it => it.StartTime >= filters.StartDate.Value);
         }
 
         if (filters.EndDate.HasValue)
         {
-            query = query.Where(it => it.Date <= filters.EndDate.Value);
+            query = query.Where(it => it.StartTime <= filters.EndDate.Value);
         }
 
         if (filters.TrainersIds?.Any() == true)

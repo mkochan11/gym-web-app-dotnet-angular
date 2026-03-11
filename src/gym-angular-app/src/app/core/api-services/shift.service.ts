@@ -21,6 +21,14 @@ export class ShiftService {
     return this.httpService.post<any>(`shifts/${shiftId}/cancel`, cancelDto);
   }
 
+  deleteShift(shiftId: number): Observable<any> {
+    return this.httpService.delete<any>(`shifts/${shiftId}`);
+  }
+
+  restoreShift(shiftId: number): Observable<any> {
+    return this.httpService.post<any>(`shifts/${shiftId}/restore`, {});
+  }
+
   createShift(shiftData: any): Observable<any>{
     const createDto = {
       employeeId: shiftData.formData.employeeId,

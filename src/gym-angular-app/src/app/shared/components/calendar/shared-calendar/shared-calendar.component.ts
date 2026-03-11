@@ -55,6 +55,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   @Output() eventEdit = new EventEmitter<CalendarEvent>();
   @Output() eventCancel = new EventEmitter<CalendarEvent>();
   @Output() eventDelete = new EventEmitter<CalendarEvent>();
+  @Output() eventRestore = new EventEmitter<CalendarEvent>();
 
   config!: CalendarConfig;
   calendarOptions!: CalendarOptions;
@@ -261,6 +262,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
       type: extendedProps['type'],
       trainer: extendedProps['trainer'],
       client: extendedProps['client'],
+      employee: extendedProps['employee'],
       capacity: extendedProps['capacity'],
       enrolled: extendedProps['enrolled'],
       description: extendedProps['description'],
@@ -355,6 +357,13 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
     }
   }
 
+  onRestoreEvent() {
+    if (this.selectedEvent) {
+      this.eventRestore.emit(this.selectedEvent);
+      this.closeDetailsPanel();
+    }
+  }
+
   closeDetailsPanel() {
     this.showDetailsPanel = false;
     this.selectedEvent = null;
@@ -412,6 +421,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
               break;
             case 'shift':
               events = this.transformShiftsToEvents(data as Shift[]);
+              console.log('Loaded shifts:', events);
               break;
           }
           
@@ -540,6 +550,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
       type: extendedProps['type'],
       trainer: extendedProps['trainer'],
       client: extendedProps['client'],
+      employee: extendedProps['employee'],
       capacity: extendedProps['capacity'],
       enrolled: extendedProps['enrolled'],
       description: extendedProps['description'],
@@ -554,7 +565,14 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
 
   getEventColor(event: any): string {
     const eventType = event.type || event.extendedProps?.type;
-    
+    const status = event.status || event.extendedProps?.status;
+
+    if (status === 'Cancelled') {
+      return '#EF4444';
+    } else if (status === 'Completed') {
+      return '#9c9c9c';
+    } 
+
     switch (eventType) {
       case 'individual': return '#3B82F6';
       case 'group': return '#10B981';
@@ -568,14 +586,21 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   }
 
   getPermissionsForEvent(): any {
-    if (!this.selectedEventType) return {};
-    
-    return {
-      canEdit: this.config[`canEdit${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
-      canCancel: this.config[`canEdit${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
-      canDelete: this.config[`canDelete${this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1)}Trainings` as keyof CalendarConfig] as boolean,
-    };
-  }
+  if (!this.selectedEventType) return {};
+
+  const typeCapitalized = this.selectedEventType.charAt(0).toUpperCase() + this.selectedEventType.slice(1);
+  const suffix = this.selectedEventType === 'shift' ? 's' : 'Trainings';
+
+  const editKey = `canEdit${typeCapitalized}${suffix}` as keyof CalendarConfig;
+  const deleteKey = `canDelete${typeCapitalized}${suffix}` as keyof CalendarConfig;
+
+  return {
+    canEdit: !!this.config[editKey],
+    canCancel: !!this.config[editKey],
+    canDelete: !!this.config[deleteKey],
+    canRestore: !!this.config[editKey]
+  };
+}
 
   hasActiveFilters(): boolean {
     return !!(
@@ -600,8 +625,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
         title: `${training.trainingType.name} - ${trainerName}`,
         start: startDate,
         end: endDate,
-        backgroundColor: this.getEventColor({ type: 'group' }),
-        borderColor: this.getEventColor({ type: 'group' }),
+        backgroundColor: this.getEventColor({ type: 'group', status: training.status }),
+        borderColor: this.getEventColor({ type: 'group', status: training.status }),
         extendedProps: {
           type: 'group',
           trainer: trainerName,
@@ -635,8 +660,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
         title: `PT - ${trainerName}`,
         start: startDate,
         end: endDate,
-        backgroundColor: this.getEventColor({ type: 'individual' }),
-        borderColor: this.getEventColor({ type: 'individual' }),
+        backgroundColor: this.getEventColor({ type: 'individual', status : training.status }),
+        borderColor: this.getEventColor({ type: 'individual', status : training.status }),
         extendedProps: {
           type: 'individual',
           trainer: trainerName,
@@ -663,8 +688,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
         title: `Shift - ${employeeName}`,
         start: startDate,
         end: endDate,
-        backgroundColor: this.getEventColor({ type: 'shift' }),
-        borderColor: this.getEventColor({ type: 'shift' }),
+        backgroundColor: this.getEventColor({ type: 'shift', status: shift.status }),
+        borderColor: this.getEventColor({ type: 'shift', status: shift.status }),
         extendedProps: {
           type: 'shift',
           employee: employeeName,

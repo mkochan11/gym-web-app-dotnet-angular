@@ -16,17 +16,16 @@ public class GroupTrainingRepository(ApplicationDbContext context) : Repository<
             .Where(t =>
                 t.TrainerId == trainerId &&
                 !t.IsCancelled &&
-                start < t.Date.Add(t.Duration) &&
-                end > t.Date)
+                start < t.EndTime &&
+                end > t.StartTime)
             .AnyAsync(ct);
     }
 
-    public async Task<IEnumerable<GroupTraining>> GetAllGroupTrainingsWithTrainersAsync() =>
+    public async Task<IEnumerable<GroupTraining>> GetAllGroupTrainingsWithDetailsAsync() =>
         await _context.GroupTrainings
             .Include(gt => gt.Trainer)
             .Include(gt => gt.Participations)
             .Include(gt => gt.TrainingType)
-            .Where(gt => !gt.Removed)
             .ToListAsync();
 
     public async Task<IEnumerable<GroupTraining>> GetFilteredGroupTrainingsAsync(GroupTrainingFiltersDto filters)
@@ -34,17 +33,17 @@ public class GroupTrainingRepository(ApplicationDbContext context) : Repository<
         var query = _context.GroupTrainings
             .Include(gt => gt.Trainer)
             .Include(gt => gt.TrainingType)
-            .Where(gt => !gt.Removed && !gt.IsCancelled)
+            .Where(gt => !gt.Removed)
             .AsQueryable();
 
         if (filters.StartDate.HasValue)
         {
-            query = query.Where(gt => gt.Date >= filters.StartDate.Value);
+            query = query.Where(gt => gt.StartTime >= filters.StartDate.Value);
         }
 
         if (filters.EndDate.HasValue)
         {
-            query = query.Where(gt => gt.Date <= filters.EndDate.Value);
+            query = query.Where(gt => gt.StartTime <= filters.EndDate.Value);
         }
 
         if (filters.TrainerIds?.Any() == true)

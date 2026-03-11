@@ -21,6 +21,14 @@ export class GroupTrainingService {
     return this.httpService.post<any>(`trainings/group/${trainingId}/cancel`, cancelDto);
   }
 
+  deleteGroupTraining(trainingId: number): Observable<any> {
+    return this.httpService.delete<any>(`trainings/group/${trainingId}`);
+  }
+
+  restoreGroupTraining(trainingId: number): Observable<any> {
+    return this.httpService.post<any>(`trainings/group/${trainingId}/restore`, {});
+  }
+
   createGroupTraining(trainingData: any): Observable<any>{
     const createDto = {
       trainerId: trainingData.formData.trainerId,

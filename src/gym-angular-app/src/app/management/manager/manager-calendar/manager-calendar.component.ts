@@ -9,6 +9,7 @@ import { GroupTrainingService, IndividualTrainingService, ShiftService } from '.
 import { DialogModule } from 'primeng/dialog';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ManagerCalendarEventAddModalComponent } from './manager-calendar-event-add/manager-calendar-event-add.component';
+import { CalendarService } from '../../../core/services/calendar-service';
 
 @Component({
   selector: 'app-manager-calendar',
@@ -49,7 +50,8 @@ import { ManagerCalendarEventAddModalComponent } from './manager-calendar-event-
       (eventCreate)="onEventCreate($event)"
       (eventEdit)="onEventEdit($event)"
       (eventCancel)="onEventCancel($event)"
-      (eventDelete)="onEventDelete($event)">
+      (eventDelete)="onEventDelete($event)"
+      (eventRestore)="onEventRestore($event)">
     </app-shared-calendar>
   `
 })
@@ -62,6 +64,7 @@ export class ManagerCalendarComponent implements AfterViewInit {
   private groupTrainingService = inject(GroupTrainingService);
   private individualTrainingService = inject(IndividualTrainingService);
   private shiftService = inject(ShiftService);
+  private calendarService = inject(CalendarService);
 
   showCancelDialog = false;
   selectedEvent: any = null;
@@ -130,6 +133,19 @@ export class ManagerCalendarComponent implements AfterViewInit {
     });
   }
 
+  onEventRestore(event: any) {
+    console.log('Manager: Restore event', event);
+    
+    this.confirmationService.confirm({
+      message: `Are you sure you want to restore "${event.title}"?`,
+      header: 'Confirm Restoration',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.performEventRestore(event);
+      }
+    });
+  }
+
   onCancellationConfirmed(cancellationReason: string) {
     this.isCancelling = true;
     this.performEventCancellation(this.selectedEvent, cancellationReason);
@@ -169,7 +185,7 @@ export class ManagerCalendarComponent implements AfterViewInit {
         this.sharedCalendar.refreshCalendar();
       },
       error: (error) => {
-        this.toastService.show(`Failed to create event. "${error}"`, 'error');
+        this.toastService.show(`Failed to create event: ${error.message}`, 'error');
         this.isCancelling = false;
       }
     });
@@ -181,55 +197,44 @@ export class ManagerCalendarComponent implements AfterViewInit {
   }
 
   private performEventCancellation(event: any, reason: string) {
-    let cancellationObservable;
-
-    switch (event.type) {
-      case 'group':
-        cancellationObservable = this.groupTrainingService.cancelGroupTraining(
-          this.extractId(event.id), 
-          reason
-        );
-        break;
-      case 'individual':
-        cancellationObservable = this.individualTrainingService.cancelIndividualTraining(
-          this.extractId(event.id), 
-          reason
-        );
-        break;
-      case 'shift':
-        cancellationObservable = this.shiftService.cancelShift(
-          this.extractId(event.id), 
-          reason
-        );
-        break;
-      default:
-        this.toastService.show('Unknown event type', 'error');
-        this.isCancelling = false;
-        return;
-    }
-
-    cancellationObservable.subscribe({
-      next: (response) => {
-        this.toastService.show(`Event "${event.title}" has been cancelled successfully`, 'success');
+    this.calendarService.cancelEvent(event.type, event.id, reason).subscribe({
+      next: () => {
+        this.toastService.show(`Event "${event.title}" cancelled`, 'success');
         this.showCancelDialog = false;
         this.resetCancellationState();
-
         this.sharedCalendar.refreshCalendar();
       },
-      error: (error) => {
-        this.toastService.show(`Failed to cancel event. "${error}"`, 'error');
-        this.isCancelling = false;
-      }
+      error: (err) => this.toastService.show(err.message, 'error')
     });
   }
 
   private performEventDeletion(event: any) {
-    setTimeout(() => {
-      this.toastService.show(`Event "${event.title}" has been deleted successfully`, 'success');
-    }, 1000);
+    this.calendarService.deleteEvent(event.type, event.id).subscribe({
+      next: () => {
+        this.toastService.show(`Event "${event.title}" deleted`, 'success');
+        this.sharedCalendar.refreshCalendar();
+      },
+      error: (err) => this.toastService.show(err.message, 'error')
+    });
   }
 
-  private extractId(eventId: string): number {
-    return parseInt(eventId.split('-')[1]);
+  private performEventRestore(event: any) {
+    this.calendarService.restoreEvent(event.type, event.id).subscribe({
+      next: () => {
+        this.toastService.show(
+          `Event "${event.title}" has been restored successfully`, 
+          'success'
+        );
+        
+        this.sharedCalendar.refreshCalendar();
+        this.resetCancellationState();
+      },
+      error: (error) => {
+        this.toastService.show(
+          `Failed to restore event: ${error.message}`, 
+          'error'
+        );
+      }
+    });
   }
 }

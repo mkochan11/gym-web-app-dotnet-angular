@@ -1,5 +1,6 @@
 ﻿using GymWebApp.Application.CQRS.Shifts;
 using GymWebApp.Application.DTOs;
+using GymWebApp.Application.DTOs.Events;
 using GymWebApp.Application.Extensions;
 using GymWebApp.Application.Interfaces.Repositories;
 using MediatR;
@@ -57,9 +58,26 @@ public class ShiftsController : BaseController
     }
 
     [HttpPost("{id}/cancel")]
-    public async Task<ActionResult> CancelShiftTraining(int id, [FromBody] CancelShiftCommand command)
+    public async Task<ActionResult> CancelShift(int id, [FromBody] CancelEventRequest request)
     {
-        command.UpdatedById = CurrentUserId;
+        var command = new CancelShiftCommand(
+            id,
+            request.CancellationReason,
+            CurrentUserId);
+
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<ActionResult> DeleteShiftAsync(int id)
+    {
+        var command = new DeleteShiftCommand(
+            id,
+            CurrentUserId
+        );
+
         await _mediator.Send(command);
         return Ok();
     }
