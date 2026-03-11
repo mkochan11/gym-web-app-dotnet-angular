@@ -49,7 +49,9 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   private clientService = inject(ClientService);
   private destroy$ = new Subject<void>();
 
-  @Input() role: string = 'RECEPTIONIST';
+  @Input() config: CalendarConfig = CALENDAR_CONFIGS['RECEPTIONIST'];
+  @Input() showFilters = true;
+  @Input() showDetailsPanelDefault = false;
   @Output() eventClick = new EventEmitter<CalendarEvent>();
   @Output() eventCreate = new EventEmitter<any>();
   @Output() eventEdit = new EventEmitter<CalendarEvent>();
@@ -57,14 +59,12 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   @Output() eventDelete = new EventEmitter<CalendarEvent>();
   @Output() eventRestore = new EventEmitter<CalendarEvent>();
 
-  config!: CalendarConfig;
   calendarOptions!: CalendarOptions;
   
   selectedEvent: CalendarEvent | null = null;
   selectedEventType: 'group' | 'individual' | 'shift' | null = null;
   showDetailsPanel = false;
   isLoading = false;
-  showFilters = true;
 
   visibleEvents = {
     group: true,
@@ -93,8 +93,11 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   filterSubject = new Subject<CalendarFilters>();
 
   ngOnInit() {
-    this.role = this.authService.getRole()?.toUpperCase() ?? 'RECEPTIONIST';
-    this.config = CALENDAR_CONFIGS[this.role] || CALENDAR_CONFIGS['RECEPTIONIST'];
+    if (!this.config) {
+      const role = this.authService.getRole()?.toUpperCase() ?? 'RECEPTIONIST';
+      this.config = CALENDAR_CONFIGS[role] || CALENDAR_CONFIGS['RECEPTIONIST'];
+    }
+    this.showDetailsPanel = this.showDetailsPanelDefault;
     this.currentFilters = this.getInitialFilters();
     this.visibleEvents = {
       group: this.config.canViewGroupTrainings,

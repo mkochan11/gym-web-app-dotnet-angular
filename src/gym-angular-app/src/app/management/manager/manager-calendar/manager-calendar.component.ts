@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedCalendarComponent } from '../../../shared/components/calendar/shared-calendar/shared-calendar.component';
 import { EventCancellationDialogComponent } from '../../../shared/components/calendar/event-cancellation-dialog/event-cancellation-dialog.component';
@@ -8,8 +8,12 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { GroupTrainingService, IndividualTrainingService, ShiftService } from '../../../core/api-services';
 import { DialogModule } from 'primeng/dialog';
 import { DialogService } from 'primeng/dynamicdialog';
-import { ManagerCalendarEventAddModalComponent } from './manager-calendar-event-add/manager-calendar-event-add.component';
 import { CalendarService } from '../../../core/services/calendar-service';
+import { EventAddModalComponent, EventTypeOption, EmployeeOption, TrainingTypeOption } from '../../../shared/components/calendar/event-add-modal/event-add-modal.component';
+import { EmployeeService, TrainingTypeService } from '../../../core/api-services';
+import { Employee } from '../../../core/models/employee';
+import { TrainingType } from '../../../core/models/training-type';
+import { CALENDAR_CONFIGS, CalendarConfig } from '../../../core/configurations/calendar-config';
 
 @Component({
   selector: 'app-manager-calendar',
@@ -20,7 +24,7 @@ import { CalendarService } from '../../../core/services/calendar-service';
     EventCancellationDialogComponent,
     ConfirmDialogModule,
     DialogModule,
-    ManagerCalendarEventAddModalComponent
+    EventAddModalComponent
   ],
   providers: [ConfirmationService, MessageService, DialogService],
   template: `
@@ -37,16 +41,19 @@ import { CalendarService } from '../../../core/services/calendar-service';
       (cancelled)="onCancellationCancelled()">
     </app-event-cancellation-dialog>
 
-    <app-manager-calendar-event-add-modal
+    <app-event-add-modal
       [(visible)]="showEventModal"
       [startTime]="creationStartTime"
       [endTime]="creationEndTime"
+      [availableEventTypes]="availableEventTypes"
+      [employeeOptions]="employeeOptions"
+      [trainingTypeOptions]="trainingTypeOptions"
       (eventCreated)="onEventCreated($event)"
       (cancelled)="onEventCreationCancelled()">
-    </app-manager-calendar-event-add-modal>
+    </app-event-add-modal>
 
     <app-shared-calendar 
-      [role]="'MANAGER'"
+      [config]="managerConfig"
       (eventCreate)="onEventCreate($event)"
       (eventEdit)="onEventEdit($event)"
       (eventCancel)="onEventCancel($event)"
@@ -55,8 +62,7 @@ import { CalendarService } from '../../../core/services/calendar-service';
     </app-shared-calendar>
   `
 })
-
-export class ManagerCalendarComponent implements AfterViewInit {
+export class ManagerCalendarComponent implements AfterViewInit, OnInit {
   @ViewChild(SharedCalendarComponent) sharedCalendar!: SharedCalendarComponent;
 
   private toastService = inject(ToastService);
@@ -65,6 +71,10 @@ export class ManagerCalendarComponent implements AfterViewInit {
   private individualTrainingService = inject(IndividualTrainingService);
   private shiftService = inject(ShiftService);
   private calendarService = inject(CalendarService);
+  private employeeService = inject(EmployeeService);
+  private trainingTypeService = inject(TrainingTypeService);
+
+  managerConfig: CalendarConfig = CALENDAR_CONFIGS['MANAGER'];
 
   showCancelDialog = false;
   selectedEvent: any = null;
@@ -73,56 +83,78 @@ export class ManagerCalendarComponent implements AfterViewInit {
   showEventModal = false;
   creationStartTime!: Date;
   creationEndTime!: Date;
-  availableEventTypes: any[] = [];
+
+  availableEventTypes: EventTypeOption[] = [
+    { value: 'group', label: 'Group Training', description: 'Training session for multiple participants', color: '#10B981', icon: 'pi pi-users' },
+    { value: 'individual', label: 'Individual Training', description: 'One-on-one personal training session', color: '#3B82F6', icon: 'pi pi-user' },
+    { value: 'shift', label: 'Staff Shift', description: 'Employee work schedule', color: '#F59E0B', icon: 'pi pi-briefcase' }
+  ];
+
+  employeeOptions: EmployeeOption[] = [];
+  trainingTypeOptions: TrainingTypeOption[] = [];
+
+  ngOnInit() {
+    this.loadDropdownData();
+  }
 
   ngAfterViewInit(): void {}
+
+  private loadDropdownData() {
+    this.employeeService.getAllEmployees().subscribe({
+      next: (employees: Employee[]) => {
+        this.employeeOptions = employees.map(emp => ({
+          id: emp.id,
+          name: `${emp.firstName} ${emp.lastName}`,
+          role: emp.role
+        }));
+      }
+    });
+
+    this.trainingTypeService.getAllTrainingTypes().subscribe({
+      next: (trainingTypes: TrainingType[]) => {
+        this.trainingTypeOptions = trainingTypes.map(tt => ({
+          id: tt.id,
+          name: tt.name
+        }));
+      }
+    });
+  }
 
   async onEventCreate(createInfo: any) {
     try {
       this.creationStartTime = new Date(createInfo.start);
       this.creationEndTime = new Date(createInfo.end);
-
       setTimeout(() => {
         this.showEventModal = true;
-    }, 0);
-      
+      }, 0);
     } catch (error: any) {
       this.toastService.show('Failed to start event creation. Please try again.', 'error');
     }
   }
 
   onEventCreated(eventData: any) {
-    console.log('Event created:', eventData);
     this.createEvent(eventData);
     this.showEventModal = false;
   }
 
   onEventCreationCancelled() {
-    console.log('Event creation cancelled by user');
     this.showEventModal = false;
   }
 
   onEventEdit(event: any) {
-    console.log('Manager: Edit event', event);
     this.toastService.show(`Edit event: ${event.title}`, 'info');
   }
 
   onEventCancel(event: any) {
-    console.log('Manager: Cancel event received', event);
-    
     if (!event) {
-      console.error('No event provided for cancellation');
       this.toastService.show('No event selected for cancellation', 'error');
       return;
     }
-
     this.selectedEvent = event;
     this.showCancelDialog = true;
   }
 
   onEventDelete(event: any) {
-    console.log('Manager: Delete event', event);
-    
     this.confirmationService.confirm({
       message: `Are you sure you want to delete "${event.title}"? This action cannot be undone.`,
       header: 'Confirm Deletion',
@@ -134,8 +166,6 @@ export class ManagerCalendarComponent implements AfterViewInit {
   }
 
   onEventRestore(event: any) {
-    console.log('Manager: Restore event', event);
-    
     this.confirmationService.confirm({
       message: `Are you sure you want to restore "${event.title}"?`,
       header: 'Confirm Restoration',
@@ -152,14 +182,12 @@ export class ManagerCalendarComponent implements AfterViewInit {
   }
 
   onCancellationCancelled() {
-    console.log('Cancellation was cancelled by user');
     this.resetCancellationState();
   }
 
   private createEvent(eventData: any) {
     let creationObservable;
 
-    console.log(`Create Event with`, eventData)
     switch (eventData.type) {
       case 'group':
         creationObservable = this.groupTrainingService.createGroupTraining(eventData);
@@ -181,7 +209,6 @@ export class ManagerCalendarComponent implements AfterViewInit {
         this.toastService.show(`Event has been created successfully`, 'success');
         this.showCancelDialog = false;
         this.resetCancellationState();
-
         this.sharedCalendar.refreshCalendar();
       },
       error: (error) => {
@@ -221,19 +248,12 @@ export class ManagerCalendarComponent implements AfterViewInit {
   private performEventRestore(event: any) {
     this.calendarService.restoreEvent(event.type, event.id).subscribe({
       next: () => {
-        this.toastService.show(
-          `Event "${event.title}" has been restored successfully`, 
-          'success'
-        );
-        
+        this.toastService.show(`Event "${event.title}" has been restored successfully`, 'success');
         this.sharedCalendar.refreshCalendar();
         this.resetCancellationState();
       },
       error: (error) => {
-        this.toastService.show(
-          `Failed to restore event: ${error.message}`, 
-          'error'
-        );
+        this.toastService.show(`Failed to restore event: ${error.message}`, 'error');
       }
     });
   }

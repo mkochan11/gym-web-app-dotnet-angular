@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace GymWebApp.Application.WebModels.Employee;
 
-namespace GymWebApp.Application.WebModels.Employee
+public class EmployeeWithEmploymentsWebModel
 {
-    public class EmployeeWithEmploymentsWebModel
-    {
-    }
+    public int Id { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public IEnumerable<EmploymentWebModel>? Employments { get; set; }
 }

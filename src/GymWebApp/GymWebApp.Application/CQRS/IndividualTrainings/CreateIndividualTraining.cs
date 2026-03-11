@@ -29,7 +29,7 @@ public static class CreateIndividualTraining
 
         public async Task<int> Handle(CreateIndividualTrainingCommand command, CancellationToken ct)
         {
-            var trainer = await _employeeRepository.GetByIdAsync(command.TrainerId)
+            var trainer = await _employeeRepository.GetByIdWithEmploymentsAsync(command.TrainerId)
                 ?? throw new NotFoundException("Trainer", command.TrainerId);
 
             if (!trainer.IsEmployeeActive())
@@ -52,7 +52,7 @@ public static class CreateIndividualTraining
             {
                 TrainerId = command.TrainerId,
                 StartTime = command.StartDate.ToUniversalTime(),
-                EndTime = command.StartDate.ToUniversalTime(),
+                EndTime = command.EndDate.ToUniversalTime(),
                 Description = command.Description ?? string.Empty,
                 Notes = command.Notes ?? string.Empty,
                 CreatedById = command.CreatedById,

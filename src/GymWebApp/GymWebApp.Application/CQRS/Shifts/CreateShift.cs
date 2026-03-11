@@ -25,7 +25,7 @@ public static class CreateShift
     
         public async Task<int> Handle(CreateShiftCommand command, CancellationToken ct)
         {
-            var employee = await _employeeRepository.GetByIdAsync(command.EmployeeId)
+            var employee = await _employeeRepository.GetByIdWithEmploymentsAsync(command.EmployeeId)
                 ?? throw new NotFoundException("Employee", command.EmployeeId);
 
             if (!employee.IsEmployeeActive())

@@ -6,11 +6,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
-import { EmployeeService, TrainingTypeService } from '../../../../core/api-services';
-import { Employee } from '../../../../core/models/employee';
-import { TrainingType } from '../../../../core/models/training-type';
 
-interface EventTypeOption {
+export interface EventTypeOption {
   value: 'group' | 'individual' | 'shift';
   label: string;
   description: string;
@@ -18,8 +15,19 @@ interface EventTypeOption {
   icon: string;
 }
 
+export interface EmployeeOption {
+  id: number;
+  name: string;
+  role?: string;
+}
+
+export interface TrainingTypeOption {
+  id: number;
+  name: string;
+}
+
 @Component({
-  selector: 'app-manager-calendar-event-add-modal',
+  selector: 'app-event-add-modal',
   standalone: true,
   imports: [
     CommonModule,
@@ -131,8 +139,8 @@ interface EventTypeOption {
                     name="endTime"
                     [showTime]="true"
                     [showIcon]="true"
-                    [required]="true"
                     [minDate]="minDate"
+                    [required]="true"
                     [timeOnly]="false"
                     (onSelect)="onTimeChange()"
                     [class]="{'invalid': submitted && !formData.endTime}">
@@ -144,11 +152,9 @@ interface EventTypeOption {
               </div>
             </div>
 
-            <!-- Event Specific Fields -->
             <div class="form-section" *ngIf="selectedEventType">
               <h4>{{ getEventTypeLabel() }} Details</h4>
               
-              <!-- Group Training Fields -->
               <div *ngIf="selectedEventType === 'group'" class="form-row">
                 <div class="form-group">
                   <label for="trainingType">Training Type *</label>
@@ -187,7 +193,6 @@ interface EventTypeOption {
                 </div>
               </div>
 
-              <!-- Individual Training Fields -->
               <div *ngIf="selectedEventType === 'individual'" class="form-group">
                 <label for="trainer">Trainer *</label>
                 <p-dropdown
@@ -206,13 +211,12 @@ interface EventTypeOption {
                 </small>
               </div>
 
-              <!-- Shift Fields -->
               <div *ngIf="selectedEventType === 'shift'" class="form-group">
                 <label for="employee">Employee *</label>
                 <p-dropdown
                   id="employee"
                   [(ngModel)]="formData.employeeId"
-                  [options]="receptionistOptions"
+                  [options]="employeeOptions"
                   name="employee"
                   optionLabel="name"
                   optionValue="id"
@@ -225,7 +229,6 @@ interface EventTypeOption {
                 </small>
               </div>
 
-              <!-- Additional Fields -->
               <div class="form-row" *ngIf="selectedEventType === 'group'">
                 <div class="form-group">
                   <label for="maxParticipants">Max Participants</label>
@@ -307,19 +310,19 @@ interface EventTypeOption {
       </div>
     </div>
   `,
-  styleUrls: ['./manager-calendar-event-add.component.scss']
+  styleUrls: ['./event-add-modal.component.scss']
 })
-export class ManagerCalendarEventAddModalComponent implements OnInit, OnChanges {
+export class EventAddModalComponent implements OnInit, OnChanges {
   @Input() visible = false;
-  @Input() startTime!: Date;
-  @Input() endTime!: Date;
+  @Input() startTime?: Date;
+  @Input() endTime?: Date;
+  @Input() availableEventTypes: EventTypeOption[] = [];
+  @Input() employeeOptions: EmployeeOption[] = [];
+  @Input() trainingTypeOptions: TrainingTypeOption[] = [];
   
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() eventCreated = new EventEmitter<any>();
   @Output() cancelled = new EventEmitter<void>();
-
-  private employeeService = inject(EmployeeService);
-  private trainingTypeService = inject(TrainingTypeService);
 
   currentStep = 1;
   selectedEventType: 'group' | 'individual' | 'shift' | null = null;
@@ -328,14 +331,8 @@ export class ManagerCalendarEventAddModalComponent implements OnInit, OnChanges 
   loading = false;
 
   minDate: Date = new Date();
-  timeConstraints = {
-    hourMin: 8,
-    hourMax: 22
-  };
 
-  trainerOptions: any[] = [];
-  receptionistOptions: any[] = [];
-  trainingTypeOptions: any[] = [];
+  trainerOptions: EmployeeOption[] = [];
   difficultyLevels = [
     { label: 'Level 1 - Beginner', value: 1 },
     { label: 'Level 2 - Basic', value: 2 },
@@ -344,40 +341,19 @@ export class ManagerCalendarEventAddModalComponent implements OnInit, OnChanges 
     { label: 'Level 5 - Expert', value: 5 }
   ];
 
-  availableEventTypes: EventTypeOption[] = [
-      {
-        value: 'group',
-        label: 'Group Training',
-        description: 'Training session for multiple participants',
-        color: '#10B981',
-        icon: 'pi pi-users'
-      },
-      {
-        value: 'individual',
-        label: 'Individual Training',
-        description: 'One-on-one personal training session',
-        color: '#3B82F6',
-        icon: 'pi pi-user'
-      },
-      {
-        value: 'shift',
-        label: 'Staff Shift',
-        description: 'Employee work schedule',
-        color: '#F59E0B',
-        icon: 'pi pi-briefcase'
-      }
-    ];
-
   ngOnChanges(changes: SimpleChanges) {
     if ((changes['visible'] && this.visible) || 
         ((changes['startTime'] || changes['endTime']) && this.visible)) {
       this.initializeFormData();
       this.setMinDate();
     }
+    
+    if (changes['employeeOptions']) {
+      this.trainerOptions = this.employeeOptions.filter(emp => emp.role === 'Trainer');
+    }
   }
 
   ngOnInit() {
-    this.loadDropdownData();
     this.setMinDate();
   }
 
@@ -405,35 +381,6 @@ export class ManagerCalendarEventAddModalComponent implements OnInit, OnChanges 
 
   private isValidDate(date: any): boolean {
     return date instanceof Date && !isNaN(date.getTime());
-  }
-
-  private loadDropdownData() {
-    this.employeeService.getAllEmployees().subscribe({
-      next: (employees: Employee[]) => {
-        this.receptionistOptions = employees
-        .filter(emp => emp.role === 'Receptionist')
-        .map(emp => ({
-          id: emp.id,
-          name: `${emp.firstName} ${emp.lastName}`
-        }));
-
-        this.trainerOptions = employees
-        .filter(emp => emp.role === 'Trainer')
-        .map(emp => ({
-          id: emp.id,
-          name: `${emp.firstName} ${emp.lastName}`
-        }));
-      }
-    });
-
-    this.trainingTypeService.getAllTrainingTypes().subscribe({
-      next: (trainingTypes: TrainingType[]) => {
-        this.trainingTypeOptions = trainingTypes.map(tt => ({
-          id: tt.id,
-          name: tt.name
-        }));
-      }
-    });
   }
 
   selectEventType(type: EventTypeOption) {
