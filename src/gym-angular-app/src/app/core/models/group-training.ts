@@ -6,7 +6,7 @@ export interface GroupTraining {
     description: string;
     date: string;
     duration: string;
-    status: string;
+    statuses: string[];
     trainer: Trainer;
     maxParticipantNumber: number;
     currentParticipantNumber: number;

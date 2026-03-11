@@ -12,7 +12,7 @@ export interface CalendarEvent {
     description?: string;
     difficultyLevel?: number;
     trainingType?: string;
-    status?: string;
+    statuses?: string[];
     originalData: any;
     oldStart: Date;
     oldEnd: Date;

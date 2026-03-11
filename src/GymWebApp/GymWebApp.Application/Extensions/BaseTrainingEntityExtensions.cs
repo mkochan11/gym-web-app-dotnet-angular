@@ -5,21 +5,25 @@ namespace GymWebApp.Application.Extensions;
 
 public static class BaseTrainingEntityExtensions
 {
-    public static EventStatus GetTrainingStatus(this BaseTrainingEntity training)
+    public static IEnumerable<EventStatus> GetTrainingStatuses(this BaseTrainingEntity training)
     {
-        if (training.IsCancelled) return EventStatus.Cancelled;
-
-        if (training.StartTime > DateTime.UtcNow)
+        if (training.IsCancelled)
         {
-            return EventStatus.Scheduled;
+            yield return EventStatus.Cancelled;
+        }
+
+        if (training.EndTime < DateTime.UtcNow)
+        {
+            yield return EventStatus.Completed;
         }
         else if (training.StartTime <= DateTime.UtcNow && training.EndTime >= DateTime.UtcNow)
         {
-            return EventStatus.Ongoing;
+            yield return EventStatus.Ongoing;
         }
-        else
+
+        if (training.StartTime > DateTime.UtcNow)
         {
-            return EventStatus.Completed;
+            yield return EventStatus.Scheduled;
         }
     }
 

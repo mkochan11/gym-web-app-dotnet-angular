@@ -15,7 +15,7 @@ public class IndividualTrainingWebModel
 
     public TimeSpan Duration { get; set; }
 
-    public string Status { get; set; } = null!;
+    public string[] Statuses { get; set; } = [];
 
     public TrainerWebModel Trainer { get; set; } = null!;
 

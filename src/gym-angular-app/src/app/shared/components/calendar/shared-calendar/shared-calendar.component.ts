@@ -271,7 +271,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
       description: extendedProps['description'],
       difficultyLevel: extendedProps['difficultyLevel'],
       trainingType: extendedProps['trainingType'],
-      status: extendedProps['status'],
+      statuses: extendedProps['statuses'],
       originalData: extendedProps['originalData'],
       oldEnd: extendedProps['oldEnd'],
       oldStart: extendedProps['oldStart']
@@ -528,11 +528,12 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
   }
 
   private isEventCompletedOrOngoing(eventData: any): boolean {
-    const status = eventData.status?.toLowerCase();
+    const statuses = eventData.statuses || (eventData.status ? [eventData.status] : []);
+    const statusLower = statuses.map((s: string) => s.toLowerCase());
     const eventDate = new Date(eventData.date || eventData.startDate);
     const now = new Date();
     
-    if (status === 'completed' || status === 'cancelled') {
+    if (statusLower.includes('completed') || statusLower.includes('cancelled')) {
       return true;
     }
     
@@ -559,7 +560,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
       description: extendedProps['description'],
       difficultyLevel: extendedProps['difficultyLevel'],
       trainingType: extendedProps['trainingType'],
-      status: extendedProps['status'],
+      statuses: extendedProps['statuses'],
       originalData: extendedProps['originalData'],
       oldEnd: extendedProps['oldEnd'],
       oldStart: extendedProps['oldStart']
@@ -568,7 +569,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
 
   getEventColor(event: any): string {
     const eventType = event.type || event.extendedProps?.type;
-    const status = event.status || event.extendedProps?.status;
+    const statuses = event.statuses || event.extendedProps?.statuses;
+    const status = Array.isArray(statuses) ? statuses[0] : statuses;
 
     if (status === 'Cancelled') {
       return '#EF4444';
@@ -628,8 +630,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
         title: `${training.trainingType.name} - ${trainerName}`,
         start: startDate,
         end: endDate,
-        backgroundColor: this.getEventColor({ type: 'group', status: training.status }),
-        borderColor: this.getEventColor({ type: 'group', status: training.status }),
+        backgroundColor: this.getEventColor({ type: 'group', statuses: training.statuses }),
+        borderColor: this.getEventColor({ type: 'group', statuses: training.statuses }),
         extendedProps: {
           type: 'group',
           trainer: trainerName,
@@ -640,7 +642,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
           difficultyLevel: training.difficultyLevel,
           capacity: training.maxParticipantNumber,
           enrolled: training.currentParticipantNumber,
-          status: training.status,
+          statuses: training.statuses,
           originalData: training
         }
       };
@@ -663,8 +665,8 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
         title: `PT - ${trainerName}`,
         start: startDate,
         end: endDate,
-        backgroundColor: this.getEventColor({ type: 'individual', status : training.status }),
-        borderColor: this.getEventColor({ type: 'individual', status : training.status }),
+        backgroundColor: this.getEventColor({ type: 'individual', statuses: training.statuses }),
+        borderColor: this.getEventColor({ type: 'individual', statuses: training.statuses }),
         extendedProps: {
           type: 'individual',
           trainer: trainerName,
@@ -672,7 +674,7 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
           client: clientName,
           clientId: training.client?.id || null,
           description: training.description,
-          status: training.status,
+          statuses: training.statuses,
           originalData: training
         }
       };
@@ -691,14 +693,14 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
         title: `Shift - ${employeeName}`,
         start: startDate,
         end: endDate,
-        backgroundColor: this.getEventColor({ type: 'shift', status: shift.status }),
-        borderColor: this.getEventColor({ type: 'shift', status: shift.status }),
+        backgroundColor: this.getEventColor({ type: 'shift', statuses: shift.statuses }),
+        borderColor: this.getEventColor({ type: 'shift', statuses: shift.statuses }),
         extendedProps: {
           type: 'shift',
           employee: employeeName,
           employeeId: shift.employee.id,
           originalData: shift,
-          status: shift.status
+          statuses: shift.statuses
         }
       };
     });

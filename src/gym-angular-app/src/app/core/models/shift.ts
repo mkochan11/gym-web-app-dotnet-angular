@@ -5,5 +5,5 @@ export interface Shift {
     startDate: string;
     endDate: string;
     employee: Employee;
-    status: string;
+    statuses: string[];
 }

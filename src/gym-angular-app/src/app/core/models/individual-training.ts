@@ -6,7 +6,7 @@ export interface IndividualTraining {
     description: string;
     date: string;
     duration: string;
-    status: string;
+    statuses: string[];
     trainer: Trainer;
     client: Client;
 }

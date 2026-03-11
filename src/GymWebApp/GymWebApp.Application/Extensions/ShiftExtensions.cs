@@ -16,25 +16,29 @@ public static class ShiftExtensions
             StartDate = shift.StartTime,
             EndDate = shift.EndTime,
             Employee = shift.Employee.ToEmployeeWebModel(),
-            Status = shift.GetShiftStatus().ToString()
+            Statuses = shift.GetShiftStatuses().Select(s => s.ToString()).ToArray()
         };
     }
 
-    private static EventStatus GetShiftStatus(this Shift shift)
+    private static IEnumerable<EventStatus> GetShiftStatuses(this Shift shift)
     {
-        if (shift.IsCancelled) return EventStatus.Cancelled;
-
-        if (shift.StartTime > DateTime.Now)
+        if (shift.IsCancelled)
         {
-            return EventStatus.Scheduled;
+            yield return EventStatus.Cancelled;
+        }
+
+        if (shift.EndTime < DateTime.Now)
+        {
+            yield return EventStatus.Completed;
         }
         else if (shift.StartTime <= DateTime.Now && shift.EndTime >= DateTime.Now)
         {
-            return EventStatus.Ongoing;
+            yield return EventStatus.Ongoing;
         }
-        else
+
+        if (shift.StartTime > DateTime.Now)
         {
-            return EventStatus.Completed;
+            yield return EventStatus.Scheduled;
         }
     }
 

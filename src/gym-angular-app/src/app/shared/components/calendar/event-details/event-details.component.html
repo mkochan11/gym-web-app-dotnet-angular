@@ -101,28 +101,28 @@
 
     <div class="actions" *ngIf="permissions">
       <button pButton 
-              *ngIf="permissions.canEdit && event.status !== 'Completed' && event.status !== 'Ongoing'"
+              *ngIf="permissions.canEdit && hasNoneOfStatuses(['Completed', 'Ongoing'])"
               label="Edit Event" 
               icon="pi pi-pencil"
               class="p-button-outlined"
               (click)="editEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canCancel && event.status !== 'Completed' && event.status !== 'Ongoing' && event.status !== 'Cancelled'"
+              *ngIf="permissions.canCancel && hasNoneOfStatuses(['Completed', 'Ongoing', 'Cancelled'])"
               label="Cancel Event" 
               icon="pi pi-times"
               class="p-button-danger"
               (click)="cancelEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canDelete && event.status === 'Cancelled'"
+              *ngIf="permissions.canDelete && hasStatus('Cancelled')"
               label="Delete Event" 
               icon="pi pi-trash"
               class="p-button-danger p-button-outlined"
               (click)="deleteEvent()">
       </button>
       <button pButton 
-              *ngIf="permissions.canEdit && event.status === 'Cancelled'"
+              *ngIf="permissions.canEdit && hasStatus('Cancelled') && !hasStatus('Completed') && !hasStatus('Ongoing')"
               label="Restore Event" 
               icon="pi pi-history"
               class="p-button-success p-button-outlined"

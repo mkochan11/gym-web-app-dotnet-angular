@@ -15,7 +15,7 @@ public static class IndividualTrainingExtensions
             Description = individualTraining.Description,   
             Date = individualTraining.StartTime.ToLocalTime(),
             Duration = individualTraining.EndTime.ToLocalTime() - individualTraining.StartTime.ToLocalTime(),
-            Status = individualTraining.GetTrainingStatus().ToString(),
+            Statuses = individualTraining.GetTrainingStatuses().Select(s => s.ToString()).ToArray(),
             Trainer = individualTraining.Trainer.ToTrainerWebModel(),
             Client = individualTraining.Client?.ToClientWebModel(),
         };
@@ -31,7 +31,7 @@ public static class IndividualTrainingExtensions
             Description = individualTraining.Description,
             StartTime = individualTraining.StartTime.ToLocalTime(),
             Duration = individualTraining.EndTime.ToLocalTime() - individualTraining.StartTime.ToLocalTime(),
-            Status = individualTraining.GetTrainingStatus().ToString(),
+            Statuses = individualTraining.GetTrainingStatuses().Select(s => s.ToString()).ToArray(),
             Trainer = individualTraining.Trainer.ToTrainerWebModel(),
             Client = individualTraining.Client?.ToClientWebModel(),
             CancelledAt = individualTraining.CancelledAt?.ToLocalTime(),

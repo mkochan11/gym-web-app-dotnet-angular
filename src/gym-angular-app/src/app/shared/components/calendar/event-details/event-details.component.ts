@@ -50,15 +50,29 @@ export class EventDetailsComponent {
   getStatusBadgeSeverity() {
     if (!this.event) return 'secondary';
     
-    if (this.event.status === 'Ongoing') return 'info';
-    if (this.event.status === 'Completed') return 'success';
-    if (this.event.status === 'Scheduled') return 'secondary';
+    const statuses = this.event.statuses;
+    const status = Array.isArray(statuses) ? statuses[0] : statuses;
+    
+    if (status === 'Ongoing') return 'info';
+    if (status === 'Completed') return 'success';
+    if (status === 'Scheduled') return 'secondary';
     return 'secondary';
   }
 
   getEventStatus() {
     if (!this.event) return '';
-    return this.event.status;
+    const statuses = this.event.statuses;
+    return Array.isArray(statuses) ? statuses.join(', ') : statuses;
+  }
+
+  hasStatus(status: string): boolean {
+    if (!this.event || !this.event.statuses) return false;
+    return this.event.statuses.includes(status);
+  }
+
+  hasNoneOfStatuses(statuses: string[]): boolean {
+    if (!this.event || !this.event.statuses) return true;
+    return !this.event.statuses.some(s => statuses.includes(s));
   }
 
   getDuration(): string {
