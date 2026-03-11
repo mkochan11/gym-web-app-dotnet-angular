@@ -81,4 +81,17 @@ public class ShiftsController : BaseController
         await _mediator.Send(command);
         return Ok();
     }
+
+    [HttpPost("{id}/restore")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<ActionResult> RestoreShiftAsync(int id)
+    {
+        var command = new RestoreShiftCommand(
+            id,
+            CurrentUserId
+        );
+
+        await _mediator.Send(command);
+        return Ok();
+    }
 }

@@ -11,10 +11,17 @@ public static class RestoreIndividualTraining
     public class Handler : IRequestHandler<RestoreIndividualTrainingCommand>
     {
         private readonly IIndividualTrainingRepository _individualTrainingRepository;
+        private readonly IGroupTrainingRepository _groupTrainingRepository;
+        private readonly IShiftRepository _shiftRepository;
 
-        public Handler(IIndividualTrainingRepository individualTrainingRepository)
+        public Handler(
+            IIndividualTrainingRepository individualTrainingRepository,
+            IGroupTrainingRepository groupTrainingRepository,
+            IShiftRepository shiftRepository)
         {
             _individualTrainingRepository = individualTrainingRepository;
+            _groupTrainingRepository = groupTrainingRepository;
+            _shiftRepository = shiftRepository;
         }
 
         public async Task Handle(RestoreIndividualTrainingCommand command, CancellationToken cancellationToken)
@@ -26,11 +33,37 @@ public static class RestoreIndividualTraining
                 throw new BusinessRuleViolationException("Training has not been cancelled");
             }
 
+            if (training.StartTime < DateTime.UtcNow)
+            {
+                throw new BusinessRuleViolationException("Cannot restore training that is in the past");
+            }
+
+            var hasIndividualConflict = await _individualTrainingRepository.ExistsOverlappingAsync(
+                training.TrainerId, training.StartTime, training.EndTime, cancellationToken);
+
+            if (hasIndividualConflict)
+            {
+                throw new BusinessRuleViolationException("Trainer has an overlapping individual training at this time");
+            }
+
+            var hasGroupConflict = await _groupTrainingRepository.ExistsOverlappingAsync(
+                training.TrainerId, training.StartTime, training.EndTime, cancellationToken);
+
+            if (hasGroupConflict)
+            {
+                throw new BusinessRuleViolationException("Trainer has an overlapping group training at this time");
+            }
+
+            var hasShiftConflict = await _shiftRepository.ExistsOverlappingAsync(
+                training.TrainerId, training.StartTime, training.EndTime, cancellationToken);
+
+            if (hasShiftConflict)
+            {
+                throw new BusinessRuleViolationException("Trainer has an overlapping shift at this time");
+            }
+
             training.SetCancelledFalse(command.UpdatedById);
-
-            //TODO: check if training is in the past and if so, don't allow to restore it
-            //TODO: check if trainer is available at the time of training, if not, don't allow to restore it
-
+            
             //TODO: sent notification
 
             await _individualTrainingRepository.SaveChangesAsync();
