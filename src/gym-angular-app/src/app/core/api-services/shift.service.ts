@@ -39,6 +39,16 @@ export class ShiftService {
     return this.httpService.post<any>(`shifts`, createDto);
   }
 
+  updateShift(shiftId: number, shiftData: any): Observable<any> {
+    const updateDto = {
+      employeeId: shiftData.formData.employeeId,
+      startTime: shiftData.formData.startTime.toISOString(),
+      endTime: shiftData.formData.endTime.toISOString(),
+    }
+
+    return this.httpService.put<any>(`shifts/${shiftId}`, updateDto);
+  }
+
   getShiftsFiltered(filters?: CalendarFilters): Observable<Shift[]> {
     let url = 'shifts/filtered';
     const params = this.buildFilterParams(filters);

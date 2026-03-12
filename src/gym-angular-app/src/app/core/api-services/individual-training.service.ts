@@ -40,6 +40,17 @@ export class IndividualTrainingService {
     return this.httpService.post<any>(`trainings/individual`, createDto);
   }
 
+  updateIndividualTraining(trainingId: number, trainingData: any): Observable<any> {
+    const updateDto = {
+      trainerId: trainingData.formData.trainerId,
+      startDate: trainingData.formData.startTime.toISOString(),
+      endDate: trainingData.formData.endTime.toISOString(),
+      description: trainingData.formData.description
+    }
+
+    return this.httpService.put<any>(`trainings/individual/${trainingId}`, updateDto);
+  }
+
   getIndividualTrainingsFiltered(filters?: CalendarFilters): Observable<IndividualTraining[]> {
     let url = 'trainings/individual/filtered';
     const params = this.buildFilterParams(filters);

@@ -10,6 +10,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DialogService } from 'primeng/dynamicdialog';
 import { CalendarService } from '../../../core/services/calendar-service';
 import { EventAddModalComponent, EventTypeOption, EmployeeOption, TrainingTypeOption } from '../../../shared/components/calendar/event-add-modal/event-add-modal.component';
+import { EventEditModalComponent } from '../../../shared/components/calendar/event-edit-modal/event-edit-modal.component';
 import { EmployeeService, TrainingTypeService } from '../../../core/api-services';
 import { Employee } from '../../../core/models/employee';
 import { TrainingType } from '../../../core/models/training-type';
@@ -24,7 +25,8 @@ import { CALENDAR_CONFIGS, CalendarConfig } from '../../../core/configurations/c
     EventCancellationDialogComponent,
     ConfirmDialogModule,
     DialogModule,
-    EventAddModalComponent
+    EventAddModalComponent,
+    EventEditModalComponent
   ],
   providers: [ConfirmationService, MessageService, DialogService],
   template: `
@@ -51,6 +53,15 @@ import { CALENDAR_CONFIGS, CalendarConfig } from '../../../core/configurations/c
       (eventCreated)="onEventCreated($event)"
       (cancelled)="onEventCreationCancelled()">
     </app-event-add-modal>
+
+    <app-event-edit-modal
+      [(visible)]="showEditModal"
+      [event]="selectedEventForEdit"
+      [employeeOptions]="employeeOptions"
+      [trainingTypeOptions]="trainingTypeOptions"
+      (eventUpdated)="onEventUpdated($event)"
+      (cancelled)="onEventEditCancelled()">
+    </app-event-edit-modal>
 
     <app-shared-calendar 
       [config]="managerConfig"
@@ -81,8 +92,10 @@ export class ManagerCalendarComponent implements AfterViewInit, OnInit {
   isCancelling = false;
 
   showEventModal = false;
+  showEditModal = false;
   creationStartTime!: Date;
   creationEndTime!: Date;
+  selectedEventForEdit: any = null;
 
   availableEventTypes: EventTypeOption[] = [
     { value: 'group', label: 'Group Training', description: 'Training session for multiple participants', color: '#10B981', icon: 'pi pi-users' },
@@ -142,7 +155,24 @@ export class ManagerCalendarComponent implements AfterViewInit, OnInit {
   }
 
   onEventEdit(event: any) {
-    this.toastService.show(`Edit event: ${event.title}`, 'info');
+    if (!event) {
+      this.toastService.show('No event selected for editing', 'error');
+      return;
+    }
+    this.selectedEventForEdit = event;
+    setTimeout(() => {
+      this.showEditModal = true;
+    }, 0);
+  }
+
+  onEventUpdated(eventData: any) {
+    this.updateEvent(eventData);
+    this.showEditModal = false;
+  }
+
+  onEventEditCancelled() {
+    this.showEditModal = false;
+    this.selectedEventForEdit = null;
   }
 
   onEventCancel(event: any) {
@@ -214,6 +244,36 @@ export class ManagerCalendarComponent implements AfterViewInit, OnInit {
       error: (error) => {
         this.toastService.show(`Failed to create event: ${error.message}`, 'error');
         this.isCancelling = false;
+      }
+    });
+  }
+
+  private updateEvent(eventData: any) {
+    let updateObservable;
+
+    switch (eventData.type) {
+      case 'group':
+        updateObservable = this.groupTrainingService.updateGroupTraining(eventData.id, eventData);
+        break;
+      case 'individual':
+        updateObservable = this.individualTrainingService.updateIndividualTraining(eventData.id, eventData);
+        break;
+      case 'shift':
+        updateObservable = this.shiftService.updateShift(eventData.id, eventData);
+        break;
+      default:
+        this.toastService.show('Unknown event type', 'error');
+        return;
+    }
+
+    updateObservable.subscribe({
+      next: (response) => {
+        this.toastService.show(`Event has been updated successfully`, 'success');
+        this.selectedEventForEdit = null;
+        this.sharedCalendar.refreshCalendar();
+      },
+      error: (error) => {
+        this.toastService.show(`Failed to update event: ${error.message}`, 'error');
       }
     });
   }

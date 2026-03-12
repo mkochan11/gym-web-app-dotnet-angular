@@ -1,0 +1,418 @@
+import { Component, Input, Output, EventEmitter, OnInit, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { CalendarModule } from 'primeng/calendar';
+import { DropdownModule } from 'primeng/dropdown';
+import { CalendarEvent } from '../../../../core/models/shared-calendar/calendar-event';
+
+export interface EmployeeOption {
+  id: number;
+  name: string;
+  role?: string;
+}
+
+export interface TrainingTypeOption {
+  id: number;
+  name: string;
+}
+
+@Component({
+  selector: 'app-event-edit-modal',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    InputTextareaModule,
+    CalendarModule,
+    DropdownModule
+  ],
+  template: `
+    <div class="modal-overlay" [class.show]="visible" (click)="onOverlayClick($event)">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        
+        <div class="stepper-header">
+          <div class="step-title-header">
+            <h3>Edit {{ getEventTypeLabel() }}</h3>
+            <p>Modify the event details</p>
+          </div>
+          
+          <button class="close-btn" (click)="onCancel()">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <div class="step-content">
+          <form #eventForm="ngForm" class="event-form">
+            <div class="form-section">
+              <h4>Date & Time</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="startTime">Start Time *</label>
+                  <p-calendar
+                    id="startTime"
+                    [(ngModel)]="formData.startTime"
+                    name="startTime"
+                    [showTime]="true"
+                    [showIcon]="true"
+                    [required]="true"
+                    [minDate]="minDate"
+                    [timeOnly]="false"
+                    (onSelect)="onTimeChange()"
+                    [class]="{'invalid': submitted && !formData.startTime}">
+                  </p-calendar>
+                  <small class="error-message" *ngIf="submitted && !formData.startTime">
+                    Start time is required
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label for="endTime">End Time *</label>
+                  <p-calendar
+                    id="endTime"
+                    [(ngModel)]="formData.endTime"
+                    name="endTime"
+                    [showTime]="true"
+                    [showIcon]="true"
+                    [minDate]="minDate"
+                    [required]="true"
+                    [timeOnly]="false"
+                    (onSelect)="onTimeChange()"
+                    [class]="{'invalid': submitted && !formData.endTime}">
+                  </p-calendar>
+                  <small class="error-message" *ngIf="submitted && !formData.endTime">
+                    End time is required
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section" *ngIf="eventType">
+              <h4>{{ getEventTypeLabel() }} Details</h4>
+              
+              <div *ngIf="eventType === 'group'" class="form-row">
+                <div class="form-group">
+                  <label for="trainingType">Training Type *</label>
+                  <p-dropdown
+                    id="trainingType"
+                    [(ngModel)]="formData.trainingTypeId"
+                    [options]="trainingTypeOptions"
+                    name="trainingType"
+                    optionLabel="name"
+                    optionValue="id"
+                    [required]="true"
+                    placeholder="Select training type"
+                    [class]="{'invalid': submitted && !formData.trainingTypeId}">
+                  </p-dropdown>
+                  <small class="error-message" *ngIf="submitted && !formData.trainingTypeId">
+                    Training type is required
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label for="trainer">Trainer *</label>
+                  <p-dropdown
+                    id="trainer"
+                    [(ngModel)]="formData.trainerId"
+                    [options]="trainerOptions"
+                    name="trainer"
+                    optionLabel="name"
+                    optionValue="id"
+                    [required]="true"
+                    placeholder="Select trainer"
+                    [class]="{'invalid': submitted && !formData.trainerId}">
+                  </p-dropdown>
+                  <small class="error-message" *ngIf="submitted && !formData.trainerId">
+                    Trainer is required
+                  </small>
+                </div>
+              </div>
+
+              <div *ngIf="eventType === 'individual'" class="form-group">
+                <label for="trainer">Trainer *</label>
+                <p-dropdown
+                  id="trainer"
+                  [(ngModel)]="formData.trainerId"
+                  [options]="trainerOptions"
+                  name="trainer"
+                  optionLabel="name"
+                  optionValue="id"
+                  [required]="true"
+                  placeholder="Select trainer"
+                  [class]="{'invalid': submitted && !formData.trainerId}">
+                </p-dropdown>
+                <small class="error-message" *ngIf="submitted && !formData.trainerId">
+                  Trainer is required
+                </small>
+              </div>
+
+              <div *ngIf="eventType === 'shift'" class="form-group">
+                <label for="employee">Employee *</label>
+                <p-dropdown
+                  id="employee"
+                  [(ngModel)]="formData.employeeId"
+                  [options]="employeeOptions"
+                  name="employee"
+                  optionLabel="name"
+                  optionValue="id"
+                  [required]="true"
+                  placeholder="Select employee"
+                  [class]="{'invalid': submitted && !formData.employeeId}">
+                </p-dropdown>
+                <small class="error-message" *ngIf="submitted && !formData.employeeId">
+                  Employee is required
+                </small>
+              </div>
+
+              <div class="form-row" *ngIf="eventType === 'group'">
+                <div class="form-group">
+                  <label for="maxParticipants">Max Participants</label>
+                  <input
+                    id="maxParticipants"
+                    type="number"
+                    pInputText
+                    [(ngModel)]="formData.maxParticipants"
+                    name="maxParticipants"
+                    min="1"
+                    max="50">
+                </div>
+
+                <div class="form-group">
+                  <label for="difficultyLevel">Difficulty Level</label>
+                  <p-dropdown
+                    id="difficultyLevel"
+                    [(ngModel)]="formData.difficultyLevel"
+                    [options]="difficultyLevels"
+                    name="difficultyLevel"
+                    placeholder="Select difficulty level">
+                  </p-dropdown>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section" *ngIf="eventType === 'group' || eventType === 'individual'">
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea
+                  id="description"
+                  pInputTextarea
+                  [(ngModel)]="formData.description"
+                  name="description"
+                  rows="3"
+                  placeholder="Enter event description...">
+                </textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button 
+            pButton 
+            label="Cancel" 
+            class="p-button-text" 
+            (click)="onCancel()">
+          </button>
+          
+          <div class="action-buttons">
+            <button 
+              pButton 
+              label="Update Event" 
+              class="p-button-primary" 
+              (click)="onSubmit()"
+              [loading]="loading">
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styleUrls: ['./event-edit-modal.component.scss']
+})
+export class EventEditModalComponent implements OnInit, OnChanges {
+  @Input() visible = false;
+  @Input() event: CalendarEvent | null = null;
+  @Input() employeeOptions: EmployeeOption[] = [];
+  @Input() trainingTypeOptions: TrainingTypeOption[] = [];
+  
+  @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() eventUpdated = new EventEmitter<any>();
+  @Output() cancelled = new EventEmitter<void>();
+
+  eventType: 'group' | 'individual' | 'shift' | null = null;
+  formData: any = {};
+  submitted = false;
+  loading = false;
+
+  minDate: Date = new Date();
+
+  trainerOptions: EmployeeOption[] = [];
+  difficultyLevels = [
+    { label: 'Level 1 - Beginner', value: 1 },
+    { label: 'Level 2 - Basic', value: 2 },
+    { label: 'Level 3 - Intermediate', value: 3 },
+    { label: 'Level 4 - Advanced', value: 4 },
+    { label: 'Level 5 - Expert', value: 5 }
+  ];
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ((changes['visible'] && this.visible) || changes['event']) {
+      if (this.event) {
+        this.initializeFormData();
+      }
+    }
+    
+    if (changes['employeeOptions']) {
+      this.trainerOptions = this.employeeOptions.filter(emp => emp.role === 'Trainer');
+    }
+  }
+
+  ngOnInit() {
+    this.setMinDate();
+  }
+
+  private setMinDate() {
+    this.minDate = new Date();
+    this.minDate.setMinutes(0, 0, 0);
+  }
+
+  private initializeFormData() {
+    if (!this.event) return;
+
+    this.eventType = this.event.type;
+
+    const start = this.event.start instanceof Date 
+      ? this.event.start 
+      : new Date(this.event.start);
+    
+    const end = this.event.end instanceof Date 
+      ? this.event.end 
+      : new Date(this.event.end);
+
+    const originalData = this.event.originalData || {};
+
+    this.formData = {
+      startTime: start,
+      endTime: end,
+      description: originalData.description || '',
+      maxParticipants: originalData.maxParticipantNumber || originalData.maxParticipants || 10,
+      difficultyLevel: originalData.difficultyLevel || originalData.difficultyLevel || null,
+      trainerId: originalData.trainer?.id || originalData.trainerId || null,
+      trainingTypeId: originalData.trainingType?.id || originalData.trainingTypeId || null,
+      employeeId: originalData.employee?.id || originalData.employeeId || null
+    };
+  }
+
+  onSubmit() {
+    this.submitted = true;
+
+    if (!this.isFormValid()) {
+      return;
+    }
+
+    this.loading = true;
+
+    setTimeout(() => {
+      const originalData = this.event?.originalData || {};
+      const numericId = originalData.id || this.extractNumericId(this.event?.id);
+      
+      const result = {
+        id: numericId,
+        type: this.eventType,
+        startTime: this.formData.startTime,
+        endTime: this.formData.endTime,
+        formData: { ...this.formData }
+      };
+      
+      this.eventUpdated.emit(result);
+      this.loading = false;
+      this.closeModal();
+    }, 100);
+  }
+
+  private isFormValid(): boolean {
+    if (!this.formData.startTime || !this.formData.endTime) {
+      return false;
+    }
+
+    switch (this.eventType) {
+      case 'group':
+        return !!(this.formData.trainerId && this.formData.trainingTypeId);
+      case 'individual':
+        return !!(this.formData.trainerId);
+      case 'shift':
+        return !!this.formData.employeeId;
+      default:
+        return false;
+    }
+  }
+
+  private validateTimeRange(): void {
+    if (this.formData.startTime && this.formData.endTime) {
+      const start = new Date(this.formData.startTime);
+      const end = new Date(this.formData.endTime);
+      
+      if (start.getHours() < 8) {
+        start.setHours(8, 0, 0, 0);
+        this.formData.startTime = start;
+      }
+      
+      if (end.getHours() >= 22) {
+        if (end.getHours() > 22 || (end.getHours() === 22 && end.getMinutes() > 0)) {
+          end.setHours(22, 0, 0, 0);
+          this.formData.endTime = end;
+        }
+      }
+      
+      if (end <= start) {
+        end.setTime(start.getTime() + 60 * 60 * 1000);
+        this.formData.endTime = end;
+      }
+    }
+  }
+
+  onTimeChange() {
+    this.validateTimeRange();
+  }
+
+  getEventTypeLabel(): string {
+    switch (this.eventType) {
+      case 'group': return 'Group Training';
+      case 'individual': return 'Individual Training';
+      case 'shift': return 'Staff Shift';
+      default: return 'Event';
+    }
+  }
+
+  onCancel() {
+    this.cancelled.emit();
+    this.closeModal();
+  }
+
+  onOverlayClick(event: MouseEvent) {
+    this.onCancel();
+  }
+
+  private extractNumericId(id: string | undefined): number | null {
+    if (!id) return null;
+    const parts = id.split('-');
+    const numericPart = parts[parts.length - 1];
+    const parsed = parseInt(numericPart, 10);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  private closeModal() {
+    this.visible = false;
+    this.visibleChange.emit(false);
+    this.resetForm();
+  }
+
+  private resetForm() {
+    this.eventType = null;
+    this.submitted = false;
+  }
+}

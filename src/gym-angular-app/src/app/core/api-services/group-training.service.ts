@@ -43,6 +43,20 @@ export class GroupTrainingService {
     return this.httpService.post<any>(`trainings/group`, createDto);
   }
 
+  updateGroupTraining(trainingId: number, trainingData: any): Observable<any> {
+    const updateDto = {
+      trainerId: trainingData.formData.trainerId,
+      trainingTypeId: trainingData.formData.trainingTypeId,
+      difficultyLevel: trainingData.formData.difficultyLevel,
+      startDate: trainingData.formData.startTime.toISOString(),
+      endDate: trainingData.formData.endTime.toISOString(),
+      maxParticipantNumber: trainingData.formData.maxParticipants,
+      description: trainingData.formData.description
+    }
+
+    return this.httpService.put<any>(`trainings/group/${trainingId}`, updateDto);
+  }
+
   getGroupTrainingsFiltered(filters?: CalendarFilters): Observable<GroupTraining[]> {
     let url = 'trainings/group/filtered';
     const params = this.buildFilterParams(filters);
