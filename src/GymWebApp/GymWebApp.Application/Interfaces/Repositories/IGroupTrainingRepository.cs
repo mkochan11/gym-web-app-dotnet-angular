@@ -8,4 +8,5 @@ public interface IGroupTrainingRepository : IRepository<GroupTraining>
     Task<IEnumerable<GroupTraining>> GetAllGroupTrainingsWithDetailsAsync();
     Task<IEnumerable<GroupTraining>> GetFilteredGroupTrainingsAsync(GroupTrainingFiltersDto filters);
     Task<bool> ExistsOverlappingAsync(int trainerId, DateTime start, DateTime end, CancellationToken ct);
+    Task<bool> ExistsOverlappingExcludingAsync(int trainerId, DateTime start, DateTime end, int excludeId, CancellationToken ct);
 }

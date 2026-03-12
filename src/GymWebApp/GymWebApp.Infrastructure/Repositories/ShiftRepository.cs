@@ -22,6 +22,18 @@ public class ShiftRepository : Repository<Shift>, IShiftRepository
                 ct);
     }
 
+    public async Task<bool> ExistsOverlappingExcludingAsync(int employeeId, DateTime start, DateTime end, int excludeId, CancellationToken ct)
+    {
+        return await _context.Shifts
+            .AnyAsync(s => 
+                s.EmployeeId == employeeId && 
+                !s.Removed &&
+                s.Id != excludeId &&
+                s.StartTime < end && 
+                s.EndTime > start, 
+                ct);
+    }
+
     public async Task<IEnumerable<Shift>> GetAllShiftsAsync() => 
         await _context.Shifts
             .Include(s => s.Employee)

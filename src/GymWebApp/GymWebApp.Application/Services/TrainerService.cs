@@ -35,4 +35,20 @@ public class TrainerService : ITrainerService
 
         return !hasGroupConflict;
     }
+
+    public async Task<bool> IsAvailableExcludingAsync(int trainerId, DateTime startTime, DateTime endTime, int excludeTrainingId, CancellationToken cancellationToken)
+    {
+        var hasIndividualConflict =
+           await _individualTrainingRepository.ExistsOverlappingExcludingAsync(
+               trainerId, startTime, endTime, excludeTrainingId, cancellationToken);
+
+        if (hasIndividualConflict)
+            return false;
+
+        var hasGroupConflict =
+            await _groupTrainingRepository.ExistsOverlappingExcludingAsync(
+                trainerId, startTime, endTime, excludeTrainingId, cancellationToken);
+
+        return !hasGroupConflict;
+    }
 }

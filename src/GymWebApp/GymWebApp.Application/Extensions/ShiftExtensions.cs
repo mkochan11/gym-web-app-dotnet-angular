@@ -20,7 +20,7 @@ public static class ShiftExtensions
         };
     }
 
-    private static IEnumerable<EventStatus> GetShiftStatuses(this Shift shift)
+    public static IEnumerable<EventStatus> GetShiftStatuses(this Shift shift)
     {
         if (shift.IsCancelled)
         {

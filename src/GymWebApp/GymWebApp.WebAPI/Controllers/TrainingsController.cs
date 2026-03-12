@@ -91,6 +91,20 @@ public class TrainingsController : BaseController
         return Ok();
     }
 
+    [HttpPut("group/{id}")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult> EditGroupTrainingAsync(int id, [FromBody] EditGroupTrainingCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("Id in URL does not match Id in body");
+        }
+
+        var updatedCommand = command with { UpdatedById = CurrentUserId };
+        await _mediator.Send(updatedCommand);
+        return Ok();
+    }
+
     [HttpGet("individual")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<IndividualTrainingWebModel>>> GetAllIndividualTrainingsAsync()
@@ -152,6 +166,20 @@ public class TrainingsController : BaseController
             CurrentUserId
         );
         await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpPut("individual/{id}")]
+    [Authorize(Roles = "Admin,Trainer,Manager")]
+    public async Task<ActionResult> EditIndividualTrainingAsync(int id, [FromBody] EditIndividualTrainingCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("Id in URL does not match Id in body");
+        }
+
+        var updatedCommand = command with { UpdatedById = CurrentUserId };
+        await _mediator.Send(updatedCommand);
         return Ok();
     }
 }

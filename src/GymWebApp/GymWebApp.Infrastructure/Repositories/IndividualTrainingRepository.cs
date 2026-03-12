@@ -22,6 +22,22 @@ public class IndividualTrainingRepository(ApplicationDbContext context) : Reposi
             .AnyAsync(ct);
     }
 
+    public async Task<bool> ExistsOverlappingExcludingAsync(int trainerId, DateTime start, DateTime end, int excludeId, CancellationToken ct)
+    {
+        start = start.ToUniversalTime();
+        end = end.ToUniversalTime();
+
+        return await _context.IndividualTrainings
+            .Where(t =>
+                t.TrainerId == trainerId &&
+                t.Id != excludeId &&
+                !t.IsCancelled &&
+                !t.Removed &&
+                start < t.EndTime &&
+                end > t.StartTime)
+            .AnyAsync(ct);
+    }
+
     public async Task<IEnumerable<IndividualTraining>> GetAllIndividualTrainingsWithDetailsAsync() =>
         await _context.IndividualTrainings
             .Include(it => it.Trainer)
