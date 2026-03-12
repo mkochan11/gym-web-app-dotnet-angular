@@ -95,13 +95,9 @@ public class TrainingsController : BaseController
     [Authorize(Roles = "Admin,Trainer,Manager")]
     public async Task<ActionResult> EditGroupTrainingAsync(int id, [FromBody] EditGroupTrainingCommand command)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("Id in URL does not match Id in body");
-        }
-
-        var updatedCommand = command with { UpdatedById = CurrentUserId };
-        await _mediator.Send(updatedCommand);
+        command.Id = id;
+        command.UpdatedById = CurrentUserId;
+        await _mediator.Send(command);
         return Ok();
     }
 
@@ -173,13 +169,9 @@ public class TrainingsController : BaseController
     [Authorize(Roles = "Admin,Trainer,Manager")]
     public async Task<ActionResult> EditIndividualTrainingAsync(int id, [FromBody] EditIndividualTrainingCommand command)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("Id in URL does not match Id in body");
-        }
-
-        var updatedCommand = command with { UpdatedById = CurrentUserId };
-        await _mediator.Send(updatedCommand);
+        command.Id = id;
+        command.UpdatedById = CurrentUserId;
+        await _mediator.Send(command);
         return Ok();
     }
 }

@@ -146,15 +146,16 @@ public static class EditGroupTraining
     }
 }
 
-public record EditGroupTrainingCommand(
-    int Id,
-    int TrainerId,
-    int TrainingTypeId,
-    int MaxParticipantNumber,
-    int DifficultyLevel,
-    DateTime StartDate,
-    DateTime EndDate,
-    string? Description,
-    string? Notes,
-    string UpdatedById
-) : IRequest;
+public class EditGroupTrainingCommand : IRequest
+{
+    public int Id { get; set; }
+    public int TrainerId { get; init; }
+    public int TrainingTypeId { get; init; }
+    public int MaxParticipantNumber { get; init; }
+    public int DifficultyLevel { get; init; }
+    public DateTime StartDate { get; init; }
+    public DateTime EndDate { get; init; }
+    public string? Description { get; init; }
+    public string? Notes { get; init; }
+    public string UpdatedById { get; set; } = string.Empty;
+}

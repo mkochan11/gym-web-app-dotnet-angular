@@ -99,13 +99,9 @@ public class ShiftsController : BaseController
     [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult> EditShiftAsync(int id, [FromBody] EditShiftCommand command)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("Id in URL does not match Id in body");
-        }
-
-        var updatedCommand = command with { UpdatedById = CurrentUserId };
-        await _mediator.Send(updatedCommand);
+        command.Id = id;
+        command.UpdatedById = CurrentUserId;
+        await _mediator.Send(command);
         return Ok();
     }
 }

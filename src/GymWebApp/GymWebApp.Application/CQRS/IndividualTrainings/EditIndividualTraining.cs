@@ -125,13 +125,14 @@ public static class EditIndividualTraining
     }
 }
 
-public record EditIndividualTrainingCommand(
-    int Id,
-    int TrainerId,
-    int? ClientId,
-    DateTime StartDate,
-    DateTime EndDate,
-    string? Description,
-    string? Notes,
-    string UpdatedById
-) : IRequest;
+public class EditIndividualTrainingCommand : IRequest
+{
+    public int Id { get; set; }
+    public int TrainerId { get; init; }
+    public int? ClientId { get; init; }
+    public DateTime StartDate { get; init; }
+    public DateTime EndDate { get; init; }
+    public string? Description { get; init; }
+    public string? Notes { get; init; }
+    public string UpdatedById { get; set; } = string.Empty;
+}

@@ -424,7 +424,6 @@ export class SharedCalendarComponent implements OnInit, OnDestroy {
               break;
             case 'shift':
               events = this.transformShiftsToEvents(data as Shift[]);
-              console.log('Loaded shifts:', events);
               break;
           }
           

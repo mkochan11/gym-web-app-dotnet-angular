@@ -99,10 +99,11 @@ public static class EditShift
     }
 }
 
-public record EditShiftCommand(
-    int Id,
-    int EmployeeId,
-    DateTime StartTime,
-    DateTime EndTime,
-    string UpdatedById
-) : IRequest;
+public class EditShiftCommand : IRequest
+{
+    public int Id { get; set; }
+    public int EmployeeId { get; init; }
+    public DateTime StartTime { get; init; }
+    public DateTime EndTime { get; init; }
+    public string UpdatedById { get; set; } = string.Empty;
+}
