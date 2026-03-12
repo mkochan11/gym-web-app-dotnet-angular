@@ -6,12 +6,14 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 5vh;
   z-index: 10000;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
+  overflow-y: auto;
 
   &.show {
     opacity: 1;
@@ -23,9 +25,8 @@
   background: white;
   border-radius: 12px;
   width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow: hidden;
+  max-width: 700px;
+  min-height: 500px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   transform: translateY(20px);
   transition: transform 0.3s ease;
@@ -77,8 +78,7 @@
 
 .step-content {
   padding: 2rem;
-  max-height: 60vh;
-  overflow-y: auto;
+  padding-bottom: 3rem;
 }
 
 .event-form {
@@ -147,5 +147,11 @@
   .p-dropdown,
   .p-calendar {
     width: 100%;
+  }
+
+  .p-dropdown-panel {
+    z-index: 10001 !important;
+    max-height: 250px !important;
+    overflow-y: auto !important;
   }
 }
