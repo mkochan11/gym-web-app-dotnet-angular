@@ -1,10 +1,13 @@
 ﻿using GymWebApp.Application.Extensions;
 using GymWebApp.Application.Interfaces.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;
 
 [Route("api/employees")]
+[ApiController]
+[Authorize(Roles = "Admin,Manager")]
 public class EmployeesController : ControllerBase
 {
     private readonly IEmployeeRepository _employeeRepository;

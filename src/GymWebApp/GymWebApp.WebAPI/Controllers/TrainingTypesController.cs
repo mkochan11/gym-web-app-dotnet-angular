@@ -1,10 +1,13 @@
 ﻿using GymWebApp.Application.Extensions;
 using GymWebApp.Application.Interfaces.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;
 
 [Route("api/training-types")]
+[ApiController]
+[Authorize]
 public class TrainingTypesController : ControllerBase
 {
     private readonly ITrainingTypeRepository _trainingTypeRepository;

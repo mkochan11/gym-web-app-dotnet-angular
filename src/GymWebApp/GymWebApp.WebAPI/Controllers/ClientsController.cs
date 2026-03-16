@@ -1,10 +1,12 @@
 ﻿using GymWebApp.Application.Extensions;
 using GymWebApp.Application.Interfaces.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymWebApp.WebAPI.Controllers;
 
 [Route("api/clients")]
+[ApiController]
 public class ClientsController : ControllerBase
 {
     private readonly IClientRepository _clientRepository;
@@ -16,6 +18,7 @@ public class ClientsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Manager,Receptionist")]
     public async Task<ActionResult> GetClientsAsync()
     {
         var clients = await _clientRepository.GetAllAsync();

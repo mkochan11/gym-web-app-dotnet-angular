@@ -24,6 +24,7 @@ public class ShiftsController : BaseController
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult> GetShiftsAsync()
     {
         var shifts = await _shiftRepository.GetAllShiftsAsync();
@@ -42,6 +43,7 @@ public class ShiftsController : BaseController
     }
 
     [HttpGet("filtered")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> GetFilteredShiftsAsync([FromQuery] GetShiftsFilteredQuery query)
     {
         var shiftFiltersDto = new ShiftFiltersDto
@@ -58,6 +60,7 @@ public class ShiftsController : BaseController
     }
 
     [HttpPost("{id}/cancel")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult> CancelShift(int id, [FromBody] CancelEventRequest request)
     {
         var command = new CancelShiftCommand(

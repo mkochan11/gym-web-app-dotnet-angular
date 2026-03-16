@@ -8,7 +8,7 @@ namespace GymWebApp.WebAPI.Controllers;
 
 [Route("api/users")]
 [ApiController]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;

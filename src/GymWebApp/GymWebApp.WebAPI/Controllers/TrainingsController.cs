@@ -39,7 +39,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("group")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult<int>> CreateGroupTrainingAsync([FromBody] CreateGroupTrainingCommand command)
     {
         command.CreatedById = CurrentUserId;
@@ -48,6 +48,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpGet("group/filtered")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer,Client")]
     public async Task<ActionResult<IEnumerable<CalendarGroupTrainingWebModel>>> GetFilteredGroupTrainingsAsync([FromQuery] GetGroupTrainingsFilteredQuery query)
     {
         var result = await _mediator.Send(query);
@@ -55,7 +56,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("group/{id}/cancel")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> CancelGroupTrainingAsync(int id, [FromBody] CancelEventRequest request)
     {
         var command = new CancelGroupCommand(
@@ -68,7 +69,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("group/{id}/restore")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> RestoreGroupTrainingAsync(int id)
     {
         var command = new RestoreGroupTrainingCommand(
@@ -80,7 +81,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpDelete("group/{id}")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> DeleteGroupTrainingAsync(int id)
     {
         var command = new DeleteGroupTrainingCommand(
@@ -92,7 +93,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPut("group/{id}")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> EditGroupTrainingAsync(int id, [FromBody] EditGroupTrainingCommand command)
     {
         command.Id = id;
@@ -112,7 +113,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("individual")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult<int>> CreateIndividualTrainingAsync([FromBody] CreateIndividualTrainingCommand command)
     {
         command.CreatedById = CurrentUserId;
@@ -121,6 +122,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpGet("individual/filtered")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer,Client")]
     public async Task<ActionResult<IEnumerable<CalendarGroupTrainingWebModel>>> GetFilteredIndividualTrainingsAsync([FromQuery] GetIndividualTrainingsFilteredQuery query)
     {
         var result = await _mediator.Send(query);
@@ -128,7 +130,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("individual/{id}/cancel")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> CancelIndiviudalTraining(int id, [FromBody] CancelEventRequest request)
     {
         var command = new CancelIndividualTrainingCommand(
@@ -141,7 +143,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPost("individual/{id}/restore")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> RestoreIndividualTrainingAsync(int id)
     {
         var command = new RestoreIndividualTrainingCommand(
@@ -154,7 +156,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpDelete("individual/{id}")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> DeleteIndividualTrainingAsync(int id)
     {
         var command = new DeleteIndividualTrainingCommand(
@@ -166,7 +168,7 @@ public class TrainingsController : BaseController
     }
 
     [HttpPut("individual/{id}")]
-    [Authorize(Roles = "Admin,Trainer,Manager")]
+    [Authorize(Roles = "Admin,Manager,Receptionist,Trainer")]
     public async Task<ActionResult> EditIndividualTrainingAsync(int id, [FromBody] EditIndividualTrainingCommand command)
     {
         command.Id = id;
