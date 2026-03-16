@@ -1,0 +1,32 @@
+.field {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  input,
+  :host ::ng-deep .p-dropdown,
+  :host ::ng-deep .p-password {
+    width: 100%;
+  }
+}
+
+:host ::ng-deep {
+  .p-dialog-content {
+    padding: 1.5rem;
+    overflow: visible !important;
+  }
+
+  .p-toolbar {
+    padding: 1rem;
+  }
+
+  .p-dropdown-panel {
+    z-index: 10001 !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+  }
+}

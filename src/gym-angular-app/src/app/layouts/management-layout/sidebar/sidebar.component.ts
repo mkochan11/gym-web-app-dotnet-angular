@@ -36,7 +36,8 @@ export class SidebarComponent {
   ]
 
   adminSidebarItems: MenuItem[] = [
-    { label: 'Users', icon: 'pi pi-users', routerLink: ['/management/users'] },
+    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/management/admin'] },
+    { label: 'Users', icon: 'pi pi-users', routerLink: ['/management/admin/users'] },
     { label: 'Equipment', icon: 'pi pi-box', routerLink: ['/management/equipment'] },
     { label: 'Reports', icon: 'pi pi-chart-line', routerLink: ['/management/reports'] },
     { label: 'Settings', icon: 'pi pi-cog', routerLink: ['/management/settings'] },
@@ -44,15 +45,25 @@ export class SidebarComponent {
   ]
 
   ownerSidebarItems: MenuItem[] = [
-    { label: 'Users', icon: 'pi pi-users', routerLink: ['/management/users'] },
+    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/management/admin'] },
+    { label: 'Users', icon: 'pi pi-users', routerLink: ['/management/admin/users'] },
     { label: 'Equipment', icon: 'pi pi-box', routerLink: ['/management/equipment'] },
     { label: 'Reports', icon: 'pi pi-chart-line', routerLink: ['/management/reports'] },
   ]
 
   get model(): MenuItem[] {
-    return this.authService.getRole() === 'Manager' ? this.managerSidebarItems :
-           this.authService.getRole() === 'Trainer' ? this.trainerSidebarItems :
-           this.authService.getRole() === 'Admin' ? this.adminSidebarItems :
-           this.authService.getRole() === 'Owner' ? this.ownerSidebarItems : [];
+    const role = this.authService.getRole();
+    if (!role) return [];
+    
+    const roles = role.split(',').map(r => r.trim().toLowerCase());
+    
+    if (roles.includes('admin') || roles.includes('owner')) {
+      return roles.includes('admin') ? this.adminSidebarItems : this.ownerSidebarItems;
+    }
+    if (roles.includes('manager')) return this.managerSidebarItems;
+    if (roles.includes('trainer')) return this.trainerSidebarItems;
+    if (roles.includes('receptionist')) return this.managerSidebarItems;
+    
+    return [];
   }
 }

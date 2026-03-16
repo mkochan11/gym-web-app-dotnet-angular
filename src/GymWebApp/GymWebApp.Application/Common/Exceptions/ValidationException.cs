@@ -11,4 +11,10 @@ public class ValidationException : AppException
     {
         Errors = new Dictionary<string, string[]>(errors);
     }
+
+    public ValidationException(string message, IDictionary<string, string[]> errors)
+        : base(message, ErrorCode.ValidationError)
+    {
+        Errors = new Dictionary<string, string[]>(errors);
+    }
 }

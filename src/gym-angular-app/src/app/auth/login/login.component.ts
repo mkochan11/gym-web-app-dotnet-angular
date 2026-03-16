@@ -51,14 +51,30 @@ export class LoginComponent implements OnDestroy {
     this.auth.login(this.form.value as { email: string; password: string }).subscribe({
       next: () => {
         this.loading = false;
-        const role = this.auth.getRole()?.toLowerCase();
-        const managementRoles = ['admin', 'manager', 'owner', 'trainer', ];
+        const role = this.auth.getRole();
+        console.log('Login success, role:', role);
 
-        if (role && role === 'client') 
+        if (role) {
+          const roles = role.split(',').map(r => r.trim().toLowerCase());
+          
+          if (roles.includes('admin')) {
+            this.router.navigate(['/management/admin']);
+          } else if (roles.includes('manager')) {
+            this.router.navigate(['/management/manager']);
+          } else if (roles.includes('owner')) {
+            this.router.navigate(['/management/admin']);
+          } else if (roles.includes('trainer')) {
+            this.router.navigate(['/management/trainer']);
+          } else if (roles.includes('receptionist')) {
+            this.router.navigate(['/management/receptionist']);
+          } else if (roles.includes('client')) {
             this.router.navigate(['/client']);
-        else if (role && managementRoles.includes(role)) {
-            this.router.navigate([`/management/${role}`]);
+          } else {
+            this.router.navigate(['/']);
           }
+        } else {
+          this.router.navigate(['/']);
+        }
 
         this.toastService.show('Logged in successfully', 'success');
       },

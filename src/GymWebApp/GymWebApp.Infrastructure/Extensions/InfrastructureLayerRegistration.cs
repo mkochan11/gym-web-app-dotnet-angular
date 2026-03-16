@@ -39,6 +39,7 @@ public static class InfrastructureLayerRegistration
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<ITrainingTypeRepository, TrainingTypeRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
         services.AddScoped<IUserSeeder, UserSeeder>();

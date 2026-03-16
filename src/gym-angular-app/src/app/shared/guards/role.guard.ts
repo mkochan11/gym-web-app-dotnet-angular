@@ -15,9 +15,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  const rolesArray = Array.isArray(userRole)
-    ? userRole.map(r => r.toLowerCase())
-    : [userRole.toLowerCase()];
+  const rolesArray = userRole.split(',').map(r => r.trim().toLowerCase());
 
   const isAllowed = expectedRoles.some(r => rolesArray.includes(r.toLowerCase()));
 

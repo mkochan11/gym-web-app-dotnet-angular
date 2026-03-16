@@ -31,7 +31,10 @@ public class UserSeeder : IUserSeeder
         var appUser = new ApplicationUser
         {
             Email = userToAdd.Email,
-            UserName = userToAdd.Email
+            UserName = userToAdd.Email,
+            FirstName = userToAdd.Name,
+            LastName = userToAdd.Surname,
+            CreatedAt =  DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(appUser, userToAdd.Password);
