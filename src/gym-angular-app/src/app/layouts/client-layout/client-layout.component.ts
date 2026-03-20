@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/api-services';
 import { ToastService } from '../../core/services/toast.service';
 import { primeNgModules } from '../../shared/primeng';
+import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-client-layout',
@@ -14,9 +15,9 @@ import { primeNgModules } from '../../shared/primeng';
 })
 export class ClientLayoutComponent {
 
-  menuItems = [
-    { label: 'Products', routerLink: '/client/products' },
-    { label: 'Settings', routerLink: '/client/settings' }
+  menuItems: MenuItem[] = [
+    { label: 'Dashboard', routerLink: '/client' },
+    { label: 'My Membership', routerLink: '/client/membership' }
   ];
 
   constructor(

@@ -50,7 +50,7 @@ export class AuthService {
     } catch {}
   }
 
-  cacheRoleFromToken() {
+  public cacheRoleFromToken() {
     const token = this.getToken();
     if (!token) return;
 
@@ -65,7 +65,7 @@ export class AuthService {
         localStorage.setItem(ROLE_KEY, role);
       }
 
-      const userId = decoded[nameIdentifierClaim];
+      const userId = decoded['sub'] || decoded[nameIdentifierClaim];
       if (userId) {
         localStorage.setItem(USER_ID_KEY, userId);
       }

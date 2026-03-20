@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ToastComponent } from "./shared/components/toast/toast.component";
+import { AuthService } from './core/api-services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,9 @@ export class AppComponent {
   hideLayout = false;
   year = new Date().getFullYear();
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private authService: AuthService) {
+    this.authService.cacheRoleFromToken();
+    
     router.events.subscribe(() => {
       const url = this.router.url;
       this.hideLayout = url.startsWith('/login') || url.startsWith('/register') || url.startsWith('/management') || url.startsWith('/client');

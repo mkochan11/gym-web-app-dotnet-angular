@@ -31,4 +31,7 @@ public class GymMembership : AuditableEntity
     public bool IsCancelled { get; set; } = false;
     
     public DateTime? CancelledAt { get; set; }
+    
+    [MaxLength(500)]
+    public string? CancellationReason { get; set; }
 }

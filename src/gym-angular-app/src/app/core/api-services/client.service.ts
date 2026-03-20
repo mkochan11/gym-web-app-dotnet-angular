@@ -12,4 +12,8 @@ export class ClientService {
   getAllClients(): Observable<Client[]> {
     return this.httpService.get<Client[]>('clients');
   }
+
+  getClientByAccountId(accountId: string): Observable<Client | null> {
+    return this.httpService.get<Client>(`clients/account/${accountId}`);
+  }
 }

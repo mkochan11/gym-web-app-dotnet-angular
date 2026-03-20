@@ -1,0 +1,43 @@
+using GymWebApp.Application.Interfaces.Repositories;
+using GymWebApp.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace GymWebApp.Infrastructure.Repositories;
+
+public class GymMembershipRepository : Repository<GymMembership>, IGymMembershipRepository
+{
+    public GymMembershipRepository(ApplicationDbContext context) : base(context)
+    {
+    }
+
+    public async Task<GymMembership?> GetByIdWithDetailsAsync(int id)
+    {
+        return await _context.Set<GymMembership>()
+            .Include(m => m.Client)
+            .Include(m => m.MembershipPlan)
+            .Include(m => m.Payments)
+            .FirstOrDefaultAsync(m => m.Id == id && !m.Removed);
+    }
+
+    public async Task<GymMembership?> GetActiveMembershipByClientIdAsync(int clientId)
+    {
+        var today = DateTime.UtcNow.Date;
+        return await _context.Set<GymMembership>()
+            .Include(m => m.Client)
+            .Include(m => m.MembershipPlan)
+            .FirstOrDefaultAsync(m => 
+                m.ClientId == clientId && 
+                !m.Removed && 
+                !m.IsCancelled && 
+                m.EndDate >= today);
+    }
+
+    public async Task<IEnumerable<GymMembership>> GetMembershipsByClientIdAsync(int clientId)
+    {
+        return await _context.Set<GymMembership>()
+            .Include(m => m.MembershipPlan)
+            .Where(m => m.ClientId == clientId && !m.Removed)
+            .OrderByDescending(m => m.CreatedAt)
+            .ToListAsync();
+    }
+}
