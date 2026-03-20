@@ -102,4 +102,38 @@ public class UserRepository : IUserRepository
         var roleName = role.ToString();
         await _userManager.AddToRoleAsync(user, roleName);
     }
+
+    public async Task<string?> UpdateAsync(string id, string email, string firstName, string lastName, string? phoneNumber, string role)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return "User not found";
+
+        user.Email = email;
+        user.UserName = email;
+        user.FirstName = firstName;
+        user.LastName = lastName;
+        user.PhoneNumber = phoneNumber;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            return errors;
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Any())
+        {
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        }
+        await _userManager.AddToRoleAsync(user, role);
+
+        return null;
+    }
+
+    public async Task<bool> EmailExistsAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        return user != null;
+    }
 }

@@ -10,6 +10,8 @@ public interface IUserRepository
     Task<UserWebModel?> GetByIdAsync(string id);
     Task<ApplicationUser?> GetByEmailAsync(string email);
     Task<(ApplicationUser User, string Error)?> CreateAsync(CreateUserWebModel model);
+    Task<string?> UpdateAsync(string id, string email, string firstName, string lastName, string? phoneNumber, string role);
+    Task<bool> EmailExistsAsync(string email);
     Task<List<UserRole>> GetAllRolesAsync();
     Task AddToRoleAsync(ApplicationUser user, UserRole role);
 }

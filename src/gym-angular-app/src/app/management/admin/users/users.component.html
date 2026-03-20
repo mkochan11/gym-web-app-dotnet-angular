@@ -28,6 +28,7 @@
         <th pSortableColumn="lastName">Last Name <p-sortIcon field="lastName"></p-sortIcon></th>
         <th pSortableColumn="role">Role <p-sortIcon field="role"></p-sortIcon></th>
         <th pSortableColumn="createdAt">Created At <p-sortIcon field="createdAt"></p-sortIcon></th>
+        <th style="width: 8rem">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-user>
@@ -39,6 +40,9 @@
           <p-tag [value]="user.role" [severity]="getSeverity(user.role)"></p-tag>
         </td>
         <td>{{ user.createdAt | date: 'medium' }}</td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text" pTooltip="Edit User" (click)="editUser(user)"></button>
+        </td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
@@ -52,7 +56,7 @@
 <p-dialog
   [(visible)]="userDialog"
   [style]="{ width: '450px' }"
-  header="Create New User"
+  [header]="isEditMode ? 'Edit User' : 'Create New User'"
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
@@ -75,7 +79,7 @@
         </small>
       </div>
 
-      <div class="field">
+      <div class="field" *ngIf="!isEditMode">
         <label for="password">Password *</label>
         <p-password
           id="password"

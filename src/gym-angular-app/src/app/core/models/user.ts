@@ -16,3 +16,12 @@ export interface CreateUserRequest {
   phoneNumber?: string;
   role: string;
 }
+
+export interface UpdateUserRequest {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  role: string;
+}

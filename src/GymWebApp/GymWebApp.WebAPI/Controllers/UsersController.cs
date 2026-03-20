@@ -38,4 +38,26 @@ public class UsersController : ControllerBase
         var roles = await _mediator.Send(new GetRolesQuery());
         return Ok(roles);
     }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserWebModel>> GetUserById(string id)
+    {
+        var user = await _mediator.Send(new GetUserByIdQuery { Id = id });
+        if (user == null)
+        {
+            return NotFound();
+        }
+        return Ok(user);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<UserWebModel>> UpdateUser(string id, [FromBody] UpdateUserCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("User ID mismatch");
+        }
+        var user = await _mediator.Send(command);
+        return Ok(user);
+    }
 }

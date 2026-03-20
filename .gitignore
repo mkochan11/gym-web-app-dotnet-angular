@@ -412,6 +412,11 @@ FodyWeavers.xsd
 *.md
 !README.md
 
+# Custom
+.idea/
+.agents/
+skills-lock.json
+
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 

@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../../core/api-services/user.service';
-import { User, CreateUserRequest } from '../../../core/models/user';
+import { User, CreateUserRequest, UpdateUserRequest } from '../../../core/models/user';
 import { MessageService } from 'primeng/api';
 
 import { TableModule } from 'primeng/table';
@@ -14,6 +14,7 @@ import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface RoleOption {
   label: string;
@@ -34,7 +35,8 @@ interface RoleOption {
     PasswordModule,
     ToastModule,
     ToolbarModule,
-    TagModule
+    TagModule,
+    TooltipModule
   ],
   providers: [MessageService],
   templateUrl: './users.component.html',
@@ -49,6 +51,8 @@ export class UsersComponent implements OnInit {
   roles: RoleOption[] = [];
   loading = false;
   submitted = false;
+  isEditMode = false;
+  editingUserId: string | null = null;
 
   userDialog = false;
   userForm: FormGroup;
@@ -56,7 +60,7 @@ export class UsersComponent implements OnInit {
   constructor() {
     this.userForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.minLength(8)]],
       firstName: ['', [Validators.required, Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.maxLength(100)]],
       phoneNumber: [''],
@@ -94,15 +98,36 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  openNewUser() {
-    this.userForm.reset();
-    this.submitted = false;
-    this.userDialog = true;
-  }
-
   hideDialog() {
     this.userDialog = false;
     this.submitted = false;
+    this.isEditMode = false;
+    this.editingUserId = null;
+  }
+
+  openNewUser() {
+    this.userForm.reset();
+    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
+    this.submitted = false;
+    this.isEditMode = false;
+    this.editingUserId = null;
+    this.userDialog = true;
+  }
+
+  editUser(user: User) {
+    this.isEditMode = true;
+    this.editingUserId = user.id;
+    this.userForm.patchValue({
+      email: user.email,
+      password: '',
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber || '',
+      role: user.role
+    });
+    this.userForm.get('password')?.clearValidators();
+    this.submitted = false;
+    this.userDialog = true;
   }
 
   saveUser() {
@@ -112,6 +137,14 @@ export class UsersComponent implements OnInit {
       return;
     }
 
+    if (this.isEditMode && this.editingUserId) {
+      this.updateUser();
+    } else {
+      this.createUser();
+    }
+  }
+
+  private createUser() {
     const userData: CreateUserRequest = {
       email: this.userForm.value.email,
       password: this.userForm.value.password,
@@ -129,6 +162,34 @@ export class UsersComponent implements OnInit {
       },
       error: (err) => {
         const errorMessage = err.error?.errors?.Email?.[0] || err.error?.errors?.CreateUser?.[0] || 'Failed to create user';
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMessage });
+      }
+    });
+  }
+
+  private updateUser() {
+    if (!this.editingUserId) return;
+
+    const userData: UpdateUserRequest = {
+      id: this.editingUserId,
+      email: this.userForm.value.email,
+      firstName: this.userForm.value.firstName,
+      lastName: this.userForm.value.lastName,
+      phoneNumber: this.userForm.value.phoneNumber || undefined,
+      role: this.userForm.value.role
+    };
+
+    this.userService.updateUser(this.editingUserId, userData).subscribe({
+      next: (updatedUser) => {
+        const index = this.users.findIndex(u => u.id === updatedUser.id);
+        if (index !== -1) {
+          this.users[index] = updatedUser;
+        }
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'User updated successfully' });
+        this.hideDialog();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.errors?.Email?.[0] || err.error?.errors?.UpdateUser?.[0] || 'Failed to update user';
         this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMessage });
       }
     });
