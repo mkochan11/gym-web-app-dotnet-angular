@@ -32,4 +32,11 @@ public class ClientRepository : Repository<Client>, IClientRepository
             .Where(c => c.AccountId == accountId && !c.Removed)
             .ExecuteUpdateAsync(setters => setters.SetProperty(c => c.Removed, true));
     }
+
+    public async Task<Client> CreateAsync(Client client)
+    {
+        await _context.Set<Client>().AddAsync(client);
+        await _context.SaveChangesAsync();
+        return client;
+    }
 }
