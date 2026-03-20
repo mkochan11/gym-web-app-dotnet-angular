@@ -14,4 +14,6 @@ public interface IUserRepository
     Task<bool> EmailExistsAsync(string email);
     Task<List<UserRole>> GetAllRolesAsync();
     Task AddToRoleAsync(ApplicationUser user, UserRole role);
+    Task<bool> DeleteAsync(string id);
+    Task<string?> GetCurrentUserIdAsync();
 }

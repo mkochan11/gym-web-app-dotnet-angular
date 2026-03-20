@@ -152,4 +152,50 @@ describe('UserService', () => {
       req.flush(mockRoles);
     });
   });
+
+  describe('deleteUser', () => {
+    it('should call DELETE users/{id} API and return void', (done) => {
+      const userId = 'user-123';
+
+      service.deleteUser(userId).subscribe({
+        next: (result) => {
+          expect(result).toBeNull();
+          done();
+        },
+        error: done.fail
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/users/${userId}`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null);
+    });
+
+    it('should handle not found error', () => {
+      const userId = 'non-existing-user';
+
+      service.deleteUser(userId).subscribe({
+        error: (error) => {
+          expect(error).toBeTruthy();
+        }
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/users/${userId}`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ message: 'User not found' }, { status: 404, statusText: 'Not Found' });
+    });
+
+    it('should handle unauthorized error (self-delete attempt)', () => {
+      const userId = 'current-user-id';
+
+      service.deleteUser(userId).subscribe({
+        error: (error) => {
+          expect(error).toBeTruthy();
+        }
+      });
+
+      const req = httpMock.expectOne(`${baseUrl}/users/${userId}`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush({ errors: { DeleteUser: ['You cannot delete your own account'] } }, { status: 400, statusText: 'Bad Request' });
+    });
+  });
 });

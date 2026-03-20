@@ -1,4 +1,5 @@
 <p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
 <div class="card">
   <p-toolbar styleClass="mb-4 gap-2">
@@ -28,7 +29,7 @@
         <th pSortableColumn="lastName">Last Name <p-sortIcon field="lastName"></p-sortIcon></th>
         <th pSortableColumn="role">Role <p-sortIcon field="role"></p-sortIcon></th>
         <th pSortableColumn="createdAt">Created At <p-sortIcon field="createdAt"></p-sortIcon></th>
-        <th style="width: 8rem">Actions</th>
+        <th style="width: 10rem">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-user>
@@ -42,6 +43,7 @@
         <td>{{ user.createdAt | date: 'medium' }}</td>
         <td>
           <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text" pTooltip="Edit User" (click)="editUser(user)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" pTooltip="Delete User" [disabled]="user.id === getCurrentUserId()" (click)="confirmDeleteUser(user)"></button>
         </td>
       </tr>
     </ng-template>
@@ -152,5 +154,31 @@
   <ng-template pTemplate="footer">
     <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
     <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-success" (click)="saveUser()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="deleteDialog"
+  [style]="{ width: '450px' }"
+  header="Confirm Delete"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  (onHide)="hideDeleteDialog()">
+
+  <ng-template pTemplate="content">
+    <div class="confirmation-content">
+      <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-right: 10px; color: var(--red-500);"></i>
+      <span *ngIf="userToDelete">
+        Are you sure you want to delete <b>{{ userToDelete.firstName }} {{ userToDelete.lastName }}</b> ({{ userToDelete.email }})?
+      </span>
+      <p style="margin-top: 10px; color: var(--red-500);">This action cannot be undone.</p>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDeleteDialog()"></button>
+    <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="deleteUser()"></button>
   </ng-template>
 </p-dialog>

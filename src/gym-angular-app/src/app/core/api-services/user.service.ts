@@ -25,6 +25,10 @@ export class UserService {
     return this.httpService.put<User>(`users/${id}`, user);
   }
 
+  deleteUser(id: string): Observable<void> {
+    return this.httpService.delete<void>(`users/${id}`);
+  }
+
   getRoles(): Observable<string[]> {
     return this.httpService.get<string[]>('users/roles');
   }

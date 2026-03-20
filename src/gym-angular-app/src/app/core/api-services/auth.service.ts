@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 
 const TOKEN_KEY = 'auth_token';
 const ROLE_KEY = 'user_role';
+const USER_ID_KEY = 'user_id';
 
 @Injectable({
   providedIn: 'root'
@@ -57,10 +58,16 @@ export class AuthService {
       const decoded: any = jwtDecode(token);
 
       const roleClaim = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+      const nameIdentifierClaim = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
 
       const role = decoded[roleClaim];
       if (role) {
         localStorage.setItem(ROLE_KEY, role);
+      }
+
+      const userId = decoded[nameIdentifierClaim];
+      if (userId) {
+        localStorage.setItem(USER_ID_KEY, userId);
       }
     } catch (err) {
       console.error("Failed to decode token", err);
@@ -79,10 +86,15 @@ export class AuthService {
     return localStorage.getItem(ROLE_KEY);
   }
 
+  getUserId(): string | null {
+    return localStorage.getItem(USER_ID_KEY);
+  }
+
   logout(): void {
     try {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(ROLE_KEY);
+      localStorage.removeItem(USER_ID_KEY);
     } catch {}
   }
 }

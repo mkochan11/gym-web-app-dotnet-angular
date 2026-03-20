@@ -3,6 +3,8 @@ using GymWebApp.Application.CQRS.Users;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Application.WebModels.User;
+using GymWebApp.Domain.Entities;
+using GymWebApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -11,12 +13,19 @@ namespace GymWebApp.UnitTests.Application.Commands.UpdateUser;
 public class UpdateUserHandlerTests
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IClientRepository> _clientRepositoryMock;
+    private readonly Mock<IEmployeeRepository> _employeeRepositoryMock;
     private readonly GymWebApp.Application.CQRS.Users.UpdateUser.Handler _handler;
 
     public UpdateUserHandlerTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
-        _handler = new GymWebApp.Application.CQRS.Users.UpdateUser.Handler(_userRepositoryMock.Object);
+        _clientRepositoryMock = new Mock<IClientRepository>();
+        _employeeRepositoryMock = new Mock<IEmployeeRepository>();
+        _handler = new GymWebApp.Application.CQRS.Users.UpdateUser.Handler(
+            _userRepositoryMock.Object,
+            _clientRepositoryMock.Object,
+            _employeeRepositoryMock.Object);
     }
 
     [Fact]
@@ -62,6 +71,12 @@ public class UpdateUserHandlerTests
         _userRepositoryMock.Setup(x => x.GetByIdAsync(userId))
             .ReturnsAsync(updatedUser);
 
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync(userId))
+            .ReturnsAsync((Client?)null);
+
+        _employeeRepositoryMock.Setup(x => x.GetByAccountIdAsync(userId))
+            .ReturnsAsync((Employee?)null);
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -90,7 +105,7 @@ public class UpdateUserHandlerTests
         var act = () => _handler.Handle(command, CancellationToken.None);
 
         await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("User with id non-existing-id was not found");
+            .WithMessage("Entity \"User\" (non-existing-id) was not found.");
     }
 
     [Fact]
@@ -168,6 +183,12 @@ public class UpdateUserHandlerTests
         _userRepositoryMock.Setup(x => x.GetByIdAsync(userId))
             .ReturnsAsync(updatedUser);
 
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync(userId))
+            .ReturnsAsync((Client?)null);
+
+        _employeeRepositoryMock.Setup(x => x.GetByAccountIdAsync(userId))
+            .ReturnsAsync((Employee?)null);
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
         _userRepositoryMock.Verify(x => x.EmailExistsAsync(It.IsAny<string>()), Times.Never);
@@ -210,24 +231,24 @@ public class UpdateUserHandlerTests
     }
 
     [Fact]
-    public async Task Handle_RoleChange_UpdatesRole()
+    public async Task Handle_ClientToTrainerRoleChange_RemovesClientAndCreatesEmployee()
     {
-        var userId = "user-id-123";
+        var userId = "user-id-456";
         var command = new UpdateUserCommand
         {
             Id = userId,
-            Email = "john@example.com",
-            FirstName = "John",
-            LastName = "Doe",
-            Role = "Admin"
+            Email = "changed@example.com",
+            FirstName = "Changed",
+            LastName = "User",
+            Role = "Trainer"
         };
 
         var existingUser = new UserWebModel
         {
             Id = userId,
-            Email = "john@example.com",
-            FirstName = "John",
-            LastName = "Doe",
+            Email = "old@example.com",
+            FirstName = "Old",
+            LastName = "User",
             Role = "Client"
         };
 
@@ -237,21 +258,31 @@ public class UpdateUserHandlerTests
             Email = command.Email,
             FirstName = command.FirstName,
             LastName = command.LastName,
-            Role = "Admin"
+            Role = "Trainer"
         };
 
-        _userRepositoryMock.Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(existingUser);
+        var existingClient = new Client { Id = 1, AccountId = userId, Name = "Old" };
+
+        _userRepositoryMock.SetupSequence(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(existingUser)
+            .ReturnsAsync(updatedUser);
 
         _userRepositoryMock.Setup(x => x.UpdateAsync(
-            userId, command.Email, command.FirstName, command.LastName, null, command.Role))
+            userId, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string>()))
             .ReturnsAsync((string?)null);
 
-        _userRepositoryMock.Setup(x => x.GetByIdAsync(userId))
-            .ReturnsAsync(updatedUser);
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync(userId))
+            .ReturnsAsync(existingClient);
+
+        _employeeRepositoryMock.Setup(x => x.GetByAccountIdAsync(userId))
+            .ReturnsAsync((Employee?)null);
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.Role.Should().Be("Admin");
+        result.Role.Should().Be("Trainer");
+        _clientRepositoryMock.Verify(x => x.Remove(It.IsAny<Client>()), Times.Once);
+        _employeeRepositoryMock.Verify(x => x.AddAsync(It.Is<Employee>(e => 
+            e.AccountId == userId && 
+            e.Role == EmployeeRole.Trainer)), Times.Once);
     }
 }

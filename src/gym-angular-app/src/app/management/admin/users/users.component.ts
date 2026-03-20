@@ -2,8 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserService } from '../../../core/api-services/user.service';
+import { AuthService } from '../../../core/api-services/auth.service';
 import { User, CreateUserRequest, UpdateUserRequest } from '../../../core/models/user';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -15,6 +16,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 interface RoleOption {
   label: string;
@@ -36,14 +38,16 @@ interface RoleOption {
     ToastModule,
     ToolbarModule,
     TagModule,
-    TooltipModule
+    TooltipModule,
+    ConfirmDialogModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
 export class UsersComponent implements OnInit {
   private userService = inject(UserService);
+  private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
 
@@ -56,6 +60,9 @@ export class UsersComponent implements OnInit {
 
   userDialog = false;
   userForm: FormGroup;
+
+  deleteDialog = false;
+  userToDelete: User | null = null;
 
   constructor() {
     this.userForm = this.fb.group({
@@ -210,5 +217,36 @@ export class UsersComponent implements OnInit {
       default:
         return 'secondary';
     }
+  }
+
+  confirmDeleteUser(user: User): void {
+    this.userToDelete = user;
+    this.deleteDialog = true;
+  }
+
+  hideDeleteDialog(): void {
+    this.deleteDialog = false;
+    this.userToDelete = null;
+  }
+
+  deleteUser(): void {
+    if (!this.userToDelete) return;
+
+    this.userService.deleteUser(this.userToDelete.id).subscribe({
+      next: () => {
+        this.users = this.users.filter(u => u.id !== this.userToDelete!.id);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'User deleted successfully' });
+        this.hideDeleteDialog();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.errors?.DeleteUser?.[0] || 'Failed to delete user';
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: errorMessage });
+        this.hideDeleteDialog();
+      }
+    });
+  }
+
+  getCurrentUserId(): string | null {
+    return this.authService.getUserId();
   }
 }

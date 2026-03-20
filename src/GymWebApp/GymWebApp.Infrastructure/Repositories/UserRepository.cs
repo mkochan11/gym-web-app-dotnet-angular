@@ -136,4 +136,24 @@ public class UserRepository : IUserRepository
         var user = await _userManager.FindByEmailAsync(email);
         return user != null;
     }
+
+    public async Task<bool> DeleteAsync(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null) return false;
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (roles.Any())
+        {
+            await _userManager.RemoveFromRolesAsync(user, roles);
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+        return result.Succeeded;
+    }
+
+    public Task<string?> GetCurrentUserIdAsync()
+    {
+        return Task.FromResult<string?>(null);
+    }
 }

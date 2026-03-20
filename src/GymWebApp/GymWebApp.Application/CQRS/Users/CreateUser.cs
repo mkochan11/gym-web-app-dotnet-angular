@@ -2,6 +2,7 @@ using FluentValidation;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Application.WebModels.User;
+using GymWebApp.Domain.Entities;
 using GymWebApp.Domain.Enums;
 using MediatR;
 using ValidationException = GymWebApp.Application.Common.Exceptions.ValidationException;
@@ -13,10 +14,17 @@ public static class CreateUser
     public class Handler : IRequestHandler<CreateUserCommand, UserWebModel>
     {
         private readonly IUserRepository _userRepository;
+        private readonly IClientRepository _clientRepository;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public Handler(IUserRepository userRepository)
+        public Handler(
+            IUserRepository userRepository,
+            IClientRepository clientRepository,
+            IEmployeeRepository employeeRepository)
         {
             _userRepository = userRepository;
+            _clientRepository = clientRepository;
+            _employeeRepository = employeeRepository;
         }
 
         public async Task<UserWebModel> Handle(CreateUserCommand command, CancellationToken ct)
@@ -56,8 +64,73 @@ public static class CreateUser
                 throw new InvalidOperationException("Failed to retrieve created user");
             }
 
+            await CreateRelatedEntityAsync(createdUser.Id, command);
+
+            if (Enum.TryParse<UserRole>(command.Role, out var role))
+            {
+                if (role == UserRole.Client)
+                {
+                    await _clientRepository.SaveChangesAsync();
+                }
+                else if (IsEmployeeRole(role))
+                {
+                    await _employeeRepository.SaveChangesAsync();
+                }
+            }
+
             var userModel = await _userRepository.GetByIdAsync(createdUser.Id);
             return userModel!;
+        }
+
+        private async Task CreateRelatedEntityAsync(string userId, CreateUserCommand command)
+        {
+            if (Enum.TryParse<UserRole>(command.Role, out var userRole))
+            {
+                if (userRole == UserRole.Client)
+                {
+                    var client = new Client
+                    {
+                        AccountId = userId,
+                        Name = command.FirstName,
+                        Surname = command.LastName,
+                        RegistrationDate = DateTime.UtcNow
+                    };
+                    await _clientRepository.AddAsync(client);
+                }
+                else if (IsEmployeeRole(userRole))
+                {
+                    var employeeRole = MapToEmployeeRole(userRole);
+                    var employee = new Employee
+                    {
+                        AccountId = userId,
+                        Name = command.FirstName,
+                        Surname = command.LastName,
+                        Role = employeeRole,
+                        RegistrationDate = DateTime.UtcNow
+                    };
+                    await _employeeRepository.AddAsync(employee);
+                }
+            }
+        }
+
+        private static bool IsEmployeeRole(UserRole role)
+        {
+            return role == UserRole.Owner || 
+                   role == UserRole.Manager || 
+                   role == UserRole.Trainer || 
+                   role == UserRole.Receptionist;
+        }
+
+        private static EmployeeRole MapToEmployeeRole(UserRole role)
+        {
+            return role switch
+            {
+                UserRole.Owner => EmployeeRole.Owner,
+                UserRole.Manager => EmployeeRole.Manager,
+                UserRole.Trainer => EmployeeRole.Trainer,
+                UserRole.Receptionist => EmployeeRole.Receptionist,
+                _ => throw new ArgumentException($"Cannot map {role} to EmployeeRole")
+            };
         }
     }
 

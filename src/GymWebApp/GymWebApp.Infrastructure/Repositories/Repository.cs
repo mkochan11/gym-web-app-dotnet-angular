@@ -30,7 +30,6 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
     public void Remove(T entity)
     {
         entity.Removed = true;
-        _dbSet.Update(entity);
     }
 
     public async Task<int> SaveChangesAsync() =>
