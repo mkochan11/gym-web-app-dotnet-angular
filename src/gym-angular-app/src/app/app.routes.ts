@@ -86,6 +86,12 @@ export const routes: Routes = [
             canActivate: [authGuard, roleGuard],
             data: { roles: ['Admin'] },
             loadComponent: () => import('./management/admin/users/users.component').then(m => m.UsersComponent)
+          },
+          {
+            path: 'membership-plans',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin', 'Manager'] },
+            loadComponent: () => import('./features/membership-plans/membership-plans-list/membership-plans-list.component').then(m => m.MembershipPlansListComponent)
           }
         ]
       },

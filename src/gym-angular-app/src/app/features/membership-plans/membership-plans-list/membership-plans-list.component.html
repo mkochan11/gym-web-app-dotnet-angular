@@ -1,0 +1,214 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="start">
+      <h2 class="m-0">Membership Plans</h2>
+    </ng-template>
+    <ng-template pTemplate="center">
+      <button pButton pRipple label="Create New Plan" icon="pi pi-plus" class="p-button-success" (click)="openNewPlan()"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    [value]="plans"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} plans"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    styleClass="p-datatable-striped"
+    [tableStyle]="{ 'min-width': '50rem' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="type">Type <p-sortIcon field="type"></p-sortIcon></th>
+        <th pSortableColumn="price">Price <p-sortIcon field="price"></p-sortIcon></th>
+        <th pSortableColumn="durationTime">Duration <p-sortIcon field="durationTime"></p-sortIcon></th>
+        <th>Features</th>
+        <th>Status</th>
+        <th style="width: 10rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-plan>
+      <tr>
+        <td>{{ plan.type }}</td>
+        <td>{{ plan.price | currency }}</td>
+        <td>{{ plan.durationTime }} ({{ plan.durationInMonths }} months)</td>
+        <td>
+          <span *ngFor="let feature of formatFeatures(plan)" class="feature-badge">
+            {{ feature }}
+          </span>
+        </td>
+        <td>
+          <p-tag [value]="getStatusLabel(plan.isActive)" [severity]="getSeverityStatus(plan.isActive)"></p-tag>
+        </td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text" pTooltip="Edit Plan" (click)="editPlan(plan)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" pTooltip="Delete Plan" (click)="confirmDeletePlan(plan)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center">No membership plans found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="planDialog"
+  [style]="{ width: '600px' }"
+  [header]="isEditMode ? 'Edit Membership Plan' : 'Create New Membership Plan'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  (onHide)="hideDialog()">
+
+  <ng-template pTemplate="content">
+    <form [formGroup]="planForm" (ngSubmit)="savePlan()">
+      <div class="form-grid">
+        <div class="field">
+          <label for="type">Type *</label>
+          <input
+            id="type"
+            type="text"
+            pInputText
+            formControlName="type"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && planForm.get('type')?.invalid }"
+          />
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && planForm.get('type')?.invalid">
+            Type is required and must not exceed 100 characters.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="price">Price *</label>
+          <p-inputNumber
+            id="price"
+            formControlName="price"
+            mode="currency"
+            currency="USD"
+            locale="en-US"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && planForm.get('price')?.invalid }"
+          ></p-inputNumber>
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && planForm.get('price')?.invalid">
+            Price must be greater than 0.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="durationTime">Duration Time *</label>
+          <input
+            id="durationTime"
+            type="text"
+            pInputText
+            formControlName="durationTime"
+            placeholder="e.g., 30 days"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && planForm.get('durationTime')?.invalid }"
+          />
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && planForm.get('durationTime')?.invalid">
+            Duration time is required.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="durationInMonths">Duration In Months *</label>
+          <p-inputNumber
+            id="durationInMonths"
+            formControlName="durationInMonths"
+            [min]="1"
+            [showButtons]="true"
+            [ngClass]="{ 'ng-invalid ng-dirty': submitted && planForm.get('durationInMonths')?.invalid }"
+          ></p-inputNumber>
+          <small class="ng-dirty ng-invalid" *ngIf="submitted && planForm.get('durationInMonths')?.invalid">
+            Duration in months must be greater than 0.
+          </small>
+        </div>
+
+        <div class="field full-width">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            pInputTextarea
+            formControlName="description"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="maxTrainingsPerMonth">Max Trainings Per Month</label>
+          <p-inputNumber
+            id="maxTrainingsPerMonth"
+            formControlName="maxTrainingsPerMonth"
+            [min]="1"
+            [showButtons]="true"
+            placeholder="Unlimited if empty"
+          ></p-inputNumber>
+        </div>
+
+        <div class="features-section full-width">
+          <h4>Features</h4>
+          <div class="features-grid">
+            <div class="feature-item">
+              <p-inputSwitch formControlName="canReserveTrainings"></p-inputSwitch>
+              <label>Can Reserve Trainings</label>
+            </div>
+            <div class="feature-item">
+              <p-inputSwitch formControlName="canAccessGroupTraining"></p-inputSwitch>
+              <label>Can Access Group Training</label>
+            </div>
+            <div class="feature-item">
+              <p-inputSwitch formControlName="canAccessPersonalTraining"></p-inputSwitch>
+              <label>Can Access Personal Training</label>
+            </div>
+            <div class="feature-item">
+              <p-inputSwitch formControlName="canReceiveTrainingPlans"></p-inputSwitch>
+              <label>Can Receive Training Plans</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="isActive">Active</label>
+          <p-inputSwitch formControlName="isActive"></p-inputSwitch>
+        </div>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-success" (click)="savePlan()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="deleteDialog"
+  [style]="{ width: '450px' }"
+  header="Confirm Delete"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  (onHide)="hideDeleteDialog()">
+
+  <ng-template pTemplate="content">
+    <div class="confirmation-content">
+      <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-right: 10px; color: var(--red-500);"></i>
+      <span *ngIf="planToDelete">
+        Are you sure you want to delete <b>{{ planToDelete.type }}</b> plan?
+      </span>
+      <p style="margin-top: 10px; color: var(--red-500);">This action cannot be undone.</p>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDeleteDialog()"></button>
+    <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="deletePlan()"></button>
+  </ng-template>
+</p-dialog>

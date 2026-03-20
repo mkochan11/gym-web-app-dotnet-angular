@@ -20,6 +20,7 @@ export class SidebarComponent {
   managerSidebarItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/management/manager'] },
     { label: 'Calendar', icon: 'pi pi-calendar', routerLink: ['/management/manager/calendar'] },
+    { label: 'Membership Plans', icon: 'pi pi-credit-card', routerLink: ['/management/admin/membership-plans'] },
     { label: 'Employees', icon: 'pi pi-users', items: [
       { label: 'Trainers', icon: 'pi pi-user-edit', routerLink: ['/management/manager/trainers'] },
       { label: 'Receptionists', icon: 'pi pi-user-edit', routerLink: ['/management/manager/receptionists'] },
@@ -38,6 +39,7 @@ export class SidebarComponent {
   adminSidebarItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/management/admin'] },
     { label: 'Users', icon: 'pi pi-users', routerLink: ['/management/admin/users'] },
+    { label: 'Membership Plans', icon: 'pi pi-credit-card', routerLink: ['/management/admin/membership-plans'] },
     { label: 'Equipment', icon: 'pi pi-box', routerLink: ['/management/equipment'] },
     { label: 'Reports', icon: 'pi pi-chart-line', routerLink: ['/management/reports'] },
     { label: 'Settings', icon: 'pi pi-cog', routerLink: ['/management/settings'] },
