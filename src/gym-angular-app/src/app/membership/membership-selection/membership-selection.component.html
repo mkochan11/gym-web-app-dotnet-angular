@@ -5,21 +5,21 @@
   </div>
 
   <div class="plans-grid">
-    <div *ngFor="let plan of membershipPlans" 
-         class="plan-card" 
+    <div *ngFor="let plan of membershipPlans"
+         class="plan-card"
          [class.selected]="selectedPlan?.id === plan.id"
          [class.popular]="plan.popular"
          (click)="selectPlan(plan)">
-      
-      <p-card [header]="plan.name">
+
+      <p-card [header]="plan.type">
         <div class="card-content">
           <div class="price">
             <span class="amount">${{ plan.price }}</span>
             <span class="period">/month</span>
           </div>
-          
+
           <p class="description">{{ plan.description }}</p>
-          
+
           <ul class="features">
             <li *ngFor="let feature of plan.features">{{ feature }}</li>
           </ul>
@@ -28,10 +28,10 @@
             <p-tag value="MOST POPULAR" severity="success"></p-tag>
           </div>
         </div>
-        
+
         <ng-template pTemplate="footer">
-          <p-button 
-            label="Select Plan" 
+          <p-button
+            label="Select Plan"
             [outlined]="selectedPlan?.id !== plan.id"
             (onClick)="selectPlan(plan)">
           </p-button>
@@ -41,10 +41,25 @@
   </div>
 
   <div class="actions" *ngIf="selectedPlan">
-    <p-button 
-      label="Continue to Payment" 
+    <p-button
+      label="Continue to Payment"
       icon="pi pi-arrow-right"
       (onClick)="continueToPayment()">
+    </p-button>
+    <p-button
+      label="Skip for now"
+      [outlined]="true"
+      severity="secondary"
+      (onClick)="skipPurchase()">
+    </p-button>
+  </div>
+
+  <div class="skip-action" *ngIf="!selectedPlan">
+    <p-button
+      label="Skip for now"
+      [outlined]="true"
+      severity="secondary"
+      (onClick)="skipPurchase()">
     </p-button>
   </div>
 </div>

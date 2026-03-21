@@ -13,7 +13,7 @@
       <div class="order-summary">
         <p-card header="Order Summary">
           <div class="summary-content">
-            <h3>{{ selectedPlan.name }} Membership</h3>
+            <h3>{{ selectedPlan.type }} Membership</h3>
             <p class="price">${{ selectedPlan.price }} / month</p>
             <ul class="features">
               <li *ngFor="let feature of selectedPlan.features">{{ feature }}</li>

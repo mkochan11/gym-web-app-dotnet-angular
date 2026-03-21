@@ -1,12 +1,15 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpService } from './http.service';
+import { AuthService } from './auth.service';
+import { catchError, map, throwError } from 'rxjs';
 
 export interface MembershipPlan {
-  id: string;
-  name: string;
+  id: number;
+  type: string;
   description: string;
   price: number;
-  duration: number;
+  durationInMonths: number;
   features: string[];
   popular?: boolean;
 }
@@ -18,20 +21,35 @@ export interface PaymentData {
   cardholderName: string;
 }
 
+export interface PaymentResult {
+  success: boolean;
+  message: string;
+  membershipId?: number;
+  paymentId?: number;
+  amount?: number;
+  paymentMethod?: string;
+  startDate?: string;
+  endDate?: string;
+  planName?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class MembershipService {
+  private httpService = inject(HttpService);
+  private authService = inject(AuthService);
+
   private selectedPlanSubject = new BehaviorSubject<MembershipPlan | null>(null);
   public selectedPlan$ = this.selectedPlanSubject.asObservable();
 
   private membershipPlans: MembershipPlan[] = [
     {
-      id: 'basic',
-      name: 'Basic',
+      id: 1,
+      type: 'Basic',
       description: 'Perfect for beginners',
       price: 29.99,
-      duration: 30,
+      durationInMonths: 1,
       features: [
         'Access to gym equipment',
         'Locker room access',
@@ -39,11 +57,11 @@ export class MembershipService {
       ]
     },
     {
-      id: 'premium',
-      name: 'Premium',
+      id: 2,
+      type: 'Premium',
       description: 'Our most popular plan',
       price: 49.99,
-      duration: 30,
+      durationInMonths: 1,
       features: [
         'All Basic features',
         'Group classes access',
@@ -53,11 +71,11 @@ export class MembershipService {
       popular: true
     },
     {
-      id: 'ultimate',
-      name: 'Ultimate',
+      id: 3,
+      type: 'Ultimate',
       description: 'For serious fitness enthusiasts',
       price: 79.99,
-      duration: 30,
+      durationInMonths: 1,
       features: [
         'All Premium features',
         'Unlimited personal training',
@@ -84,22 +102,47 @@ export class MembershipService {
     this.selectedPlanSubject.next(null);
   }
 
-  processPayment(paymentData: PaymentData, plan: MembershipPlan): Promise<{ success: boolean; message: string }> {
+  processPayment(paymentData: PaymentData, plan: MembershipPlan): Promise<PaymentResult> {
+    const request = {
+      membershipPlanId: plan.id,
+      cardNumber: paymentData.cardNumber,
+      expiryDate: paymentData.expiryDate,
+      cvv: paymentData.cvv,
+      cardholderName: paymentData.cardholderName
+    };
+
     return new Promise((resolve) => {
-      setTimeout(() => {
-        const success = Math.random() > 0.2;
-        if (success) {
-          resolve({
-            success: true,
-            message: `Payment processed successfully! You now have ${plan.name} membership.`
-          });
-        } else {
-          resolve({
-            success: false,
-            message: 'Payment failed. Please check your card details and try again.'
-          });
-        }
-      }, 2000);
+      this.httpService.post<PaymentResult>('payments/process', request)
+        .pipe(
+          map(response => {
+            if (response.success) {
+              resolve({
+                success: true,
+                message: response.message,
+                membershipId: response.membershipId,
+                paymentId: response.paymentId,
+                amount: response.amount,
+                paymentMethod: response.paymentMethod,
+                startDate: response.startDate,
+                endDate: response.endDate,
+                planName: response.planName
+              });
+            } else {
+              resolve({
+                success: false,
+                message: response.message
+              });
+            }
+          }),
+          catchError(error => {
+            resolve({
+              success: false,
+              message: error.message || 'An unexpected error occurred'
+            });
+            return throwError(() => error);
+          })
+        )
+        .subscribe();
     });
   }
 }

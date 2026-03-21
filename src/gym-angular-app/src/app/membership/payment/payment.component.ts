@@ -68,7 +68,7 @@ export class PaymentComponent implements OnInit {
         if (result.success) {
           this.toastService.show(result.message, 'success');
           this.membershipService.clearSelectedPlan();
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/client']);
         } else {
           this.toastService.show(result.message, 'error');
         }

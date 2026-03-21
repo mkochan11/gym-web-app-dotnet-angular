@@ -103,5 +103,13 @@
 
   .actions {
     text-align: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .skip-action {
+    text-align: center;
+    margin-top: 1rem;
   }
 }

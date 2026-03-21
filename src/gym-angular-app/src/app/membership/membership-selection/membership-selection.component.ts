@@ -32,4 +32,9 @@ export class MembershipSelectionComponent {
       this.router.navigate(['/membership/payment']);
     }
   }
+
+  skipPurchase() {
+    this.membershipService.clearSelectedPlan();
+    this.router.navigate(['/client']);
+  }
 }
