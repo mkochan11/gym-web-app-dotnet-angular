@@ -12,7 +12,6 @@ namespace GymWebApp.UnitTests.Application.Commands.Payments;
 public class ProcessPaymentHandlerTests
 {
     private readonly Mock<IGymMembershipRepository> _gymMembershipRepositoryMock;
-    private readonly Mock<IMembershipPlanRepository> _membershipPlanRepositoryMock;
     private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
     private readonly Mock<IClientRepository> _clientRepositoryMock;
     private readonly ProcessPayment.Handler _handler;
@@ -20,37 +19,26 @@ public class ProcessPaymentHandlerTests
     public ProcessPaymentHandlerTests()
     {
         _gymMembershipRepositoryMock = new Mock<IGymMembershipRepository>();
-        _membershipPlanRepositoryMock = new Mock<IMembershipPlanRepository>();
         _paymentRepositoryMock = new Mock<IPaymentRepository>();
         _clientRepositoryMock = new Mock<IClientRepository>();
 
         _handler = new ProcessPayment.Handler(
             _gymMembershipRepositoryMock.Object,
-            _membershipPlanRepositoryMock.Object,
             _paymentRepositoryMock.Object,
             _clientRepositoryMock.Object);
     }
 
     [Fact]
-    public async Task Handle_ValidCommand_CreatesMembershipAndPayment()
+    public async Task Handle_ValidCommand_UpdatesPendingPayment()
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
             CardholderName = "John Doe",
             CreatedById = "user-123"
-        };
-
-        var plan = new MembershipPlan
-        {
-            Id = 1,
-            Type = "Premium",
-            Description = "Premium plan",
-            Price = 49.99m,
-            DurationInMonths = 1
         };
 
         var client = new Client
@@ -61,32 +49,54 @@ public class ProcessPaymentHandlerTests
             Surname = "Doe"
         };
 
-        _membershipPlanRepositoryMock.Setup(x => x.GetByIdAsync(1))
-            .ReturnsAsync(plan);
+        var membership = new GymMembership
+        {
+            Id = 1,
+            ClientId = 1,
+            MembershipPlanId = 1,
+            StartDate = DateTime.UtcNow,
+            EndDate = DateTime.UtcNow.AddMonths(1),
+            IsActive = false,
+            MembershipPlan = new MembershipPlan
+            {
+                Id = 1,
+                Type = "Premium",
+                Price = 49.99m,
+                DurationInMonths = 1
+            },
+            Payments = new List<Payment>
+            {
+                new Payment
+                {
+                    Id = 1,
+                    DueDate = DateTime.UtcNow,
+                    Status = PaymentStatus.Pending,
+                    Amount = 49.99m
+                }
+            }
+        };
 
         _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
             .ReturnsAsync(client);
 
+        _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))
+            .ReturnsAsync(membership);
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Success.Should().BeTrue();
-        result.MembershipId.Should().NotBeNull();
-        result.PaymentId.Should().NotBeNull();
-        result.PlanName.Should().Be("Premium");
-        result.Amount.Should().Be(49.99m);
+        result.MembershipId.Should().Be(1);
 
-        _gymMembershipRepositoryMock.Verify(x => x.AddAsync(It.IsAny<GymMembership>()), Times.Once);
-        _gymMembershipRepositoryMock.Verify(x => x.SaveChangesAsync(), Times.Once);
-        _paymentRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Payment>()), Times.Once);
+        _paymentRepositoryMock.Verify(x => x.Update(It.Is<Payment>(p => p.Status == PaymentStatus.Paid)), Times.Once);
         _paymentRepositoryMock.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_PlanNotFound_ThrowsNotFoundException()
+    public async Task Handle_MembershipNotFound_ThrowsNotFoundException()
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 999,
+            MembershipId = 999,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -94,13 +104,22 @@ public class ProcessPaymentHandlerTests
             CreatedById = "user-123"
         };
 
-        _membershipPlanRepositoryMock.Setup(x => x.GetByIdAsync(999))
-            .ReturnsAsync((MembershipPlan?)null);
+        var client = new Client
+        {
+            Id = 1,
+            AccountId = "user-123"
+        };
+
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
+            .ReturnsAsync(client);
+
+        _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(999))
+            .ReturnsAsync((GymMembership?)null);
 
         var act = () => _handler.Handle(command, CancellationToken.None);
 
         await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*MembershipPlan*999*");
+            .WithMessage("*GymMembership*999*");
     }
 
     [Fact]
@@ -108,24 +127,13 @@ public class ProcessPaymentHandlerTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
             CardholderName = "John Doe",
             CreatedById = "unknown-user"
         };
-
-        var plan = new MembershipPlan
-        {
-            Id = 1,
-            Type = "Premium",
-            Price = 49.99m,
-            DurationInMonths = 1
-        };
-
-        _membershipPlanRepositoryMock.Setup(x => x.GetByIdAsync(1))
-            .ReturnsAsync(plan);
 
         _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("unknown-user"))
             .ReturnsAsync((Client?)null);
@@ -137,53 +145,11 @@ public class ProcessPaymentHandlerTests
     }
 
     [Fact]
-    public async Task Handle_PaymentFails_ReturnsFailureResult()
+    public async Task Handle_PaymentNotBelongToClient_ThrowsValidationException()
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
-            CardNumber = "",
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = "John Doe",
-            CreatedById = "user-123"
-        };
-
-        var plan = new MembershipPlan
-        {
-            Id = 1,
-            Type = "Premium",
-            Price = 49.99m,
-            DurationInMonths = 1
-        };
-
-        var client = new Client
-        {
-            Id = 1,
-            AccountId = "user-123"
-        };
-
-        _membershipPlanRepositoryMock.Setup(x => x.GetByIdAsync(1))
-            .ReturnsAsync(plan);
-
-        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
-            .ReturnsAsync(client);
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Success.Should().BeFalse();
-        result.Message.Should().Contain("Payment failed");
-
-        _gymMembershipRepositoryMock.Verify(x => x.AddAsync(It.IsAny<GymMembership>()), Times.Never);
-        _paymentRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Payment>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_SetsCorrectMembershipDates()
-    {
-        var command = new ProcessPayment.Command
-        {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -191,12 +157,42 @@ public class ProcessPaymentHandlerTests
             CreatedById = "user-123"
         };
 
-        var plan = new MembershipPlan
+        var client = new Client
+        {
+            Id = 2,
+            AccountId = "user-123"
+        };
+
+        var membership = new GymMembership
         {
             Id = 1,
-            Type = "Basic",
-            Price = 29.99m,
-            DurationInMonths = 3
+            ClientId = 1,
+            MembershipPlan = new MembershipPlan { Type = "Premium" }
+        };
+
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
+            .ReturnsAsync(client);
+
+        _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))
+            .ReturnsAsync(membership);
+
+        var act = () => _handler.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<GymWebApp.Application.Common.Exceptions.ValidationException>()
+            .WithMessage("*does not belong to this client*");
+    }
+
+    [Fact]
+    public async Task Handle_NoPendingPayments_ReturnsFailureResult()
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            CardNumber = "1234567890123456",
+            ExpiryDate = "12/25",
+            Cvv = "123",
+            CardholderName = "John Doe",
+            CreatedById = "user-123"
         };
 
         var client = new Client
@@ -205,17 +201,113 @@ public class ProcessPaymentHandlerTests
             AccountId = "user-123"
         };
 
-        _membershipPlanRepositoryMock.Setup(x => x.GetByIdAsync(1))
-            .ReturnsAsync(plan);
+        var membership = new GymMembership
+        {
+            Id = 1,
+            ClientId = 1,
+            MembershipPlan = new MembershipPlan { Type = "Premium" },
+            Payments = new List<Payment>
+            {
+                new Payment { Status = PaymentStatus.Paid }
+            }
+        };
 
         _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
             .ReturnsAsync(client);
 
+        _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))
+            .ReturnsAsync(membership);
+
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.StartDate.Should().NotBeNull();
-        result.EndDate.Should().NotBeNull();
-        var expectedEndDate = result.StartDate!.Value.AddMonths(3);
-        result.EndDate.Should().BeCloseTo(expectedEndDate, TimeSpan.FromSeconds(5));
+        result.Success.Should().BeFalse();
+        result.Message.Should().Contain("No pending payments");
+    }
+
+    [Fact]
+    public async Task Handle_PaymentFails_ReturnsFailureResult()
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            CardNumber = "",
+            ExpiryDate = "12/25",
+            Cvv = "123",
+            CardholderName = "John Doe",
+            CreatedById = "user-123"
+        };
+
+        var client = new Client
+        {
+            Id = 1,
+            AccountId = "user-123"
+        };
+
+        var membership = new GymMembership
+        {
+            Id = 1,
+            ClientId = 1,
+            MembershipPlan = new MembershipPlan { Type = "Premium" },
+            Payments = new List<Payment>
+            {
+                new Payment { Status = PaymentStatus.Pending }
+            }
+        };
+
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
+            .ReturnsAsync(client);
+
+        _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))
+            .ReturnsAsync(membership);
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.Success.Should().BeFalse();
+        result.Message.Should().Contain("Payment failed");
+
+        _paymentRepositoryMock.Verify(x => x.Update(It.IsAny<Payment>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_AllPaymentsPaid_ActivatesMembership()
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            CardNumber = "1234567890123456",
+            ExpiryDate = "12/25",
+            Cvv = "123",
+            CardholderName = "John Doe",
+            CreatedById = "user-123"
+        };
+
+        var client = new Client
+        {
+            Id = 1,
+            AccountId = "user-123"
+        };
+
+        var membership = new GymMembership
+        {
+            Id = 1,
+            ClientId = 1,
+            MembershipPlan = new MembershipPlan { Type = "Premium" },
+            IsActive = false,
+            Payments = new List<Payment>
+            {
+                new Payment { Status = PaymentStatus.Pending, DueDate = DateTime.UtcNow.AddDays(-1) }
+            }
+        };
+
+        _clientRepositoryMock.Setup(x => x.GetByAccountIdAsync("user-123"))
+            .ReturnsAsync(client);
+
+        _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))
+            .ReturnsAsync(membership);
+
+        await _handler.Handle(command, CancellationToken.None);
+
+        _gymMembershipRepositoryMock.Verify(x => x.Update(It.Is<GymMembership>(m => m.IsActive == true)), Times.Once);
+        _gymMembershipRepositoryMock.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 }

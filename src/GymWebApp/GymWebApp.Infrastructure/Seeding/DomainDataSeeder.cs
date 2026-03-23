@@ -392,7 +392,9 @@ public class DomainDataSeeder : IDomainDataSeeder
             payments.Add(new Payment
             {
                 GymMembershipId = membership.Id,
-                PaymentDate = paymentDate,
+                DueDate = paymentDate,
+                PaidDate = paymentDate,
+                Status = PaymentStatus.Paid,
                 PaymentMethod = PaymentMethod.Card,
                 Amount = membership.MembershipPlan.Price,
                 TransactionId = $"TXN{Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper()}",

@@ -40,4 +40,16 @@ public class GymMembershipRepository : Repository<GymMembership>, IGymMembership
             .OrderByDescending(m => m.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task<bool> HasActiveMembershipAsync(int clientId)
+    {
+        var today = DateTime.UtcNow.Date;
+        var hasActive = await _context.Set<GymMembership>()
+            .AnyAsync(m => 
+                m.ClientId == clientId && 
+                !m.Removed && 
+                !m.IsCancelled && 
+                m.EndDate >= today);
+        return hasActive;
+    }
 }

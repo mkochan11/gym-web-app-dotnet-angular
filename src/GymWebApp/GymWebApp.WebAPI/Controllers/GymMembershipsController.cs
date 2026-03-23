@@ -54,4 +54,12 @@ public class GymMembershipsController : BaseController
         var membership = await _mediator.Send(command);
         return Ok(membership);
     }
+
+    [HttpPost("purchase")]
+    public async Task<ActionResult<GymMembershipWebModel>> PurchaseMembership([FromBody] PurchaseMembership.Command command)
+    {
+        command.UpdatedById = CurrentUserId;
+        var membership = await _mediator.Send(command);
+        return Ok(membership);
+    }
 }

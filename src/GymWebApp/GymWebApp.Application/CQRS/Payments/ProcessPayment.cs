@@ -12,7 +12,7 @@ public static class ProcessPayment
 {
     public class Command : IRequest<PaymentResultWebModel>
     {
-        public int MembershipPlanId { get; set; }
+        public int MembershipId { get; set; }
         public string CardNumber { get; set; } = string.Empty;
         public string ExpiryDate { get; set; } = string.Empty;
         public string Cvv { get; set; } = string.Empty;
@@ -23,34 +23,46 @@ public static class ProcessPayment
     public class Handler : IRequestHandler<Command, PaymentResultWebModel>
     {
         private readonly IGymMembershipRepository _gymMembershipRepository;
-        private readonly IMembershipPlanRepository _membershipPlanRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IClientRepository _clientRepository;
 
         public Handler(
             IGymMembershipRepository gymMembershipRepository,
-            IMembershipPlanRepository membershipPlanRepository,
             IPaymentRepository paymentRepository,
             IClientRepository clientRepository)
         {
             _gymMembershipRepository = gymMembershipRepository;
-            _membershipPlanRepository = membershipPlanRepository;
             _paymentRepository = paymentRepository;
             _clientRepository = clientRepository;
         }
 
         public async Task<PaymentResultWebModel> Handle(Command command, CancellationToken ct)
         {
-            var plan = await _membershipPlanRepository.GetByIdAsync(command.MembershipPlanId);
-            if (plan == null)
-            {
-                throw new NotFoundException("MembershipPlan", command.MembershipPlanId);
-            }
-
             var client = await _clientRepository.GetByAccountIdAsync(command.CreatedById!);
             if (client == null)
             {
                 throw new NotFoundException("Client", command.CreatedById);
+            }
+
+            var membership = await _gymMembershipRepository.GetByIdWithDetailsAsync(command.MembershipId);
+            if (membership == null)
+            {
+                throw new NotFoundException("GymMembership", command.MembershipId);
+            }
+
+            if (membership.ClientId != client.Id)
+            {
+                throw new GymWebApp.Application.Common.Exceptions.ValidationException("Payment does not belong to this client", new Dictionary<string, string[]>());
+            }
+
+            var pendingPayment = membership.Payments
+                .Where(p => p.Status == PaymentStatus.Pending)
+                .OrderBy(p => p.DueDate)
+                .FirstOrDefault();
+
+            if (pendingPayment == null)
+            {
+                return PaymentResultWebModel.FailureResult("No pending payments found for this membership.");
             }
 
             var paymentSuccessful = SimulatePaymentProcessing(command.CardNumber, command.Cvv);
@@ -59,48 +71,34 @@ public static class ProcessPayment
                 return PaymentResultWebModel.FailureResult("Payment failed. Please check your card details and try again.");
             }
 
-            var startDate = DateTime.UtcNow;
-            var endDate = startDate.AddMonths(plan.DurationInMonths);
+            pendingPayment.PaidDate = DateTime.UtcNow;
+            pendingPayment.Status = PaymentStatus.Paid;
+            pendingPayment.PaymentMethod = PaymentMethod.Card;
+            pendingPayment.IsSuccessful = true;
+            pendingPayment.ProcessedAt = DateTime.UtcNow;
+            pendingPayment.ProcessedBy = command.CreatedById;
 
-            var membership = new GymMembership
-            {
-                MembershipPlanId = plan.Id,
-                ClientId = client.Id,
-                StartDate = startDate,
-                EndDate = endDate,
-                IsActive = true,
-                IsCancelled = false,
-                CreatedById = command.CreatedById,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _gymMembershipRepository.AddAsync(membership);
-            await _gymMembershipRepository.SaveChangesAsync();
-
-            var payment = new Payment
-            {
-                PaymentDate = DateTime.UtcNow,
-                GymMembershipId = membership.Id,
-                PaymentMethod = PaymentMethod.Card,
-                Amount = plan.Price,
-                IsSuccessful = true,
-                ProcessedAt = DateTime.UtcNow,
-                ProcessedBy = command.CreatedById,
-                CreatedAt = DateTime.UtcNow,
-                CreatedById = command.CreatedById!
-            };
-
-            await _paymentRepository.AddAsync(payment);
+            _paymentRepository.Update(pendingPayment);
             await _paymentRepository.SaveChangesAsync();
+
+            var allPayments = membership.Payments.Where(p => p.Status != PaymentStatus.Cancelled).ToList();
+            var allDuePaid = allPayments.All(p => p.Status == PaymentStatus.Paid || p.DueDate > DateTime.UtcNow);
+
+            if (allDuePaid)
+            {
+                membership.IsActive = true;
+                _gymMembershipRepository.Update(membership);
+                await _gymMembershipRepository.SaveChangesAsync();
+            }
 
             return PaymentResultWebModel.SuccessResult(
                 membership.Id,
-                payment.Id,
-                plan.Price,
+                pendingPayment.Id,
+                pendingPayment.Amount,
                 PaymentMethod.Card.ToString(),
-                startDate,
-                endDate,
-                plan.Type);
+                membership.StartDate,
+                membership.EndDate,
+                membership.MembershipPlan?.Type ?? "Unknown");
         }
 
         private bool SimulatePaymentProcessing(string cardNumber, string cvv)
@@ -113,9 +111,9 @@ public static class ProcessPayment
     {
         public Validator()
         {
-            RuleFor(x => x.MembershipPlanId)
+            RuleFor(x => x.MembershipId)
                 .GreaterThan(0)
-                .WithMessage("Membership plan ID must be greater than 0.");
+                .WithMessage("Membership ID must be greater than 0.");
 
             RuleFor(x => x.CardNumber)
                 .NotEmpty().WithMessage("Card number is required.")

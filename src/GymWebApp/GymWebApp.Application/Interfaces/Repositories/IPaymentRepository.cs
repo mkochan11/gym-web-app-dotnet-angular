@@ -6,4 +6,5 @@ public interface IPaymentRepository : IRepository<Payment>
 {
     Task<Payment?> GetByIdWithMembershipAsync(int id);
     Task<IEnumerable<Payment>> GetPaymentsByClientIdAsync(int clientId);
+    Task AddRangeAsync(IEnumerable<Payment> payments, CancellationToken ct = default);
 }

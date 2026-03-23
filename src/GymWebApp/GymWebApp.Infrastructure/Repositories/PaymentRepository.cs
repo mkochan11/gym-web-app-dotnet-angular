@@ -26,7 +26,12 @@ public class PaymentRepository : Repository<Payment>, IPaymentRepository
             .Include(p => p.GymMembership)
                 .ThenInclude(m => m!.MembershipPlan)
             .Where(p => p.GymMembership.ClientId == clientId && !p.Removed)
-            .OrderByDescending(p => p.PaymentDate)
+            .OrderByDescending(p => p.DueDate)
             .ToListAsync();
+    }
+
+    public async Task AddRangeAsync(IEnumerable<Payment> payments, CancellationToken ct = default)
+    {
+        await _context.Set<Payment>().AddRangeAsync(payments, ct);
     }
 }

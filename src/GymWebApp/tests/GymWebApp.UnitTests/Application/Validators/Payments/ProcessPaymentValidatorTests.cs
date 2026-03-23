@@ -18,7 +18,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -35,11 +35,11 @@ public class ProcessPaymentValidatorTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Validate_InvalidMembershipPlanId_FailsValidation(int planId)
+    public void Validate_InvalidMembershipId_FailsValidation(int planId)
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = planId,
+            MembershipId = planId,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -49,7 +49,7 @@ public class ProcessPaymentValidatorTests
         var result = _validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "MembershipPlanId");
+        result.Errors.Should().Contain(e => e.PropertyName == "MembershipId");
     }
 
     [Theory]
@@ -61,7 +61,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = cardNumber,
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -80,7 +80,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = cardNumber,
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -102,7 +102,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = expiryDate,
             Cvv = "123",
@@ -122,7 +122,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = expiryDate,
             Cvv = "123",
@@ -143,7 +143,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = cvv,
@@ -163,7 +163,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = cvv,
@@ -180,7 +180,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -199,7 +199,7 @@ public class ProcessPaymentValidatorTests
         var longName = new string('A', 201);
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",
@@ -217,7 +217,7 @@ public class ProcessPaymentValidatorTests
     {
         var command = new ProcessPayment.Command
         {
-            MembershipPlanId = 1,
+            MembershipId = 1,
             CardNumber = "1234567890123456",
             ExpiryDate = "12/25",
             Cvv = "123",

@@ -8,7 +8,12 @@ namespace GymWebApp.Domain.Entities;
 public class Payment : AuditableEntity
 {
     [Required]
-    public DateTime PaymentDate { get; set; }
+    public DateTime DueDate { get; set; }
+
+    public DateTime? PaidDate { get; set; }
+
+    [Required]
+    public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
     
     [Required]
     public int GymMembershipId { get; set; }
