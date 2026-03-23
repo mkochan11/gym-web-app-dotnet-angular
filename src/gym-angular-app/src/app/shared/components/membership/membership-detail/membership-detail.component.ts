@@ -71,7 +71,15 @@ import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/mem
       </div>
 
       <ng-template pTemplate="footer">
-        <div class="flex justify-content-end gap-2" *ngIf="!membership()!.isCancelled">
+        <div class="flex justify-content-between align-items-center" *ngIf="!membership()!.isCancelled">
+          <p-button 
+            label="View Payments" 
+            icon="pi pi-credit-card" 
+            severity="info" 
+            [outlined]="true"
+            (onClick)="goToPayments()"
+            [disabled="loading()">
+          </p-button>
           <p-button 
             label="Cancel Membership" 
             icon="pi pi-times" 
@@ -132,6 +140,14 @@ export class MembershipDetailComponent implements OnInit {
 
   goToMembership() {
     this.router.navigate(['/membership']);
+  }
+
+  goToPayments() {
+    if (this.membership()) {
+      this.router.navigate(['/client/payments'], { 
+        state: { membershipId: this.membership()!.id }
+      });
+    }
   }
 
   onCancelConfirmed(reason: string | null) {

@@ -8,3 +8,4 @@ export * from './employee.service';
 export * from './training-type.service';
 export * from './client.service';
 export * from './gym-membership.service';
+export * from './payment.service';

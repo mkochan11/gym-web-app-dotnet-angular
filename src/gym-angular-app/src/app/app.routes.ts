@@ -66,6 +66,10 @@ export const routes: Routes = [
       {
         path: 'membership',
         loadComponent: () => import('./client/my-membership/my-membership.component').then(m => m.MyMembershipComponent)
+      },
+      {
+        path: 'payments',
+        loadComponent: () => import('./client/payments/payments.component').then(m => m.PaymentsComponent)
       }
     ]
   },
