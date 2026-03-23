@@ -18,8 +18,28 @@ public class PaymentsController : BaseController
         _mediator = mediator;
     }
 
+    [HttpGet("membership/{membershipId}")]
+    public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByMembership(int membershipId)
+    {
+        var query = new GetPaymentsByMembership.Query
+        {
+            MembershipId = membershipId,
+            UserId = CurrentUserId
+        };
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
     [HttpPost("process")]
     public async Task<ActionResult<PaymentResultWebModel>> ProcessPayment([FromBody] ProcessPayment.Command command)
+    {
+        command.CreatedById = CurrentUserId;
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("process-multiple")]
+    public async Task<ActionResult<IEnumerable<PaymentResultWebModel>>> ProcessMultiplePayments([FromBody] ProcessMultiplePayments.Command command)
     {
         command.CreatedById = CurrentUserId;
         var result = await _mediator.Send(command);

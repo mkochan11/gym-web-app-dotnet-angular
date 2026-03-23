@@ -30,6 +30,14 @@ public class PaymentRepository : Repository<Payment>, IPaymentRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Payment>> GetPaymentsByMembershipIdAsync(int membershipId)
+    {
+        return await _context.Set<Payment>()
+            .Where(p => p.GymMembershipId == membershipId && !p.Removed)
+            .OrderBy(p => p.DueDate)
+            .ToListAsync();
+    }
+
     public async Task AddRangeAsync(IEnumerable<Payment> payments, CancellationToken ct = default)
     {
         await _context.Set<Payment>().AddRangeAsync(payments, ct);

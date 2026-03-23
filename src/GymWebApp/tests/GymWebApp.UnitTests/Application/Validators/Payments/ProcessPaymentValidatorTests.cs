@@ -1,5 +1,6 @@
 using FluentAssertions;
 using GymWebApp.Application.CQRS.Payments;
+using GymWebApp.Domain.Enums;
 using Xunit;
 
 namespace GymWebApp.UnitTests.Application.Validators.Payments;
@@ -14,15 +15,13 @@ public class ProcessPaymentValidatorTests
     }
 
     [Fact]
-    public void Validate_ValidCommand_PassesValidation()
+    public void Validate_ValidCommand_WithCard_PassesValidation()
     {
         var command = new ProcessPayment.Command
         {
             MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = "John Doe",
+            PaymentMethod = PaymentMethod.Card,
+            TransactionId = "TXN123456",
             CreatedById = "user-123"
         };
 
@@ -32,18 +31,48 @@ public class ProcessPaymentValidatorTests
         result.Errors.Should().BeEmpty();
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Validate_InvalidMembershipId_FailsValidation(int planId)
+    [Fact]
+    public void Validate_ValidCommand_WithCash_PassesValidation()
     {
         var command = new ProcessPayment.Command
         {
-            MembershipId = planId,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = "John Doe"
+            MembershipId = 1,
+            PaymentMethod = PaymentMethod.Cash,
+            TransactionId = null,
+            CreatedById = "user-123"
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_ValidCommand_WithBankTransfer_PassesValidation()
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            PaymentMethod = PaymentMethod.BankTransfer,
+            TransactionId = "BT789012",
+            CreatedById = "user-123"
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Validate_InvalidMembershipId_FailsValidation(int membershipId)
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = membershipId,
+            PaymentMethod = PaymentMethod.Card,
+            TransactionId = "TXN123456"
         };
 
         var result = _validator.Validate(command);
@@ -52,180 +81,117 @@ public class ProcessPaymentValidatorTests
         result.Errors.Should().Contain(e => e.PropertyName == "MembershipId");
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("123")]
-    [InlineData("abc")]
-    [InlineData("12345678901234567")]
-    public void Validate_InvalidCardNumber_FailsValidation(string cardNumber)
+    [Fact]
+    public void Validate_InvalidPaymentMethod_FailsValidation()
     {
         var command = new ProcessPayment.Command
         {
             MembershipId = 1,
-            CardNumber = cardNumber,
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = "John Doe"
+            PaymentMethod = (PaymentMethod)999,
+            TransactionId = "TXN123456"
         };
 
         var result = _validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "CardNumber");
-    }
-
-    [Theory]
-    [InlineData("1234567890123456")]
-    public void Validate_ValidCardNumber_PassesValidation(string cardNumber)
-    {
-        var command = new ProcessPayment.Command
-        {
-            MembershipId = 1,
-            CardNumber = cardNumber,
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = "John Doe"
-        };
-
-        var result = _validator.Validate(command);
-
-        result.Errors.Should().NotContain(e => e.PropertyName == "CardNumber");
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("invalid")]
-    [InlineData("1225")]
-    [InlineData("13/25")]
-    [InlineData("00/25")]
-    public void Validate_InvalidExpiryDate_FailsValidation(string expiryDate)
-    {
-        var command = new ProcessPayment.Command
-        {
-            MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = expiryDate,
-            Cvv = "123",
-            CardholderName = "John Doe"
-        };
-
-        var result = _validator.Validate(command);
-
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "ExpiryDate");
-    }
-
-    [Theory]
-    [InlineData("12/25")]
-    [InlineData("01/30")]
-    public void Validate_ValidExpiryDate_PassesValidation(string expiryDate)
-    {
-        var command = new ProcessPayment.Command
-        {
-            MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = expiryDate,
-            Cvv = "123",
-            CardholderName = "John Doe"
-        };
-
-        var result = _validator.Validate(command);
-
-        result.Errors.Should().NotContain(e => e.PropertyName == "ExpiryDate");
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("12")]
-    [InlineData("12345")]
-    [InlineData("abc")]
-    public void Validate_InvalidCvv_FailsValidation(string cvv)
-    {
-        var command = new ProcessPayment.Command
-        {
-            MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = cvv,
-            CardholderName = "John Doe"
-        };
-
-        var result = _validator.Validate(command);
-
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "Cvv");
-    }
-
-    [Theory]
-    [InlineData("123")]
-    [InlineData("1234")]
-    public void Validate_ValidCvv_PassesValidation(string cvv)
-    {
-        var command = new ProcessPayment.Command
-        {
-            MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = cvv,
-            CardholderName = "John Doe"
-        };
-
-        var result = _validator.Validate(command);
-
-        result.Errors.Should().NotContain(e => e.PropertyName == "Cvv");
+        result.Errors.Should().Contain(e => e.PropertyName == "PaymentMethod");
     }
 
     [Fact]
-    public void Validate_EmptyCardholderName_FailsValidation()
+    public void Validate_MissingTransactionIdForCard_FailsValidation()
     {
         var command = new ProcessPayment.Command
         {
             MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = ""
+            PaymentMethod = PaymentMethod.Card,
+            TransactionId = null
         };
 
         var result = _validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "CardholderName");
+        result.Errors.Should().Contain(e => e.PropertyName == "TransactionId");
     }
 
     [Fact]
-    public void Validate_LongCardholderName_FailsValidation()
+    public void Validate_MissingTransactionIdForBankTransfer_FailsValidation()
     {
-        var longName = new string('A', 201);
         var command = new ProcessPayment.Command
         {
             MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = longName
+            PaymentMethod = PaymentMethod.BankTransfer,
+            TransactionId = null
         };
 
         var result = _validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "CardholderName");
+        result.Errors.Should().Contain(e => e.PropertyName == "TransactionId");
     }
 
     [Fact]
-    public void Validate_ValidCardholderName_PassesValidation()
+    public void Validate_MissingTransactionIdForOther_FailsValidation()
     {
         var command = new ProcessPayment.Command
         {
             MembershipId = 1,
-            CardNumber = "1234567890123456",
-            ExpiryDate = "12/25",
-            Cvv = "123",
-            CardholderName = "John Doe"
+            PaymentMethod = PaymentMethod.Other,
+            TransactionId = null
         };
 
         var result = _validator.Validate(command);
 
-        result.Errors.Should().NotContain(e => e.PropertyName == "CardholderName");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == "TransactionId");
+    }
+
+    [Fact]
+    public void Validate_TransactionIdTooLong_FailsValidation()
+    {
+        var longTransactionId = new string('A', 101);
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            PaymentMethod = PaymentMethod.Card,
+            TransactionId = longTransactionId
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == "TransactionId");
+    }
+
+    [Fact]
+    public void Validate_InvalidPaymentId_FailsValidation()
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            PaymentId = 0,
+            PaymentMethod = PaymentMethod.Card,
+            TransactionId = "TXN123456"
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == "PaymentId");
+    }
+
+    [Fact]
+    public void Validate_ValidPaymentId_PassesValidation()
+    {
+        var command = new ProcessPayment.Command
+        {
+            MembershipId = 1,
+            PaymentId = 5,
+            PaymentMethod = PaymentMethod.Card,
+            TransactionId = "TXN123456"
+        };
+
+        var result = _validator.Validate(command);
+
+        result.Errors.Should().NotContain(e => e.PropertyName == "PaymentId");
     }
 }
