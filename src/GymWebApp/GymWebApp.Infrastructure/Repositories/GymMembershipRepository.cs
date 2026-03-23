@@ -29,7 +29,7 @@ public class GymMembershipRepository : Repository<GymMembership>, IGymMembership
             .FirstOrDefaultAsync(m => 
                 m.ClientId == clientId && 
                 !m.Removed && 
-                m.Status == MembershipStatus.Active &&
+                (m.Status == MembershipStatus.Active || m.Status == MembershipStatus.PendingCancellation) &&
                 m.EndDate >= today);
     }
 

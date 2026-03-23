@@ -10,6 +10,11 @@ public class GymMembershipWebModel
     public string PlanDescription { get; set; } = string.Empty;
     public decimal PlanPrice { get; set; }
     public int PlanDurationInMonths { get; set; }
+    public bool CanReserveTrainings { get; set; }
+    public bool CanAccessGroupTraining { get; set; }
+    public bool CanAccessPersonalTraining { get; set; }
+    public bool CanReceiveTrainingPlans { get; set; }
+    public int? MaxTrainingsPerMonth { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public Domain.Enums.MembershipStatus Status { get; set; }
@@ -32,13 +37,18 @@ public class GymMembershipWebModel
             PlanDescription = membership.MembershipPlan?.Description ?? string.Empty,
             PlanPrice = membership.MembershipPlan?.Price ?? 0,
             PlanDurationInMonths = membership.MembershipPlan?.DurationInMonths ?? 0,
+            CanReserveTrainings = membership.MembershipPlan?.CanReserveTrainings ?? false,
+            CanAccessGroupTraining = membership.MembershipPlan?.CanAccessGroupTraining ?? false,
+            CanAccessPersonalTraining = membership.MembershipPlan?.CanAccessPersonalTraining ?? false,
+            CanReceiveTrainingPlans = membership.MembershipPlan?.CanReceiveTrainingPlans ?? false,
+            MaxTrainingsPerMonth = membership.MembershipPlan?.MaxTrainingsPerMonth,
             StartDate = membership.StartDate,
             EndDate = membership.EndDate,
             Status = membership.Status,
             IsActive = membership.IsActive,
             IsCancelled = membership.IsCancelled,
             CancelledAt = membership.CancelledAt,
-            CancellationRequestedDate = membership.CancellationRequestedDate,
+            CancellationRequestedDate = membership.CancellationRequestedDate?.ToLocalTime(),
             EffectiveEndDate = membership.EffectiveEndDate,
             CancellationReason = membership.CancellationReason
         };

@@ -47,16 +47,13 @@ public static class CancelMembership
             {
                 throw new NotActiveMembershipException($"Cannot cancel expired membership ({command.MembershipId}).");
             }
-
-            var lastPaidPayment = membership.Payments
-                .Where(p => p.Status == PaymentStatus.Paid)
-                .OrderByDescending(p => p.DueDate)
+            
+            var firstDuePayment = membership.Payments
+                .Where(p => p.Status == PaymentStatus.Pending)
+                .OrderBy(p => p.DueDate)
                 .FirstOrDefault();
 
-            var effectiveEndDate = lastPaidPayment != null
-                ? new DateTime(lastPaidPayment.DueDate.Year, lastPaidPayment.DueDate.Month, 
-                    DateTime.DaysInMonth(lastPaidPayment.DueDate.Year, lastPaidPayment.DueDate.Month))
-                : membership.EndDate;
+            var effectiveEndDate = firstDuePayment?.DueDate ?? membership.EndDate;
 
             membership.Status = MembershipStatus.PendingCancellation;
             membership.CancellationRequestedDate = DateTime.UtcNow;
