@@ -3,6 +3,7 @@ using GymWebApp.Application.CQRS.GymMemberships;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Domain.Entities;
+using GymWebApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -11,16 +12,18 @@ namespace GymWebApp.UnitTests.Application.Commands.GymMemberships;
 public class CancelMembershipHandlerTests
 {
     private readonly Mock<IGymMembershipRepository> _gymMembershipRepositoryMock;
+    private readonly Mock<IPaymentRepository> _paymentRepositoryMock;
     private readonly CancelMembership.Handler _handler;
 
     public CancelMembershipHandlerTests()
     {
         _gymMembershipRepositoryMock = new Mock<IGymMembershipRepository>();
-        _handler = new CancelMembership.Handler(_gymMembershipRepositoryMock.Object);
+        _paymentRepositoryMock = new Mock<IPaymentRepository>();
+        _handler = new CancelMembership.Handler(_gymMembershipRepositoryMock.Object, _paymentRepositoryMock.Object);
     }
 
     [Fact]
-    public async Task Handle_ValidCommand_CancelsMembership()
+    public async Task Handle_ValidCommand_SetsPendingCancellationStatus()
     {
         var membership = new GymMembership
         {
@@ -29,10 +32,14 @@ public class CancelMembershipHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow.AddMonths(-1),
             EndDate = DateTime.UtcNow.AddMonths(1),
-            IsActive = true,
-            IsCancelled = false,
+            Status = MembershipStatus.Active,
             Client = new Client { Id = 1, Name = "John", Surname = "Doe" },
-            MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" }
+            MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" },
+            Payments = new List<Payment>
+            {
+                new Payment { Id = 1, DueDate = DateTime.UtcNow.AddMonths(-1), Status = PaymentStatus.Paid },
+                new Payment { Id = 2, DueDate = DateTime.UtcNow.AddMonths(1), Status = PaymentStatus.Pending }
+            }
         };
 
         _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))
@@ -45,8 +52,9 @@ public class CancelMembershipHandlerTests
 
         result.Should().NotBeNull();
         result.Id.Should().Be(1);
-        result.IsCancelled.Should().BeTrue();
-        result.CancelledAt.Should().NotBeNull();
+        result.Status.Should().Be(MembershipStatus.PendingCancellation);
+        result.CancellationRequestedDate.Should().NotBeNull();
+        result.EffectiveEndDate.Should().NotBeNull();
         _gymMembershipRepositoryMock.Verify(x => x.Update(membership), Times.Once);
         _gymMembershipRepositoryMock.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
@@ -63,7 +71,7 @@ public class CancelMembershipHandlerTests
     }
 
     [Fact]
-    public async Task Handle_AlreadyCancelledMembership_ThrowsNotActiveMembershipException()
+    public async Task Handle_NotActiveMembership_ThrowsNotActiveMembershipException()
     {
         var membership = new GymMembership
         {
@@ -72,9 +80,7 @@ public class CancelMembershipHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow.AddMonths(-2),
             EndDate = DateTime.UtcNow.AddMonths(-1),
-            IsActive = false,
-            IsCancelled = true,
-            CancelledAt = DateTime.UtcNow.AddMonths(-1),
+            Status = MembershipStatus.Cancelled,
             Client = new Client { Id = 1, Name = "John", Surname = "Doe" },
             MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" }
         };
@@ -85,7 +91,7 @@ public class CancelMembershipHandlerTests
         var act = () => _handler.Handle(new CancelMembership.Command { MembershipId = 1 }, CancellationToken.None);
 
         await act.Should().ThrowAsync<NotActiveMembershipException>()
-            .WithMessage("*already cancelled*");
+            .WithMessage("*not active*");
     }
 
     [Fact]
@@ -98,8 +104,7 @@ public class CancelMembershipHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow.AddMonths(-3),
             EndDate = DateTime.UtcNow.AddDays(-10),
-            IsActive = false,
-            IsCancelled = false,
+            Status = MembershipStatus.Active,
             Client = new Client { Id = 1, Name = "John", Surname = "Doe" },
             MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" }
         };
@@ -123,10 +128,13 @@ public class CancelMembershipHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow.AddMonths(-1),
             EndDate = DateTime.UtcNow.AddMonths(1),
-            IsActive = true,
-            IsCancelled = false,
+            Status = MembershipStatus.Active,
             Client = new Client { Id = 1, Name = "John", Surname = "Doe" },
-            MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" }
+            MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" },
+            Payments = new List<Payment>
+            {
+                new Payment { Id = 1, DueDate = DateTime.UtcNow.AddMonths(-1), Status = PaymentStatus.Paid }
+            }
         };
 
         _gymMembershipRepositoryMock.Setup(x => x.GetByIdWithDetailsAsync(1))

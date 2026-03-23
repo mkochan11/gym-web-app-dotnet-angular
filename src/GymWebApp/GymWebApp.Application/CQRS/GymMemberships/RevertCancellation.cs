@@ -2,18 +2,17 @@ using FluentValidation;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Application.WebModels.GymMembership;
-using GymWebApp.Domain.Enums;
 using GymWebApp.Domain.Entities;
+using GymWebApp.Domain.Enums;
 using MediatR;
 
 namespace GymWebApp.Application.CQRS.GymMemberships;
 
-public static class CancelMembership
+public static class RevertCancellation
 {
     public class Command : IRequest<GymMembershipWebModel>
     {
         public int MembershipId { get; set; }
-        public string? CancellationReason { get; set; }
         public string? UpdatedById { get; set; }
     }
 
@@ -37,37 +36,30 @@ public static class CancelMembership
                 throw new NotFoundException("GymMembership", command.MembershipId);
             }
 
-            if (membership.Status != MembershipStatus.Active)
+            if (membership.Status != MembershipStatus.PendingCancellation)
             {
-                throw new NotActiveMembershipException($"Membership ({command.MembershipId}) is not active. Current status: {membership.Status}");
+                throw new NotActiveMembershipException($"Membership ({command.MembershipId}) is not in pending cancellation status. Current status: {membership.Status}");
             }
 
-            var today = DateTime.UtcNow.Date;
-            if (membership.EndDate < today)
-            {
-                throw new NotActiveMembershipException($"Cannot cancel expired membership ({command.MembershipId}).");
-            }
-
-            var lastPaidPayment = membership.Payments
-                .Where(p => p.Status == PaymentStatus.Paid)
-                .OrderByDescending(p => p.DueDate)
-                .FirstOrDefault();
-
-            var effectiveEndDate = lastPaidPayment != null
-                ? new DateTime(lastPaidPayment.DueDate.Year, lastPaidPayment.DueDate.Month, 
-                    DateTime.DaysInMonth(lastPaidPayment.DueDate.Year, lastPaidPayment.DueDate.Month))
-                : membership.EndDate;
-
-            membership.Status = MembershipStatus.PendingCancellation;
-            membership.CancellationRequestedDate = DateTime.UtcNow;
-            membership.EffectiveEndDate = effectiveEndDate;
-            membership.CancellationReason = command.CancellationReason;
+            membership.Status = MembershipStatus.Active;
+            membership.CancellationRequestedDate = null;
+            membership.EffectiveEndDate = null;
             membership.UpdatedAt = DateTime.UtcNow;
             membership.UpdatedById = command.UpdatedById;
 
-            await _paymentRepository.CancelFuturePaymentsAsync(membership.Id, today, ct);
+            var today = DateTime.UtcNow.Date;
+            var cancelledPayments = membership.Payments
+                .Where(p => p.Status == PaymentStatus.Cancelled && p.DueDate > today)
+                .ToList();
+
+            foreach (var payment in cancelledPayments)
+            {
+                payment.Status = PaymentStatus.Pending;
+                _paymentRepository.Update(payment);
+            }
 
             _gymMembershipRepository.Update(membership);
+            await _paymentRepository.SaveChangesAsync();
             await _gymMembershipRepository.SaveChangesAsync();
 
             return GymMembershipWebModel.FromEntity(membership);
@@ -81,10 +73,6 @@ public static class CancelMembership
             RuleFor(x => x.MembershipId)
                 .GreaterThan(0)
                 .WithMessage("Membership ID must be greater than 0.");
-
-            RuleFor(x => x.CancellationReason)
-                .MaximumLength(500)
-                .WithMessage("Cancellation reason cannot exceed 500 characters.");
         }
     }
 }

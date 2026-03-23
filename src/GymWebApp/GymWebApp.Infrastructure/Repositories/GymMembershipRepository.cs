@@ -1,5 +1,6 @@
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Domain.Entities;
+using GymWebApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymWebApp.Infrastructure.Repositories;
@@ -28,7 +29,7 @@ public class GymMembershipRepository : Repository<GymMembership>, IGymMembership
             .FirstOrDefaultAsync(m => 
                 m.ClientId == clientId && 
                 !m.Removed && 
-                !m.IsCancelled && 
+                m.Status == MembershipStatus.Active &&
                 m.EndDate >= today);
     }
 
@@ -48,8 +49,19 @@ public class GymMembershipRepository : Repository<GymMembership>, IGymMembership
             .AnyAsync(m => 
                 m.ClientId == clientId && 
                 !m.Removed && 
-                !m.IsCancelled && 
+                m.Status == MembershipStatus.Active &&
                 m.EndDate >= today);
         return hasActive;
+    }
+
+    public async Task<IEnumerable<GymMembership>> GetPendingCancellationsAsync(DateTime effectiveEndDate, CancellationToken ct = default)
+    {
+        return await _context.Set<GymMembership>()
+            .Include(m => m.Payments)
+            .Where(m => 
+                !m.Removed && 
+                m.Status == MembershipStatus.PendingCancellation &&
+                m.EffectiveEndDate <= effectiveEndDate)
+            .ToListAsync(ct);
     }
 }

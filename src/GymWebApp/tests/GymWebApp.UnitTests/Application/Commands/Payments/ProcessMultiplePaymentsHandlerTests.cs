@@ -50,7 +50,7 @@ public class ProcessMultiplePaymentsHandlerTests
             StartDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddMonths(2),
             MembershipPlan = new MembershipPlan { Type = "Premium", Price = 49.99m, DurationInMonths = 2 },
-            IsActive = false,
+            Status = MembershipStatus.Active,
             Payments = new List<Payment>
             {
                 new Payment { Id = 1, Status = PaymentStatus.Pending, DueDate = DateTime.UtcNow, Amount = 49.99m },
@@ -148,7 +148,7 @@ public class ProcessMultiplePaymentsHandlerTests
             Id = 1,
             ClientId = 1,
             MembershipPlan = new MembershipPlan { Type = "Premium" },
-            IsActive = false,
+            Status = MembershipStatus.Active,
             Payments = new List<Payment>
             {
                 new Payment { Id = 1, Status = PaymentStatus.Overdue, DueDate = DateTime.UtcNow.AddDays(-1), Amount = 49.99m }

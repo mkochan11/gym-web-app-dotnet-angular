@@ -2,6 +2,7 @@ using FluentAssertions;
 using GymWebApp.Application.CQRS.GymMemberships;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Domain.Entities;
+using GymWebApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -28,8 +29,7 @@ public class GetActiveMembershipHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow.AddMonths(-1),
             EndDate = DateTime.UtcNow.AddMonths(1),
-            IsActive = true,
-            IsCancelled = false,
+            Status = MembershipStatus.Active,
             Client = new Client { Id = 1, Name = "John", Surname = "Doe" },
             MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium", Description = "Best plan" }
         };
@@ -67,8 +67,7 @@ public class GetActiveMembershipHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow.AddMonths(-2),
             EndDate = DateTime.UtcNow.AddMonths(-1),
-            IsActive = false,
-            IsCancelled = true,
+            Status = MembershipStatus.Cancelled,
             CancelledAt = DateTime.UtcNow.AddDays(-1),
             Client = new Client { Id = 1, Name = "John", Surname = "Doe" },
             MembershipPlan = new MembershipPlan { Id = 1, Type = "Premium" }

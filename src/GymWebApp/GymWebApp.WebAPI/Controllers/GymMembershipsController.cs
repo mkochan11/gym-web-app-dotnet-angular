@@ -47,10 +47,23 @@ public class GymMembershipsController : BaseController
         return Ok(membership);
     }
 
-    [HttpPost("cancel")]
-    public async Task<ActionResult<GymMembershipWebModel>> CancelMembership([FromBody] CancelMembership.Command command)
+    [HttpPost("{id}/cancel")]
+    public async Task<ActionResult<GymMembershipWebModel>> CancelMembership(int id, [FromBody] CancelMembership.Command command)
     {
+        command.MembershipId = id;
         command.UpdatedById = CurrentUserId;
+        var membership = await _mediator.Send(command);
+        return Ok(membership);
+    }
+
+    [HttpPost("{id}/cancel/revert")]
+    public async Task<ActionResult<GymMembershipWebModel>> RevertCancellation(int id)
+    {
+        var command = new RevertCancellation.Command
+        {
+            MembershipId = id,
+            UpdatedById = CurrentUserId
+        };
         var membership = await _mediator.Send(command);
         return Ok(membership);
     }

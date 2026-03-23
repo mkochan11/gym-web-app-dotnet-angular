@@ -154,7 +154,7 @@ public class DomainDataSeeder : IDomainDataSeeder
                 ClientId = clients[i].Id,
                 StartDate = startDate,
                 EndDate = endDate,
-                IsActive = true,
+                Status = Domain.Enums.MembershipStatus.Active,
                 CreatedById = adminId
             });
         }

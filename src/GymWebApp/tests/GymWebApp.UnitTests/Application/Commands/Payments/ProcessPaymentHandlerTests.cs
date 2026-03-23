@@ -54,7 +54,7 @@ public class ProcessPaymentHandlerTests
             MembershipPlanId = 1,
             StartDate = DateTime.UtcNow,
             EndDate = DateTime.UtcNow.AddMonths(1),
-            IsActive = false,
+            Status = MembershipStatus.Active,
             MembershipPlan = new MembershipPlan
             {
                 Id = 1,
@@ -313,7 +313,7 @@ public class ProcessPaymentHandlerTests
             Id = 1,
             ClientId = 1,
             MembershipPlan = new MembershipPlan { Type = "Premium" },
-            IsActive = false,
+            Status = MembershipStatus.PendingCancellation,
             Payments = new List<Payment>
             {
                 new Payment { Id = 1, Status = PaymentStatus.Overdue, DueDate = DateTime.UtcNow.AddDays(-1), Amount = 49.99m }

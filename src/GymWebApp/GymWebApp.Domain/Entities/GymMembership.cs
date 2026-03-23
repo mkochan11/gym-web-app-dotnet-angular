@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GymWebApp.Domain.Entities.Abstract;
+using GymWebApp.Domain.Enums;
 
 namespace GymWebApp.Domain.Entities;
 
@@ -26,11 +27,18 @@ public class GymMembership : AuditableEntity
     
     public List<Payment> Payments { get; set; } = [];
     
-    public bool IsActive { get; set; } = true;
+    [Required]
+    public MembershipStatus Status { get; set; } = MembershipStatus.Active;
     
-    public bool IsCancelled { get; set; } = false;
+    public bool IsActive => Status == MembershipStatus.Active || Status == MembershipStatus.PendingCancellation;
+    
+    public bool IsCancelled => Status == MembershipStatus.Cancelled || Status == MembershipStatus.PendingCancellation;
     
     public DateTime? CancelledAt { get; set; }
+    
+    public DateTime? CancellationRequestedDate { get; set; }
+    
+    public DateTime? EffectiveEndDate { get; set; }
     
     [MaxLength(500)]
     public string? CancellationReason { get; set; }

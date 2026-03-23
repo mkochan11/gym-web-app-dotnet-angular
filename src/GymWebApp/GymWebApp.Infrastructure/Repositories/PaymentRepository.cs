@@ -1,5 +1,6 @@
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Domain.Entities;
+using GymWebApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymWebApp.Infrastructure.Repositories;
@@ -36,6 +37,35 @@ public class PaymentRepository : Repository<Payment>, IPaymentRepository
             .Where(p => p.GymMembershipId == membershipId && !p.Removed)
             .OrderBy(p => p.DueDate)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Payment>> GetFuturePendingPaymentsAsync(int membershipId, DateTime cutoffDate)
+    {
+        return await _context.Set<Payment>()
+            .Where(p => 
+                p.GymMembershipId == membershipId && 
+                !p.Removed &&
+                p.Status == PaymentStatus.Pending &&
+                p.DueDate > cutoffDate)
+            .ToListAsync();
+    }
+
+    public async Task CancelFuturePaymentsAsync(int membershipId, DateTime cutoffDate, CancellationToken ct = default)
+    {
+        var payments = await _context.Set<Payment>()
+            .Where(p => 
+                p.GymMembershipId == membershipId && 
+                !p.Removed &&
+                p.Status == PaymentStatus.Pending &&
+                p.DueDate > cutoffDate)
+            .ToListAsync(ct);
+
+        foreach (var payment in payments)
+        {
+            payment.Status = PaymentStatus.Cancelled;
+        }
+        
+        await SaveChangesAsync();
     }
 
     public async Task AddRangeAsync(IEnumerable<Payment> payments, CancellationToken ct = default)

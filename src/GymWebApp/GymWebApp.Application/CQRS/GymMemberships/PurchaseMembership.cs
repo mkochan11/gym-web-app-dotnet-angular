@@ -50,8 +50,7 @@ public static class PurchaseMembership
                 MembershipPlanId = command.MembershipPlanId,
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddMonths(plan.DurationInMonths),
-                IsActive = false,
-                IsCancelled = false,
+                Status = MembershipStatus.Active,
                 CreatedById = command.UpdatedById ?? string.Empty
             };
 

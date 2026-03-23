@@ -103,7 +103,7 @@ public static class ProcessPayment
 
             if (allDuePaid)
             {
-                membership.IsActive = true;
+                membership.Status = MembershipStatus.Active;
                 _gymMembershipRepository.Update(membership);
                 await _gymMembershipRepository.SaveChangesAsync();
             }

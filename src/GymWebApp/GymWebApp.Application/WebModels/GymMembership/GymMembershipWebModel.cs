@@ -12,9 +12,12 @@ public class GymMembershipWebModel
     public int PlanDurationInMonths { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public Domain.Enums.MembershipStatus Status { get; set; }
     public bool IsActive { get; set; }
     public bool IsCancelled { get; set; }
     public DateTime? CancelledAt { get; set; }
+    public DateTime? CancellationRequestedDate { get; set; }
+    public DateTime? EffectiveEndDate { get; set; }
     public string? CancellationReason { get; set; }
 
     public static GymMembershipWebModel FromEntity(Domain.Entities.GymMembership membership)
@@ -31,9 +34,12 @@ public class GymMembershipWebModel
             PlanDurationInMonths = membership.MembershipPlan?.DurationInMonths ?? 0,
             StartDate = membership.StartDate,
             EndDate = membership.EndDate,
+            Status = membership.Status,
             IsActive = membership.IsActive,
             IsCancelled = membership.IsCancelled,
             CancelledAt = membership.CancelledAt,
+            CancellationRequestedDate = membership.CancellationRequestedDate,
+            EffectiveEndDate = membership.EffectiveEndDate,
             CancellationReason = membership.CancellationReason
         };
     }
