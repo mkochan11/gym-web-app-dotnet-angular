@@ -51,10 +51,12 @@ public static class PurchaseMembership
                 StartDate = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddMonths(plan.DurationInMonths),
                 IsActive = false,
-                IsCancelled = false
+                IsCancelled = false,
+                CreatedById = command.UpdatedById ?? string.Empty
             };
 
             await _membershipRepository.AddAsync(membership);
+            await _membershipRepository.SaveChangesAsync();
 
             var payments = new List<Payment>();
             var purchaseDate = DateTime.UtcNow;
@@ -68,11 +70,13 @@ public static class PurchaseMembership
                     Amount = plan.Price,
                     Status = PaymentStatus.Pending,
                     PaymentMethod = PaymentMethod.Card,
-                    IsSuccessful = true
+                    IsSuccessful = true,
+                    CreatedById = command.UpdatedById ?? string.Empty
                 });
             }
 
             await _paymentRepository.AddRangeAsync(payments, ct);
+            await _paymentRepository.SaveChangesAsync();
 
             membership = await _membershipRepository.GetByIdWithDetailsAsync(membership.Id)
                 ?? throw new NotFoundException("Membership", membership.Id);
