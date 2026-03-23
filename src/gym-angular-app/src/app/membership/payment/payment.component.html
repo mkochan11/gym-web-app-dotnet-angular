@@ -2,102 +2,157 @@
   <div class="payment-container">
     <div class="payment-form">
       <p-button 
+        *ngIf="step() === 'form'"
         label="Back to Plans" 
         icon="pi pi-arrow-left" 
         styleClass="p-button-text"
         (onClick)="goBack()">
       </p-button>
 
-      <h1>Complete Your Purchase</h1>
+      <h1 *ngIf="step() !== 'processing'">Complete Your Purchase</h1>
 
-      <div class="order-summary">
-        <p-card header="Order Summary">
-          <div class="summary-content">
-            <h3>{{ selectedPlan.type }} Membership</h3>
-            <p class="price">${{ selectedPlan.price }} / month</p>
-            <ul class="features">
-              <li *ngFor="let feature of selectedPlan.features">{{ feature }}</li>
-            </ul>
+      <!-- Form Step -->
+      <div *ngIf="step() === 'form'">
+        <div class="order-summary">
+          <p-card header="Order Summary">
+            <div class="summary-content">
+              <h3>{{ selectedPlan.type }} Membership</h3>
+              <p class="price">${{ selectedPlan.price }} / month</p>
+              <p class="duration">{{ selectedPlan.durationInMonths }} month(s)</p>
+              <p class="description">{{ selectedPlan.description }}</p>
+            </div>
+          </p-card>
+        </div>
+
+        <form [formGroup]="paymentForm" (ngSubmit)="processPayment()">
+          <p-card header="Payment Details">
+            <div class="form-grid">
+              <div class="form-field full-width">
+                <label for="cardholderName">Cardholder Name</label>
+                <input 
+                  id="cardholderName" 
+                  type="text" 
+                  pInputText 
+                  formControlName="cardholderName"
+                  placeholder="John Doe" />
+                <p-message 
+                  *ngIf="paymentForm.controls['cardholderName'].touched && paymentForm.controls['cardholderName'].invalid"
+                  severity="error" 
+                  text="Cardholder name is required">
+                </p-message>
+              </div>
+
+              <div class="form-field full-width">
+                <label for="cardNumber">Card Number</label>
+                <input 
+                  id="cardNumber" 
+                  type="text" 
+                  pInputText 
+                  formControlName="cardNumber"
+                  placeholder="1234567890123456" />
+                <p-message 
+                  *ngIf="paymentForm.controls['cardNumber'].touched && paymentForm.controls['cardNumber'].invalid"
+                  severity="error" 
+                  text="Valid card number is required (16 digits)">
+                </p-message>
+              </div>
+
+              <div class="form-field">
+                <label for="expiryDate">Expiry Date</label>
+                <input 
+                  id="expiryDate" 
+                  type="text" 
+                  pInputText 
+                  formControlName="expiryDate"
+                  placeholder="MM/YY" />
+                <p-message 
+                  *ngIf="paymentForm.controls['expiryDate'].touched && paymentForm.controls['expiryDate'].invalid"
+                  severity="error" 
+                  text="Valid expiry date required (MM/YY)">
+                </p-message>
+              </div>
+
+              <div class="form-field">
+                <label for="cvv">CVV</label>
+                <input 
+                  id="cvv" 
+                  type="text" 
+                  pInputText 
+                  formControlName="cvv"
+                  placeholder="123" />
+                <p-message 
+                  *ngIf="paymentForm.controls['cvv'].touched && paymentForm.controls['cvv'].invalid"
+                  severity="error" 
+                  text="Valid CVV required">
+                </p-message>
+              </div>
+            </div>
+
+            <ng-template pTemplate="footer">
+              <p-button 
+                type="submit" 
+                label="Complete Purchase" 
+                icon="pi pi-lock"
+                [loading]="processing()"
+                [disabled]="paymentForm.invalid"
+                styleClass="w-full">
+              </p-button>
+            </ng-template>
+          </p-card>
+        </form>
+      </div>
+
+      <!-- Processing Step -->
+      <div *ngIf="step() === 'processing'" class="processing-container">
+        <p-card>
+          <div class="processing-content">
+            <p-progressSpinner [style]="{width: '80px', height: '80px'}" strokeWidth="4"></p-progressSpinner>
+            <h2>Processing Your Membership</h2>
+            <p>Please wait while we create your membership and process your payment...</p>
           </div>
         </p-card>
       </div>
 
-      <form [formGroup]="paymentForm" (ngSubmit)="processPayment()">
-        <p-card header="Payment Details">
-          <div class="form-grid">
-            <div class="form-field full-width">
-              <label for="cardholderName">Cardholder Name</label>
-              <input 
-                id="cardholderName" 
-                type="text" 
-                pInputText 
-                formControlName="cardholderName"
-                placeholder="John Doe" />
-              <p-message 
-                *ngIf="paymentForm.controls['cardholderName'].touched && paymentForm.controls['cardholderName'].invalid"
-                severity="error" 
-                text="Cardholder name is required">
-              </p-message>
-            </div>
+      <!-- Success Step -->
+      <div *ngIf="step() === 'success'" class="success-container">
+        <p-card>
+          <div class="success-content">
+            <i class="pi pi-check-circle success-icon"></i>
+            <h2>Membership Purchased Successfully!</h2>
+            <p>Your membership has been activated. You will be redirected to your dashboard shortly.</p>
+            <p-button 
+              label="Go to Dashboard" 
+              icon="pi pi-arrow-right"
+              (onClick)="router.navigate(['/client'])">
+            </p-button>
+          </div>
+        </p-card>
+      </div>
 
-            <div class="form-field full-width">
-              <label for="cardNumber">Card Number</label>
-              <input 
-                id="cardNumber" 
-                type="text" 
-                pInputText 
-                formControlName="cardNumber"
-                placeholder="1234 5678 9012 3456" />
-              <p-message 
-                *ngIf="paymentForm.controls['cardNumber'].touched && paymentForm.controls['cardNumber'].invalid"
-                severity="error" 
-                text="Valid card number is required (16 digits)">
-              </p-message>
-            </div>
-
-            <div class="form-field">
-              <label for="expiryDate">Expiry Date</label>
-              <input 
-                id="expiryDate" 
-                type="text" 
-                pInputText 
-                formControlName="expiryDate"
-                placeholder="MM/YY" />
-              <p-message 
-                *ngIf="paymentForm.controls['expiryDate'].touched && paymentForm.controls['expiryDate'].invalid"
-                severity="error" 
-                text="Valid expiry date required (MM/YY)">
-              </p-message>
-            </div>
-
-            <div class="form-field">
-              <label for="cvv">CVV</label>
-              <input 
-                id="cvv" 
-                type="text" 
-                pInputText 
-                formControlName="cvv"
-                placeholder="123" />
-              <p-message 
-                *ngIf="paymentForm.controls['cvv'].touched && paymentForm.controls['cvv'].invalid"
-                severity="error" 
-                text="Valid CVV required">
-              </p-message>
+      <!-- Error Step -->
+      <div *ngIf="step() === 'error'" class="error-container">
+        <p-card>
+          <div class="error-content">
+            <i class="pi pi-exclamation-circle error-icon"></i>
+            <h2>Payment Failed</h2>
+            <p>{{ errorMessage() }}</p>
+            <div class="error-actions">
+              <p-button 
+                label="Try Again" 
+                icon="pi pi-refresh"
+                (onClick)="tryAgain()"
+                styleClass="p-button-primary">
+              </p-button>
+              <p-button 
+                label="Go Back" 
+                icon="pi pi-arrow-left"
+                (onClick)="goBack()"
+                styleClass="p-button-secondary">
+              </p-button>
             </div>
           </div>
-
-          <ng-template pTemplate="footer">
-            <p-button 
-              type="submit" 
-              label="Complete Purchase" 
-              icon="pi pi-lock"
-              [loading]="processing"
-              [disabled]="paymentForm.invalid"
-              styleClass="w-full">
-            </p-button>
-          </ng-template>
         </p-card>
-      </form>
+      </div>
     </div>
   </div>
 </div>

@@ -1,7 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Observable, of, switchMap, tap, map } from 'rxjs';
 
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -9,8 +10,12 @@ import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
-import { MembershipService, MembershipPlan, PaymentData } from '../../core/api-services';
+import { MembershipService, PaymentData } from '../../core/api-services';
 import { ToastService } from '../../core/services';
+import { AuthService } from '../../core/api-services/auth.service';
+import { ClientService } from '../../core/api-services/client.service';
+import { Client } from '../../core/models/client';
+import { MembershipPlan } from '../../core/models/membership-plan.model';
 
 @Component({
   selector: 'app-payment',
@@ -29,12 +34,16 @@ import { ToastService } from '../../core/services';
 })
 export class PaymentComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  router = inject(Router);
   private membershipService = inject(MembershipService);
   private toastService = inject(ToastService);
+  private authService = inject(AuthService);
+  private clientService = inject(ClientService);
 
   selectedPlan: MembershipPlan | null = null;
-  processing = false;
+  processing = signal(false);
+  step = signal<'form' | 'processing' | 'success' | 'error'>('form');
+  errorMessage = signal<string>('');
 
   paymentForm: FormGroup = this.fb.group({
     cardNumber: ['', [Validators.required, Validators.pattern(/^\d{16}$/)]],
@@ -58,30 +67,67 @@ export class PaymentComponent implements OnInit {
       return;
     }
 
-    this.processing = true;
-    const paymentData: PaymentData = this.paymentForm.value;
+    this.processing.set(true);
+    this.step.set('processing');
+    this.errorMessage.set('');
 
-    this.membershipService.processPayment(paymentData, this.selectedPlan)
-      .then(result => {
-        this.processing = false;
+    const accountId = this.authService.getUserId();
+    if (!accountId) {
+      this.handleError('User not authenticated');
+      return;
+    }
+
+    this.clientService.getClientByAccountId(accountId).pipe(
+      switchMap(client => {
+        if (!client) {
+          throw new Error('Client profile not found');
+        }
+        return this.membershipService.purchaseMembership(this.selectedPlan!.id, client.id);
+      }),
+      switchMap(membership => {
+        const paymentData: PaymentData = this.paymentForm.value;
+        return this.membershipService.processPayment(membership.id, paymentData).pipe(
+          map(result => ({ membership, result }))
+        );
+      })
+    ).subscribe({
+      next: ({ membership, result }) => {
+        this.processing.set(false);
         
         if (result.success) {
-          this.toastService.show(result.message, 'success');
+          this.step.set('success');
+          this.toastService.show('Membership purchased successfully!', 'success');
           this.membershipService.clearSelectedPlan();
-          this.router.navigate(['/client']);
+          setTimeout(() => {
+            this.router.navigate(['/client']);
+          }, 2000);
         } else {
-          this.toastService.show(result.message, 'error');
+          this.step.set('error');
+          this.errorMessage.set(result.message || 'Payment failed');
+          this.toastService.show(result.message || 'Payment failed', 'error');
         }
-      })
-      .catch(error => {
-        this.processing = false;
-        this.toastService.show('An unexpected error occurred', 'error');
-        console.error('Payment error:', error);
-      });
+      },
+      error: (error) => {
+        this.handleError(error.message || 'An unexpected error occurred');
+      }
+    });
+  }
+
+  private handleError(message: string) {
+    this.processing.set(false);
+    this.step.set('error');
+    this.errorMessage.set(message);
+    this.toastService.show(message, 'error');
+    console.error('Payment error:', message);
   }
 
   goBack() {
     this.router.navigate(['/membership']);
+  }
+
+  tryAgain() {
+    this.step.set('form');
+    this.errorMessage.set('');
   }
 
   private markAllAsTouched() {

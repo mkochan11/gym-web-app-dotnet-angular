@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -86,7 +87,7 @@ import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/mem
     <div *ngIf="!membership() && !loading()" class="text-center p-4">
       <i class="pi pi-info-circle text-4xl text-500 mb-3"></i>
       <p class="text-500">No active membership found</p>
-      <p-button label="Purchase Membership" icon="pi pi-plus" class="mt-3"></p-button>
+      <p-button label="Purchase Membership" icon="pi pi-plus" class="mt-3" (onClick)="goToMembership()"></p-button>
     </div>
 
     <app-membership-cancel-dialog 
@@ -101,7 +102,8 @@ import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/mem
 })
 export class MembershipDetailComponent implements OnInit {
   private readonly gymMembershipService: GymMembershipService = inject(GymMembershipService);
-  private readonly toastService: ToastService = inject(ToastService);
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
 
   @Input() clientId!: number;
   @Output() membershipCancelled = new EventEmitter<void>();
@@ -126,6 +128,10 @@ export class MembershipDetailComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  goToMembership() {
+    this.router.navigate(['/membership']);
   }
 
   onCancelConfirmed(reason: string | null) {

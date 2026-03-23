@@ -55,7 +55,9 @@ type LoadState = 'loading' | 'no_account' | 'no_client' | 'no_membership' | 'loa
         <i class="pi pi-credit-card text-5xl text-300 mb-4"></i>
         <h3 class="text-xl font-semibold mb-2">No active membership</h3>
         <p class="text-500 mb-4">You don't have an active gym membership yet.</p>
-        <p-button label="Purchase Membership" icon="pi pi-plus" routerLink="/membership"></p-button>
+        <button class="p-button p-component" style="cursor: pointer;" onclick="window.location.href='/membership'">
+          <span class="p-button-label">Purchase Membership</span>
+        </button>
       </div>
     </div>
   `
@@ -105,5 +107,10 @@ export class MyMembershipComponent implements OnInit {
 
   onMembershipCancelled() {
     this.loadClientAndMembership();
+  }
+
+  goToMembership() {
+    console.log('Navigating to /membership');
+    this.router.navigateByUrl('/membership');
   }
 }

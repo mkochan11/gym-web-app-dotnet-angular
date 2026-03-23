@@ -5,10 +5,10 @@
   </div>
 
   <div class="plans-grid">
-    <div *ngFor="let plan of membershipPlans"
+    <div *ngFor="let plan of membershipPlans | async"
          class="plan-card"
          [class.selected]="selectedPlan?.id === plan.id"
-         [class.popular]="plan.popular"
+         [class.popular]="plan.isActive"
          (click)="selectPlan(plan)">
 
       <p-card [header]="plan.type">
@@ -21,11 +21,14 @@
           <p class="description">{{ plan.description }}</p>
 
           <ul class="features">
-            <li *ngFor="let feature of plan.features">{{ feature }}</li>
+            <li *ngIf="plan.canAccessGroupTraining">Group Training Access</li>
+            <li *ngIf="plan.canAccessPersonalTraining">Personal Training</li>
+            <li *ngIf="plan.canReceiveTrainingPlans">Training Plans</li>
+            <li *ngIf="plan.maxTrainingsPerMonth">{{ plan.maxTrainingsPerMonth }} Trainings/month</li>
           </ul>
 
-          <div class="popular-badge" *ngIf="plan.popular">
-            <p-tag value="MOST POPULAR" severity="success"></p-tag>
+          <div class="popular-badge" *ngIf="plan.isActive">
+            <p-tag value="ACTIVE" severity="success"></p-tag>
           </div>
         </div>
 

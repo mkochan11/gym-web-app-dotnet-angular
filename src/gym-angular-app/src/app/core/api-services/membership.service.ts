@@ -1,18 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, tap, catchError, map, of, throwError } from 'rxjs';
 import { HttpService } from './http.service';
 import { AuthService } from './auth.service';
-import { catchError, map, throwError } from 'rxjs';
-
-export interface MembershipPlan {
-  id: number;
-  type: string;
-  description: string;
-  price: number;
-  durationInMonths: number;
-  features: string[];
-  popular?: boolean;
-}
+import { MembershipPlanService } from './membership-plan.service';
+import { GymMembership } from '../models/gym-membership.model';
+import { MembershipPlan as MembershipPlanModel } from '../models/membership-plan.model';
 
 export interface PaymentData {
   cardNumber: string;
@@ -33,116 +25,103 @@ export interface PaymentResult {
   planName?: string;
 }
 
+export interface PurchaseMembershipRequest {
+  membershipPlanId: number;
+  clientId: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class MembershipService {
   private httpService = inject(HttpService);
   private authService = inject(AuthService);
+  private membershipPlanService = inject(MembershipPlanService);
 
-  private selectedPlanSubject = new BehaviorSubject<MembershipPlan | null>(null);
-  public selectedPlan$ = this.selectedPlanSubject.asObservable();
+  private selectedPlanSignal = signal<MembershipPlanModel | null>(null);
+  readonly selectedPlan = this.selectedPlanSignal.asReadonly();
 
-  private membershipPlans: MembershipPlan[] = [
-    {
-      id: 1,
-      type: 'Basic',
-      description: 'Perfect for beginners',
-      price: 29.99,
-      durationInMonths: 1,
-      features: [
-        'Access to gym equipment',
-        'Locker room access',
-        'Free WiFi'
-      ]
-    },
-    {
-      id: 2,
-      type: 'Premium',
-      description: 'Our most popular plan',
-      price: 49.99,
-      durationInMonths: 1,
-      features: [
-        'All Basic features',
-        'Group classes access',
-        'Personal trainer consultation',
-        'Nutrition plan'
-      ],
-      popular: true
-    },
-    {
-      id: 3,
-      type: 'Ultimate',
-      description: 'For serious fitness enthusiasts',
-      price: 79.99,
-      durationInMonths: 1,
-      features: [
-        'All Premium features',
-        'Unlimited personal training',
-        'Massage therapy sessions',
-        'Priority booking',
-        'Supplement discounts'
-      ]
-    }
-  ];
+  private loadingSignal = signal(false);
+  readonly loading = this.loadingSignal.asReadonly();
 
-  getMembershipPlans(): MembershipPlan[] {
-    return this.membershipPlans;
+  private errorSignal = signal<string | null>(null);
+  readonly error = this.errorSignal.asReadonly();
+
+  getMembershipPlans(): Observable<MembershipPlanModel[]> {
+    return this.membershipPlanService.getMembershipPlans();
   }
 
-  setSelectedPlan(plan: MembershipPlan) {
-    this.selectedPlanSubject.next(plan);
+  getActivePlans(): Observable<MembershipPlanModel[]> {
+    return this.membershipPlanService.getMembershipPlans().pipe(
+      map(plans => plans.filter(p => p.isActive))
+    );
   }
 
-  getSelectedPlan(): MembershipPlan | null {
-    return this.selectedPlanSubject.value;
+  setSelectedPlan(plan: MembershipPlanModel) {
+    this.selectedPlanSignal.set(plan);
+    this.errorSignal.set(null);
+  }
+
+  getSelectedPlan(): MembershipPlanModel | null {
+    return this.selectedPlanSignal();
   }
 
   clearSelectedPlan() {
-    this.selectedPlanSubject.next(null);
+    this.selectedPlanSignal.set(null);
+    this.errorSignal.set(null);
   }
 
-  processPayment(paymentData: PaymentData, plan: MembershipPlan): Promise<PaymentResult> {
+  purchaseMembership(planId: number, clientId: number): Observable<GymMembership> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    const request: PurchaseMembershipRequest = {
+      membershipPlanId: planId,
+      clientId: clientId
+    };
+
+    return this.httpService.post<GymMembership>('gym-memberships/purchase', request).pipe(
+      tap(membership => {
+        this.loadingSignal.set(false);
+      }),
+      catchError(error => {
+        this.loadingSignal.set(false);
+        this.errorSignal.set(error.message || 'Failed to purchase membership');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  processPayment(membershipId: number, paymentData: PaymentData): Observable<PaymentResult> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
     const request = {
-      membershipPlanId: plan.id,
+      membershipId: membershipId,
       cardNumber: paymentData.cardNumber,
       expiryDate: paymentData.expiryDate,
       cvv: paymentData.cvv,
       cardholderName: paymentData.cardholderName
     };
 
-    return new Promise((resolve) => {
-      this.httpService.post<PaymentResult>('payments/process', request)
-        .pipe(
-          map(response => {
-            if (response.success) {
-              resolve({
-                success: true,
-                message: response.message,
-                membershipId: response.membershipId,
-                paymentId: response.paymentId,
-                amount: response.amount,
-                paymentMethod: response.paymentMethod,
-                startDate: response.startDate,
-                endDate: response.endDate,
-                planName: response.planName
-              });
-            } else {
-              resolve({
-                success: false,
-                message: response.message
-              });
-            }
-          }),
-          catchError(error => {
-            resolve({
-              success: false,
-              message: error.message || 'An unexpected error occurred'
-            });
-            return throwError(() => error);
-          })
-        )
-        .subscribe();
-    });
+    return this.httpService.post<PaymentResult>('payments/process', request).pipe(
+      tap(result => {
+        this.loadingSignal.set(false);
+      }),
+      catchError(error => {
+        this.loadingSignal.set(false);
+        this.errorSignal.set(error.message || 'Failed to process payment');
+        return of({
+          success: false,
+          message: error.message || 'An unexpected error occurred'
+        });
+      })
+    );
+  }
+
+  getClientActiveMembership(clientId: number): Observable<GymMembership | null> {
+    return this.httpService.get<GymMembership>(`gym-memberships/client/${clientId}/active`).pipe(
+      catchError(() => of(null))
+    );
   }
 }

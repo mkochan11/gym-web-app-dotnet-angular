@@ -86,3 +86,43 @@
     }
   }
 }
+
+.processing-container,
+.success-container,
+.error-container {
+  text-align: center;
+  padding: 2rem 0;
+
+  .processing-content,
+  .success-content,
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    h2 {
+      margin: 1rem 0 0.5rem;
+    }
+
+    p {
+      color: var(--text-color-secondary);
+    }
+  }
+
+  .success-icon {
+    font-size: 4rem;
+    color: #22c55e;
+  }
+
+  .error-icon {
+    font-size: 4rem;
+    color: #ef4444;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+}
