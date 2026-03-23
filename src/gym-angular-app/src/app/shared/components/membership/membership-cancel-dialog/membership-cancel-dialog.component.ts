@@ -29,7 +29,7 @@ import { ButtonModule } from 'primeng/button';
         
         <div class="text-sm text-500 mb-3">
           <i class="pi pi-info-circle mr-2"></i>
-          Your membership will remain active until {{ endDate | date:'mediumDate' }}.
+          Your membership will remain active until the end of your current billing period.
         </div>
         
         <div class="field mt-4">

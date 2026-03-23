@@ -3,6 +3,31 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { MembershipService, PurchaseMembershipRequest } from './membership.service';
 import { GymMembership } from '../models/gym-membership.model';
 
+const mockMembership: GymMembership = {
+  id: 1,
+  clientId: 2,
+  clientName: 'John Doe',
+  membershipPlanId: 1,
+  planName: 'Premium',
+  planDescription: 'Premium plan',
+  planPrice: 100,
+  planDurationInMonths: 3,
+  canReserveTrainings: true,
+  canAccessGroupTraining: true,
+  canAccessPersonalTraining: false,
+  canReceiveTrainingPlans: false,
+  maxTrainingsPerMonth: null,
+  startDate: new Date().toISOString(),
+  endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  status: 0,
+  isActive: true,
+  isCancelled: false,
+  cancelledAt: null,
+  cancellationRequestedDate: null,
+  effectiveEndDate: null,
+  cancellationReason: null
+};
+
 describe('MembershipService', () => {
   let service: MembershipService;
   let httpMock: HttpTestingController;
@@ -30,32 +55,16 @@ describe('MembershipService', () => {
         membershipPlanId: 1,
         clientId: 2
       };
-      const mockResponse: GymMembership = {
-        id: 1,
-        clientId: 2,
-        clientName: 'John Doe',
-        membershipPlanId: 1,
-        planName: 'Premium',
-        planDescription: 'Premium plan',
-        planPrice: 100,
-        planDurationInMonths: 3,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        isActive: false,
-        isCancelled: false,
-        cancelledAt: null,
-        cancellationReason: null
-      };
 
       service.purchaseMembership(1, 2).subscribe(response => {
-        expect(response).toEqual(mockResponse);
+        expect(response).toEqual(mockMembership);
         done();
       });
 
       const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/purchase');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(mockRequest);
-      req.flush(mockResponse);
+      req.flush(mockMembership);
     });
 
     it('should set loading state during request', (done) => {
@@ -128,23 +137,6 @@ describe('MembershipService', () => {
 
   describe('getClientActiveMembership', () => {
     it('should return membership when found', (done) => {
-      const mockMembership: GymMembership = {
-        id: 1,
-        clientId: 2,
-        clientName: 'John Doe',
-        membershipPlanId: 1,
-        planName: 'Premium',
-        planDescription: 'Premium plan',
-        planPrice: 100,
-        planDurationInMonths: 3,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        isActive: true,
-        isCancelled: false,
-        cancelledAt: null,
-        cancellationReason: null
-      };
-
       service.getClientActiveMembership(2).subscribe(membership => {
         expect(membership).toEqual(mockMembership);
         done();
@@ -162,6 +154,95 @@ describe('MembershipService', () => {
 
       const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/client/999/active');
       req.flush('Not found', { status: 404, statusText: 'Not Found' });
+    });
+  });
+
+  describe('getMembershipById', () => {
+    it('should call GET /gym-memberships/{id}', (done) => {
+      service.getMembershipById(1).subscribe(membership => {
+        expect(membership).toEqual(mockMembership);
+        done();
+      });
+
+      const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/1');
+      expect(req.request.method).toBe('GET');
+      req.flush(mockMembership);
+    });
+  });
+
+  describe('getClientMemberships', () => {
+    it('should call GET /gym-memberships/client/{clientId}', (done) => {
+      const memberships = [mockMembership];
+      service.getClientMemberships(2).subscribe(result => {
+        expect(result).toEqual(memberships);
+        done();
+      });
+
+      const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/client/2');
+      expect(req.request.method).toBe('GET');
+      req.flush(memberships);
+    });
+  });
+
+  describe('cancelMembership', () => {
+    it('should call POST /gym-memberships/{id}/cancel with cancellation reason', (done) => {
+      const pendingMembership: GymMembership = {
+        ...mockMembership,
+        status: 1,
+        cancellationRequestedDate: new Date().toISOString(),
+        effectiveEndDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        cancellationReason: 'Moving away'
+      };
+
+      service.cancelMembership(1, { cancellationReason: 'Moving away' }).subscribe(membership => {
+        expect(membership.status).toBe(1);
+        expect(membership.cancellationReason).toBe('Moving away');
+        done();
+      });
+
+      const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/1/cancel');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ cancellationReason: 'Moving away' });
+      req.flush(pendingMembership);
+    });
+
+    it('should call POST /gym-memberships/{id}/cancel with null reason', (done) => {
+      const pendingMembership: GymMembership = {
+        ...mockMembership,
+        status: 1,
+        cancellationReason: null
+      };
+
+      service.cancelMembership(1, { cancellationReason: null }).subscribe(membership => {
+        expect(membership.status).toBe(1);
+        done();
+      });
+
+      const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/1/cancel');
+      req.flush(pendingMembership);
+    });
+  });
+
+  describe('revertCancellation', () => {
+    it('should call POST /gym-memberships/{id}/cancel/revert', (done) => {
+      const activeMembership: GymMembership = {
+        ...mockMembership,
+        status: 0,
+        cancellationRequestedDate: null,
+        effectiveEndDate: null
+      };
+
+      service.revertCancellation(1).subscribe(membership => {
+        expect(membership.status).toBe(0);
+        expect(membership.cancellationRequestedDate).toBeNull();
+        expect(membership.effectiveEndDate).toBeNull();
+        done();
+      });
+
+      const req = httpMock.expectOne('http://localhost:5000/api/gym-memberships/1/cancel/revert');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({});
+      req.flush(activeMembership);
     });
   });
 

@@ -3,7 +3,7 @@ import { Observable, tap, catchError, map, of, throwError } from 'rxjs';
 import { HttpService } from './http.service';
 import { AuthService } from './auth.service';
 import { MembershipPlanService } from './membership-plan.service';
-import { GymMembership } from '../models/gym-membership.model';
+import { GymMembership, CancelMembershipRequest } from '../models/gym-membership.model';
 import { MembershipPlan as MembershipPlanModel } from '../models/membership-plan.model';
 
 export interface PaymentData {
@@ -123,5 +123,21 @@ export class MembershipService {
     return this.httpService.get<GymMembership>(`gym-memberships/client/${clientId}/active`).pipe(
       catchError(() => of(null))
     );
+  }
+
+  getMembershipById(id: number): Observable<GymMembership> {
+    return this.httpService.get<GymMembership>(`gym-memberships/${id}`);
+  }
+
+  getClientMemberships(clientId: number): Observable<GymMembership[]> {
+    return this.httpService.get<GymMembership[]>(`gym-memberships/client/${clientId}`);
+  }
+
+  cancelMembership(membershipId: number, request: CancelMembershipRequest): Observable<GymMembership> {
+    return this.httpService.post<GymMembership>(`gym-memberships/${membershipId}/cancel`, request);
+  }
+
+  revertCancellation(membershipId: number): Observable<GymMembership> {
+    return this.httpService.post<GymMembership>(`gym-memberships/${membershipId}/cancel/revert`, {});
   }
 }

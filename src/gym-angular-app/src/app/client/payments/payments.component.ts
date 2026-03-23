@@ -11,7 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { ToastService } from '../../core/services/toast.service';
 import { PaymentService } from '../../core/api-services/payment.service';
-import { GymMembershipService } from '../../core/api-services/gym-membership.service';
+import { MembershipService } from '../../core/api-services/membership.service';
 import { AuthService, ClientService } from '../../core/api-services';
 import { Payment, PaymentMethod, PaymentResult } from '../../core/models/payment.model';
 
@@ -184,7 +184,7 @@ import { Payment, PaymentMethod, PaymentResult } from '../../core/models/payment
 })
 export class PaymentsComponent implements OnInit {
   private paymentService = inject(PaymentService);
-  private gymMembershipService = inject(GymMembershipService);
+  private membershipService = inject(MembershipService);
   private authService = inject(AuthService);
   private clientService = inject(ClientService);
   private toastService = inject(ToastService);
@@ -240,7 +240,7 @@ export class PaymentsComponent implements OnInit {
           return;
         }
 
-        this.gymMembershipService.getActiveMembership(client.id).subscribe({
+        this.membershipService.getClientActiveMembership(client.id).subscribe({
           next: (membership) => {
             if (!membership) {
               this.toastService.show('No active membership found', 'info');
@@ -281,7 +281,7 @@ export class PaymentsComponent implements OnInit {
   }
 
   private loadPaymentsByMembershipId(membershipId: number) {
-    this.gymMembershipService.getMembershipById(membershipId).subscribe({
+    this.membershipService.getMembershipById(membershipId).subscribe({
       next: (membership) => {
         if (!membership) {
           this.toastService.show('Membership not found', 'error');
