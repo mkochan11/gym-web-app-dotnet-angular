@@ -1,5 +1,6 @@
 using GymWebApp.Application.CQRS.GymMemberships;
 using GymWebApp.Application.WebModels.GymMembership;
+using GymWebApp.Application.WebModels.MembershipPlan;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,33 @@ public class GymMembershipsController : BaseController
     public async Task<ActionResult<GymMembershipWebModel>> PurchaseMembership([FromBody] PurchaseMembership.Command command)
     {
         command.UpdatedById = CurrentUserId;
+        var membership = await _mediator.Send(command);
+        return Ok(membership);
+    }
+
+    [HttpGet("{id}/available-plans")]
+    public async Task<ActionResult<List<MembershipPlanWebModel>>> GetAvailablePlans(int id)
+    {
+        var plans = await _mediator.Send(new GetAvailablePlans.Query { MembershipId = id });
+        return Ok(plans);
+    }
+
+    [HttpGet("{id}/calculate-credit")]
+    public async Task<ActionResult<CreditCalculationResult>> CalculateCredit(int id, [FromQuery] int newPlanId)
+    {
+        var result = await _mediator.Send(new CalculatePlanChangeCredit.Query { MembershipId = id, NewPlanId = newPlanId });
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/change-plan")]
+    public async Task<ActionResult<GymMembershipWebModel>> ChangePlan(int id, [FromBody] ChangePlanRequest request)
+    {
+        var command = new ChangeMembershipPlan.Command
+        {
+            MembershipId = id,
+            NewPlanId = request.NewPlanId,
+            UpdatedById = CurrentUserId
+        };
         var membership = await _mediator.Send(command);
         return Ok(membership);
     }

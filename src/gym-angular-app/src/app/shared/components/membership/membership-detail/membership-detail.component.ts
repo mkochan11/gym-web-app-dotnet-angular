@@ -9,6 +9,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { MembershipService } from '../../../../core/api-services/membership.service';
 import { GymMembership } from '../../../../core/models/gym-membership.model';
 import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/membership-cancel-dialog.component';
+import { PlanChangeDialogComponent } from '../plan-change-dialog/plan-change-dialog.component';
 
 @Component({
   selector: 'app-membership-detail',
@@ -19,7 +20,8 @@ import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/mem
     ButtonModule,
     TagModule,
     DividerModule,
-    MembershipCancelDialogComponent
+    MembershipCancelDialogComponent,
+    PlanChangeDialogComponent
   ],
   template: `
     <p-card *ngIf="membership()">
@@ -119,14 +121,24 @@ import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/mem
 
       <ng-template pTemplate="footer">
         <div class="flex justify-content-between align-items-center" *ngIf="membership()!.status === 0">
-          <p-button 
-            label="View Payments" 
-            icon="pi pi-credit-card" 
-            severity="info" 
-            [outlined]="true"
-            (onClick)="goToPayments()"
-            [disabled]="loading()">
-          </p-button>
+          <div class="flex gap-2">
+            <p-button 
+              label="View Payments" 
+              icon="pi pi-credit-card" 
+              severity="info" 
+              [outlined]="true"
+              (onClick)="goToPayments()"
+              [disabled]="loading()">
+            </p-button>
+            <p-button 
+              label="Change Plan" 
+              icon="pi pi-sync" 
+              severity="warning" 
+              [outlined]="true"
+              (onClick)="showPlanChangeDialog = true"
+              [disabled]="loading()">
+            </p-button>
+          </div>
           <p-button 
             label="Cancel Membership" 
             icon="pi pi-times" 
@@ -153,6 +165,13 @@ import { MembershipCancelDialogComponent } from '../membership-cancel-dialog/mem
       (confirmed)="onCancelConfirmed($event)"
       (cancelled)="onCancelCancelled()">
     </app-membership-cancel-dialog>
+
+    <app-plan-change-dialog 
+      [(visible)]="showPlanChangeDialog"
+      [membership]="membership()"
+      (visibleChange)="showPlanChangeDialog = $event"
+      (planChanged)="onPlanChanged()">
+    </app-plan-change-dialog>
   `
 })
 export class MembershipDetailComponent implements OnInit {
@@ -162,10 +181,12 @@ export class MembershipDetailComponent implements OnInit {
 
   @Input() clientId!: number;
   @Output() membershipCancelled = new EventEmitter<void>();
+  @Output() planChanged = new EventEmitter<void>();
 
   membership = signal<GymMembership | null>(null);
   loading = signal(false);
   showCancelDialog = false;
+  showPlanChangeDialog = false;
 
   ngOnInit() {
     this.loadMembership();
@@ -277,5 +298,11 @@ export class MembershipDetailComponent implements OnInit {
 
   toDate(dateStr: string): Date {
     return new Date(dateStr);
+  }
+
+  onPlanChanged() {
+    this.showPlanChangeDialog = false;
+    this.loadMembership();
+    this.planChanged.emit();
   }
 }

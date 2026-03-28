@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { DropdownModule } from 'primeng/dropdown';
@@ -23,6 +24,7 @@ import { Payment, PaymentMethod, PaymentResult } from '../../core/models/payment
     FormsModule,
     TableModule,
     ButtonModule,
+    TooltipModule,
     CardModule,
     TagModule,
     DropdownModule,
@@ -32,8 +34,18 @@ import { Payment, PaymentMethod, PaymentResult } from '../../core/models/payment
   template: `
     <div class="container mx-auto p-4">
       <div class="mb-4">
-        <h1 class="text-3xl font-bold text-900 mb-2">My Payments</h1>
-        <p class="text-500">View and pay your membership installments</p>
+        <div class="flex align-items-center gap-3 mb-2">
+          <p-button 
+            icon="pi pi-arrow-left" 
+            [text]="true"
+            pTooltip="Back to Membership"
+            (onClick)="goBackToMembership()">
+          </p-button>
+          <div>
+            <h1 class="text-3xl font-bold text-900 mb-2">My Payments</h1>
+            <p class="text-500">View and pay your membership installments</p>
+          </div>
+        </div>
       </div>
 
       <p-card *ngIf="!loading()">
@@ -358,5 +370,9 @@ export class PaymentsComponent implements OnInit {
       case 'Cancelled': return 'secondary';
       default: return 'info';
     }
+  }
+
+  goBackToMembership() {
+    this.router.navigate(['/client/membership']);
   }
 }

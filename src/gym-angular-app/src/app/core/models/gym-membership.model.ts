@@ -26,3 +26,32 @@ export interface GymMembership {
 export interface CancelMembershipRequest {
   cancellationReason: string | null;
 }
+
+export interface ChangePlanRequest {
+  newPlanId: number;
+}
+
+export interface CreditCalculation {
+  unusedDays: number;
+  creditAmount: number;
+  newMonthlyAmount: number;
+  totalDifference: number;
+  firstPaymentAmount: number;
+  currentPlanId: number;
+  newPlanId: number;
+  currentPlanName: string;
+  newPlanName: string;
+  currentPlanPrice: number;
+  newPlanPrice: number;
+  isUpgrade: boolean;
+  currentPlanCanReserveTrainings: boolean;
+  newPlanCanReserveTrainings: boolean;
+  currentPlanCanAccessGroupTraining: boolean;
+  newPlanCanAccessGroupTraining: boolean;
+  currentPlanCanAccessPersonalTraining: boolean;
+  newPlanCanAccessPersonalTraining: boolean;
+  currentPlanCanReceiveTrainingPlans: boolean;
+  newPlanCanReceiveTrainingPlans: boolean;
+  currentPlanMaxTrainingsPerMonth: number | null;
+  newPlanMaxTrainingsPerMonth: number | null;
+}

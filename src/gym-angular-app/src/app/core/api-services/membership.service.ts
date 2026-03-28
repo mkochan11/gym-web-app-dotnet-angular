@@ -3,7 +3,7 @@ import { Observable, tap, catchError, map, of, throwError } from 'rxjs';
 import { HttpService } from './http.service';
 import { AuthService } from './auth.service';
 import { MembershipPlanService } from './membership-plan.service';
-import { GymMembership, CancelMembershipRequest } from '../models/gym-membership.model';
+import { GymMembership, CancelMembershipRequest, ChangePlanRequest, CreditCalculation } from '../models/gym-membership.model';
 import { MembershipPlan as MembershipPlanModel } from '../models/membership-plan.model';
 
 export interface PaymentData {
@@ -139,5 +139,17 @@ export class MembershipService {
 
   revertCancellation(membershipId: number): Observable<GymMembership> {
     return this.httpService.post<GymMembership>(`gym-memberships/${membershipId}/cancel/revert`, {});
+  }
+
+  getAvailablePlans(membershipId: number): Observable<MembershipPlanModel[]> {
+    return this.httpService.get<MembershipPlanModel[]>(`gym-memberships/${membershipId}/available-plans`);
+  }
+
+  calculateCredit(membershipId: number, newPlanId: number): Observable<CreditCalculation> {
+    return this.httpService.get<CreditCalculation>(`gym-memberships/${membershipId}/calculate-credit?newPlanId=${newPlanId}`);
+  }
+
+  changePlan(membershipId: number, request: ChangePlanRequest): Observable<GymMembership> {
+    return this.httpService.post<GymMembership>(`gym-memberships/${membershipId}/change-plan`, request);
   }
 }
