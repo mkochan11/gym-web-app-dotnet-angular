@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClientService } from '../../core/api-services/client.service';
 import { ClientListItem, ClientDetails } from '../../core/models/client';
+import { AuthService } from '../../core/api-services/auth.service';
 import { MessageService } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ClientActivationDialogComponent } from './client-activation-dialog/client-activation-dialog.component';
 
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -33,13 +36,15 @@ import { BadgeModule } from 'primeng/badge';
     CardModule,
     BadgeModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, DialogService],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.scss'
 })
 export class ClientsComponent implements OnInit {
   private clientService = inject(ClientService);
+  private authService = inject(AuthService);
   private messageService = inject(MessageService);
+  private dialogService = inject(DialogService);
 
   clients: ClientListItem[] = [];
   loading = false;
@@ -48,6 +53,8 @@ export class ClientsComponent implements OnInit {
   detailsDialog = false;
   selectedClient: ClientDetails | null = null;
   loadingDetails = false;
+  
+  private ref: DynamicDialogRef | undefined;
 
   ngOnInit() {
     this.loadClients();
@@ -114,5 +121,35 @@ export class ClientsComponent implements OnInit {
   formatDate(date: Date | string | undefined): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('pl-PL');
+  }
+
+  canActivateMembership(client: ClientListItem): boolean {
+    const userRole = this.authService.getRole();
+    const hasPermission = userRole === 'Manager' || userRole === 'Receptionist';
+    const canActivate = client.membershipStatus !== 'Active';
+    return hasPermission && canActivate;
+  }
+
+  openActivationDialog(client: ClientListItem) {
+    this.ref = this.dialogService.open(ClientActivationDialogComponent, {
+      header: 'Activate Membership',
+      width: '70vw',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      data: {
+        client: client
+      }
+    });
+
+    this.ref.onClose.subscribe((result: boolean) => {
+      if (result) {
+        this.loadClients();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Membership activated successfully'
+        });
+      }
+    });
   }
 }

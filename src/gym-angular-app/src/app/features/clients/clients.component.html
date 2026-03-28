@@ -75,6 +75,15 @@
             pTooltip="View Details" 
             (click)="viewClientDetails(client)">
           </button>
+          <button 
+            *ngIf="canActivateMembership(client)"
+            pButton 
+            pRipple 
+            icon="pi pi-plus" 
+            class="p-button-rounded p-button-success p-button-text" 
+            pTooltip="Activate Membership" 
+            (click)="openActivationDialog(client)">
+          </button>
         </td>
       </tr>
     </ng-template>

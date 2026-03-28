@@ -30,6 +30,14 @@ export interface PurchaseMembershipRequest {
   clientId: number;
 }
 
+export interface ActivateMembershipRequest {
+  clientId: number;
+  membershipPlanId: number;
+  paymentMethod: string;
+  transactionId?: string;
+  amount: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -151,5 +159,21 @@ export class MembershipService {
 
   changePlan(membershipId: number, request: ChangePlanRequest): Observable<GymMembership> {
     return this.httpService.post<GymMembership>(`gym-memberships/${membershipId}/change-plan`, request);
+  }
+
+  activateMembershipForClient(request: ActivateMembershipRequest): Observable<GymMembership> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    return this.httpService.post<GymMembership>('gym-memberships/activate', request).pipe(
+      tap(membership => {
+        this.loadingSignal.set(false);
+      }),
+      catchError(error => {
+        this.loadingSignal.set(false);
+        this.errorSignal.set(error.message || 'Failed to activate membership');
+        return throwError(() => error);
+      })
+    );
   }
 }

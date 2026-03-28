@@ -1,0 +1,194 @@
+<div class="activation-dialog">
+  <p-steps [model]="steps" [activeIndex]="currentStep" [readonly]="true"></p-steps>
+  
+  <div class="dialog-content">
+    <!-- Client Info Header -->
+    <div class="client-info-header" *ngIf="client">
+      <h3>Activating Membership For</h3>
+      <div class="client-details">
+        <span class="client-name">{{ client.firstName }} {{ client.lastName }}</span>
+        <span class="client-email">{{ client.email }}</span>
+        <p-tag 
+          [value]="client.membershipStatus" 
+          [severity]="getStatusSeverity(client.membershipStatus)"
+          *ngIf="client.membershipStatus !== 'None'">
+        </p-tag>
+        <p-tag 
+          value="No Membership" 
+          severity="secondary"
+          *ngIf="client.membershipStatus === 'None'">
+        </p-tag>
+      </div>
+    </div>
+
+    <!-- Step 1: Select Plan -->
+    <div *ngIf="currentStep === 0" class="step-content">
+      <h4>Select Membership Plan</h4>
+      
+      <div *ngIf="loadingPlans" class="loading">
+        <i class="pi pi-spin pi-spinner"></i> Loading plans...
+      </div>
+
+      <div *ngIf="!loadingPlans && availablePlans.length === 0" class="no-plans">
+        <p>No active membership plans available.</p>
+      </div>
+
+      <div class="plans-grid" *ngIf="!loadingPlans && availablePlans.length > 0">
+        <div 
+          *ngFor="let plan of availablePlans" 
+          class="plan-card"
+          [class.selected]="selectedPlan?.id === plan.id"
+          (click)="onPlanSelect(plan)">
+          <p-card>
+            <ng-template pTemplate="title">
+              <div class="plan-header">
+                <span class="plan-name">{{ plan.type }}</span>
+                <span class="plan-price">{{ formatCurrency(plan.price) }}</span>
+              </div>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <p class="plan-description">{{ plan.description || 'No description available' }}</p>
+              <div class="plan-details">
+                <div class="detail-item">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ plan.durationInMonths }} months</span>
+                </div>
+                <div class="detail-item" *ngIf="plan.canAccessGroupTraining">
+                  <i class="pi pi-users"></i>
+                  <span>Group Training</span>
+                </div>
+                <div class="detail-item" *ngIf="plan.canAccessPersonalTraining">
+                  <i class="pi pi-user"></i>
+                  <span>Personal Training</span>
+                </div>
+                <div class="detail-item" *ngIf="plan.canReceiveTrainingPlans">
+                  <i class="pi pi-file-edit"></i>
+                  <span>Training Plans</span>
+                </div>
+                <div class="detail-item" *ngIf="plan.canReserveTrainings">
+                  <i class="pi pi-calendar-plus"></i>
+                  <span>Reservations</span>
+                </div>
+              </div>
+            </ng-template>
+          </p-card>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Payment -->
+    <div *ngIf="currentStep === 1" class="step-content">
+      <h4>Record Payment</h4>
+      
+      <div class="payment-summary" *ngIf="selectedPlan">
+        <p><strong>Plan:</strong> {{ selectedPlan.type }}</p>
+        <p><strong>Amount:</strong> {{ formatCurrency(paymentAmount) }}</p>
+      </div>
+
+      <div class="payment-form">
+        <div class="form-field">
+          <label>Payment Method</label>
+          <div class="payment-methods">
+            <div *ngFor="let method of paymentMethods" class="payment-method-option">
+              <p-radioButton 
+                [value]="method.value" 
+                [(ngModel)]="paymentMethod"
+                [inputId]="method.value">
+              </p-radioButton>
+              <label [for]="method.value">{{ method.label }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-field" *ngIf="paymentMethod === 'Card' || paymentMethod === 'BankTransfer'">
+          <label for="transactionId">Transaction ID (Optional)</label>
+          <input 
+            id="transactionId"
+            type="text" 
+            pInputText 
+            [(ngModel)]="transactionId"
+            placeholder="Enter transaction reference">
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Confirm -->
+    <div *ngIf="currentStep === 2" class="step-content">
+      <h4>Confirm Activation</h4>
+      
+      <div class="confirmation-summary" *ngIf="!activationComplete">
+        <div class="summary-section">
+          <h5>Client</h5>
+          <p>{{ client.firstName }} {{ client.lastName }}</p>
+          <p>{{ client.email }}</p>
+        </div>
+
+        <div class="summary-section">
+          <h5>Membership Plan</h5>
+          <p><strong>{{ selectedPlan?.type }}</strong></p>
+          <p>{{ selectedPlan?.description }}</p>
+          <p>Duration: {{ selectedPlan?.durationInMonths }} months</p>
+        </div>
+
+        <div class="summary-section">
+          <h5>Payment</h5>
+          <p><strong>Amount:</strong> {{ formatCurrency(paymentAmount) }}</p>
+          <p><strong>Method:</strong> {{ paymentMethod }}</p>
+          <p *ngIf="transactionId"><strong>Transaction ID:</strong> {{ transactionId }}</p>
+        </div>
+      </div>
+
+      <div class="activation-success" *ngIf="activationComplete">
+        <i class="pi pi-check-circle success-icon"></i>
+        <h4>Activation Complete!</h4>
+        <p>Membership has been successfully activated for {{ client.firstName }} {{ client.lastName }}.</p>
+        <div class="membership-details" *ngIf="activatedMembership">
+          <p><strong>Membership ID:</strong> #{{ activatedMembership.id }}</p>
+          <p><strong>Valid From:</strong> {{ formatDate(activatedMembership.startDate) }}</p>
+          <p><strong>Valid Until:</strong> {{ formatDate(activatedMembership.endDate) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog Footer -->
+  <div class="dialog-footer">
+    <button 
+      pButton 
+      type="button" 
+      label="Cancel" 
+      class="p-button-secondary"
+      (click)="close()"
+      *ngIf="!activationComplete">
+    </button>
+    
+    <button 
+      pButton 
+      type="button" 
+      label="Previous" 
+      class="p-button-secondary"
+      (click)="prevStep()"
+      *ngIf="currentStep > 0 && !activationComplete">
+    </button>
+    
+    <button 
+      pButton 
+      type="button" 
+      [label]="currentStep < steps.length - 1 ? 'Next' : 'Activate Membership'"
+      [disabled]="!canProceedToNextStep() || loading"
+      (click)="currentStep < steps.length - 1 ? nextStep() : activateMembership()"
+      *ngIf="!activationComplete">
+    </button>
+    
+    <button 
+      pButton 
+      type="button" 
+      label="Close" 
+      class="p-button-success"
+      (click)="close()"
+      *ngIf="activationComplete">
+    </button>
+  </div>
+</div>
+
+<p-toast></p-toast>

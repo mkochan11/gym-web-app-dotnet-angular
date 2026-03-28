@@ -1,6 +1,7 @@
 using GymWebApp.Application.CQRS.GymMemberships;
 using GymWebApp.Application.WebModels.GymMembership;
 using GymWebApp.Application.WebModels.MembershipPlan;
+using GymWebApp.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -103,4 +104,30 @@ public class GymMembershipsController : BaseController
         var membership = await _mediator.Send(command);
         return Ok(membership);
     }
+
+    [HttpPost("activate")]
+    [Authorize(Roles = "Manager,Receptionist")]
+    public async Task<ActionResult<GymMembershipWebModel>> ActivateMembership([FromBody] ActivateMembershipRequest request)
+    {
+        var command = new ActivateMembership.Command
+        {
+            ClientId = request.ClientId,
+            MembershipPlanId = request.MembershipPlanId,
+            PaymentMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod),
+            TransactionId = request.TransactionId,
+            Amount = request.Amount,
+            UpdatedById = CurrentUserId
+        };
+        var membership = await _mediator.Send(command);
+        return Ok(membership);
+    }
+}
+
+public class ActivateMembershipRequest
+{
+    public int ClientId { get; set; }
+    public int MembershipPlanId { get; set; }
+    public string PaymentMethod { get; set; } = "Cash";
+    public string? TransactionId { get; set; }
+    public decimal Amount { get; set; }
 }
