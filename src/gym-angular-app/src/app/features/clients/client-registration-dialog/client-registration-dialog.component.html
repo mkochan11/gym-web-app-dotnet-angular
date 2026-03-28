@@ -1,0 +1,123 @@
+<p-toast></p-toast>
+
+<div class="registration-form">
+  <form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+    <div class="field mb-3">
+      <label for="email" class="block text-900 font-medium mb-2">Email *</label>
+      <input
+        id="email"
+        type="email"
+        pInputText
+        formControlName="email"
+        class="w-full"
+        placeholder="client@example.com">
+      <small class="p-error block mt-1" *ngIf="email?.invalid && email?.touched">
+        <span *ngIf="email?.errors?.['required']">Email is required</span>
+        <span *ngIf="email?.errors?.['email']">Invalid email format</span>
+      </small>
+    </div>
+
+    <div class="formgrid grid">
+      <div class="field mb-3 col-12 md:col-6">
+        <label for="firstName" class="block text-900 font-medium mb-2">First Name *</label>
+        <input
+          id="firstName"
+          type="text"
+          pInputText
+          formControlName="firstName"
+          class="w-full"
+          placeholder="John">
+        <small class="p-error block mt-1" *ngIf="firstName?.invalid && firstName?.touched">
+          First name is required
+        </small>
+      </div>
+
+      <div class="field mb-3 col-12 md:col-6">
+        <label for="lastName" class="block text-900 font-medium mb-2">Last Name *</label>
+        <input
+          id="lastName"
+          type="text"
+          pInputText
+          formControlName="lastName"
+          class="w-full"
+          placeholder="Doe">
+        <small class="p-error block mt-1" *ngIf="lastName?.invalid && lastName?.touched">
+          Last name is required
+        </small>
+      </div>
+    </div>
+
+    <div class="field mb-3">
+      <label for="phoneNumber" class="block text-900 font-medium mb-2">Phone Number</label>
+      <input
+        id="phoneNumber"
+        type="tel"
+        pInputText
+        formControlName="phoneNumber"
+        class="w-full"
+        placeholder="+1 234 567 890">
+    </div>
+
+    <div class="field mb-3">
+      <label for="dateOfBirth" class="block text-900 font-medium mb-2">Date of Birth</label>
+      <p-calendar
+        id="dateOfBirth"
+        formControlName="dateOfBirth"
+        [showIcon]="true"
+        dateFormat="yy-mm-dd"
+        [maxDate]="today"
+        placeholder="Select date"
+        styleClass="w-full">
+      </p-calendar>
+    </div>
+
+    <div class="field mb-3">
+      <div class="flex align-items-center mb-2">
+        <p-checkbox
+          formControlName="autoGeneratePassword"
+          [binary]="true"
+          inputId="autoGenerate">
+        </p-checkbox>
+        <label for="autoGenerate" class="ml-2 text-900">Auto-generate secure password</label>
+      </div>
+      
+      <div *ngIf="!autoGeneratePassword?.value" class="mt-2">
+        <label for="password" class="block text-900 font-medium mb-2">Password *</label>
+        <p-password
+          id="password"
+          formControlName="password"
+          [toggleMask]="true"
+          [feedback]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          placeholder="Enter password">
+        </p-password>
+        <small class="text-500 block mt-1">
+          Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+        </small>
+      </div>
+    </div>
+
+    <div class="flex justify-content-end gap-2 mt-4">
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Cancel"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="onCancel()"
+        [disabled]="loading">
+      </button>
+      <button
+        pButton
+        pRipple
+        type="submit"
+        label="Register Client"
+        icon="pi pi-check"
+        class="p-button-success"
+        [loading]="loading">
+      </button>
+    </div>
+  </form>
+</div>

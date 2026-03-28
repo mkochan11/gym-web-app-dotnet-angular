@@ -7,6 +7,8 @@ import { AuthService } from '../../core/api-services/auth.service';
 import { MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ClientActivationDialogComponent } from './client-activation-dialog/client-activation-dialog.component';
+import { ClientRegistrationDialogComponent } from './client-registration-dialog/client-registration-dialog.component';
+import { ClientUser } from '../../core/models/client';
 
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -148,6 +150,32 @@ export class ClientsComponent implements OnInit {
           severity: 'success',
           summary: 'Success',
           detail: 'Membership activated successfully'
+        });
+      }
+    });
+  }
+
+  canAddClient(): boolean {
+    const userRole = this.authService.getRole();
+    return userRole === 'Manager' || userRole === 'Receptionist';
+  }
+
+  openRegistrationDialog() {
+    this.ref = this.dialogService.open(ClientRegistrationDialogComponent, {
+      header: 'Register New Client',
+      width: '500px',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000
+    });
+
+    this.ref.onClose.subscribe((result: ClientUser | undefined) => {
+      if (result) {
+        this.loadClients();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Client Registered',
+          detail: `Client ${result.firstName} ${result.lastName} registered successfully. Temporary password: ${result.temporaryPassword}`,
+          sticky: true
         });
       }
     });

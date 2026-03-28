@@ -1,5 +1,8 @@
+using GymWebApp.Application.CQRS.Clients;
 using GymWebApp.Application.Extensions;
 using GymWebApp.Application.Interfaces.Repositories;
+using GymWebApp.Application.WebModels.Client;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,13 +15,16 @@ public class ClientsController : ControllerBase
 {
     private readonly IClientRepository _clientRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IMediator _mediator;
 
     public ClientsController(
         IClientRepository clientRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IMediator mediator)
     {
         _clientRepository = clientRepository;
         _userRepository = userRepository;
+        _mediator = mediator;
     }
 
     [HttpGet]
@@ -67,5 +73,13 @@ public class ClientsController : ControllerBase
         }
 
         return Ok(client.ToClientWebModel());
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Manager,Receptionist")]
+    public async Task<ActionResult<ClientUserWebModel>> CreateClient([FromBody] CreateClientCommand command)
+    {
+        var client = await _mediator.Send(command);
+        return Ok(client);
     }
 }

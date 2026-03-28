@@ -6,6 +6,15 @@
       <h2 class="m-0">Clients</h2>
     </ng-template>
     <ng-template pTemplate="end">
+      <button 
+        *ngIf="canAddClient()"
+        pButton 
+        pRipple 
+        label="Add Client" 
+        icon="pi pi-user-plus" 
+        class="p-button-success mr-2" 
+        (click)="openRegistrationDialog()">
+      </button>
       <span class="p-input-icon-left">
         <i class="pi pi-search"></i>
         <input 

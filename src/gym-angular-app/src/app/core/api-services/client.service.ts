@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Client, ClientListItem, ClientDetails } from '../models/client';
+import { Client, ClientListItem, ClientDetails, CreateClientRequest, ClientUser } from '../models/client';
 import { Observable } from 'rxjs';
 import { HttpService } from './http.service';
 
@@ -23,5 +23,9 @@ export class ClientService {
 
   getClientByAccountId(accountId: string): Observable<Client | null> {
     return this.httpService.get<Client>(`clients/account/${accountId}`);
+  }
+
+  createClient(client: CreateClientRequest): Observable<ClientUser> {
+    return this.httpService.post<ClientUser>('clients', client);
   }
 }

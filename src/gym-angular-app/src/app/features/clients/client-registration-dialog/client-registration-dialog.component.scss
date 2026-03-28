@@ -1,0 +1,25 @@
+.registration-form {
+  max-width: 100%;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+:host ::ng-deep {
+  .p-calendar {
+    width: 100%;
+    
+    .p-inputtext {
+      width: 100%;
+    }
+  }
+  
+  .p-password {
+    width: 100%;
+    
+    .p-inputtext {
+      width: 100%;
+    }
+  }
+}

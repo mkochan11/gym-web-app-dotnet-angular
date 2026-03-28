@@ -36,3 +36,23 @@ export interface ClientDetails {
   address?: string;
   currentMembership?: ClientMembership;
 }
+
+export interface CreateClientRequest {
+  email: string;
+  password?: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  dateOfBirth?: Date;
+}
+
+export interface ClientUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  dateOfBirth?: Date;
+  temporaryPassword: string;
+  createdAt: Date;
+}
