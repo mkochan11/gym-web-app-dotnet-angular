@@ -1,0 +1,195 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="start">
+      <h2 class="m-0">Clients</h2>
+    </ng-template>
+    <ng-template pTemplate="end">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input 
+          pInputText 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          placeholder="Search by name..."
+          (keyup.enter)="onSearch()"
+          style="width: 300px;" />
+      </span>
+      <button 
+        pButton 
+        pRipple 
+        label="Search" 
+        icon="pi pi-search" 
+        class="p-button-primary ml-2" 
+        (click)="onSearch()">
+      </button>
+      <button 
+        pButton 
+        pRipple 
+        label="Clear" 
+        icon="pi pi-times" 
+        class="p-button-secondary ml-2" 
+        (click)="clearSearch()">
+      </button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    [value]="clients"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="50"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} clients"
+    [rowsPerPageOptions]="[25, 50, 100]"
+    styleClass="p-datatable-striped"
+    [tableStyle]="{ 'min-width': '50rem' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="lastName">Name <p-sortIcon field="lastName"></p-sortIcon></th>
+        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+        <th>Membership Status</th>
+        <th>Current Plan</th>
+        <th style="width: 8rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-client>
+      <tr>
+        <td>{{ client.firstName }} {{ client.lastName }}</td>
+        <td>{{ client.email }}</td>
+        <td>
+          <p-tag 
+            [value]="client.membershipStatus" 
+            [severity]="getStatusSeverity(client.membershipStatus)">
+          </p-tag>
+        </td>
+        <td>{{ client.currentPlanName || 'No active plan' }}</td>
+        <td>
+          <button 
+            pButton 
+            pRipple 
+            icon="pi pi-eye" 
+            class="p-button-rounded p-button-info p-button-text" 
+            pTooltip="View Details" 
+            (click)="viewClientDetails(client)">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center">
+          <div class="p-4">
+            <i class="pi pi-users" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
+            <p class="mt-2">No clients found.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="detailsDialog"
+  [style]="{ width: '700px' }"
+  header="Client Details"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  (onHide)="hideDetailsDialog()">
+
+  <ng-template pTemplate="content">
+    <div *ngIf="loadingDetails" class="flex justify-content-center align-items-center p-4">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+    </div>
+
+    <div *ngIf="!loadingDetails && selectedClient">
+      <div class="grid">
+        <!-- Personal Information -->
+        <div class="col-12 md:col-6">
+          <p-card header="Personal Information">
+            <div class="field mb-3">
+              <label class="font-bold block mb-1">Full Name:</label>
+              <span>{{ selectedClient.firstName }} {{ selectedClient.lastName }}</span>
+            </div>
+            <div class="field mb-3">
+              <label class="font-bold block mb-1">Email:</label>
+              <span>{{ selectedClient.email }}</span>
+            </div>
+            <div class="field mb-3" *ngIf="selectedClient.phoneNumber">
+              <label class="font-bold block mb-1">Phone:</label>
+              <span>{{ selectedClient.phoneNumber }}</span>
+            </div>
+            <div class="field mb-3" *ngIf="selectedClient.dateOfBirth">
+              <label class="font-bold block mb-1">Date of Birth:</label>
+              <span>{{ formatDate(selectedClient.dateOfBirth) }}</span>
+            </div>
+            <div class="field mb-3">
+              <label class="font-bold block mb-1">Registration Date:</label>
+              <span>{{ formatDate(selectedClient.registrationDate) }}</span>
+            </div>
+            <div class="field mb-3" *ngIf="selectedClient.address">
+              <label class="font-bold block mb-1">Address:</label>
+              <span>{{ selectedClient.address }}</span>
+            </div>
+          </p-card>
+        </div>
+
+        <!-- Membership Information -->
+        <div class="col-12 md:col-6">
+          <p-card header="Current Membership">
+            <div *ngIf="selectedClient.currentMembership; else noMembership">
+              <div class="field mb-3">
+                <label class="font-bold block mb-1">Plan:</label>
+                <span>{{ selectedClient.currentMembership.planName }}</span>
+              </div>
+              <div class="field mb-3">
+                <label class="font-bold block mb-1">Status:</label>
+                <p-tag 
+                  [value]="selectedClient.currentMembership.status" 
+                  [severity]="getStatusSeverity(selectedClient.currentMembership.status)">
+                </p-tag>
+              </div>
+              <div class="field mb-3">
+                <label class="font-bold block mb-1">Start Date:</label>
+                <span>{{ formatDate(selectedClient.currentMembership.startDate) }}</span>
+              </div>
+              <div class="field mb-3">
+                <label class="font-bold block mb-1">End Date:</label>
+                <span>{{ formatDate(selectedClient.currentMembership.endDate) }}</span>
+              </div>
+              <div class="field mb-3">
+                <label class="font-bold block mb-1">Price:</label>
+                <span>{{ selectedClient.currentMembership.price | currency:'PLN' }}</span>
+              </div>
+              <div class="field mb-3">
+                <label class="font-bold block mb-1">Features:</label>
+                <div class="flex gap-2 flex-wrap">
+                  <p-badge *ngIf="selectedClient.currentMembership.canAccessGroupTraining" 
+                           value="Group Training" 
+                           severity="success"></p-badge>
+                  <p-badge *ngIf="selectedClient.currentMembership.canAccessPersonalTraining" 
+                           value="Personal Training" 
+                           severity="info"></p-badge>
+                </div>
+              </div>
+            </div>
+            <ng-template #noMembership>
+              <div class="text-center p-4">
+                <i class="pi pi-id-card" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
+                <p class="mt-2 text-secondary">No active membership</p>
+              </div>
+            </ng-template>
+          </p-card>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Close" icon="pi pi-times" class="p-button-text" (click)="hideDetailsDialog()"></button>
+  </ng-template>
+</p-dialog>

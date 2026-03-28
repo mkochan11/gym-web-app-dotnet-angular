@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MembershipPlanService } from '../../../core/api-services/membership-plan.service';
+import { AuthService } from '../../../core/api-services/auth.service';
 import { MembershipPlan, CreateMembershipPlanRequest, UpdateMembershipPlanRequest } from '../../../core/models/membership-plan.model';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -44,6 +45,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class MembershipPlansListComponent implements OnInit {
   private membershipPlanService = inject(MembershipPlanService);
+  private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private messageService = inject(MessageService);
 
@@ -58,6 +60,13 @@ export class MembershipPlansListComponent implements OnInit {
 
   deleteDialog = false;
   planToDelete: MembershipPlan | null = null;
+
+  get canEditPlans(): boolean {
+    const role = this.authService.getRole();
+    if (!role) return false;
+    const roles = role.split(',').map(r => r.trim().toLowerCase());
+    return roles.includes('admin') || roles.includes('manager');
+  }
 
   constructor() {
     this.planForm = this.fb.group({
@@ -76,17 +85,21 @@ export class MembershipPlansListComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('[MembershipPlans] Component initialized');
     this.loadPlans();
   }
 
   loadPlans() {
+    console.log('[MembershipPlans] Loading plans...');
     this.loading = true;
     this.membershipPlanService.getMembershipPlans().subscribe({
       next: (plans) => {
+        console.log('[MembershipPlans] Plans loaded:', plans.length);
         this.plans = plans;
         this.loading = false;
       },
       error: (err) => {
+        console.log('[MembershipPlans] Error loading plans:', err);
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load membership plans' });
         this.loading = false;
       }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -8,8 +8,16 @@ export class HttpService {
   private baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
 
-  get<T>(endpoint: string): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}/${endpoint}`)
+  get<T>(endpoint: string, params?: { [key: string]: any }): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
+    }
+    return this.http.get<T>(`${this.baseUrl}/${endpoint}`, { params: httpParams })
       .pipe(catchError(this.handleError));
   }
 

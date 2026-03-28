@@ -7,7 +7,7 @@
       <h2 class="m-0">Membership Plans</h2>
     </ng-template>
     <ng-template pTemplate="center">
-      <button pButton pRipple label="Create New Plan" icon="pi pi-plus" class="p-button-success" (click)="openNewPlan()"></button>
+      <button *ngIf="canEditPlans" pButton pRipple label="Create New Plan" icon="pi pi-plus" class="p-button-success" (click)="openNewPlan()"></button>
     </ng-template>
   </p-toolbar>
 
@@ -46,8 +46,8 @@
           <p-tag [value]="getStatusLabel(plan.isActive)" [severity]="getSeverityStatus(plan.isActive)"></p-tag>
         </td>
         <td>
-          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text" pTooltip="Edit Plan" (click)="editPlan(plan)"></button>
-          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" pTooltip="Delete Plan" (click)="confirmDeletePlan(plan)"></button>
+          <button *ngIf="canEditPlans" pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text" pTooltip="Edit Plan" (click)="editPlan(plan)"></button>
+          <button *ngIf="canEditPlans" pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" pTooltip="Delete Plan" (click)="confirmDeletePlan(plan)"></button>
         </td>
       </tr>
     </ng-template>

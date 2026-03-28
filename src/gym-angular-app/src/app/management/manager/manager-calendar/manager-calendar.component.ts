@@ -107,28 +107,38 @@ export class ManagerCalendarComponent implements AfterViewInit, OnInit {
   trainingTypeOptions: TrainingTypeOption[] = [];
 
   ngOnInit() {
+    console.log('[ManagerCalendar] Component initialized');
     this.loadDropdownData();
   }
 
   ngAfterViewInit(): void {}
 
   private loadDropdownData() {
+    console.log('[ManagerCalendar] Loading dropdown data...');
     this.employeeService.getAllEmployees().subscribe({
       next: (employees: Employee[]) => {
+        console.log('[ManagerCalendar] Employees loaded:', employees.length);
         this.employeeOptions = employees.map(emp => ({
           id: emp.id,
           name: `${emp.firstName} ${emp.lastName}`,
           role: emp.role
         }));
+      },
+      error: (err) => {
+        console.log('[ManagerCalendar] Error loading employees:', err);
       }
     });
 
     this.trainingTypeService.getAllTrainingTypes().subscribe({
       next: (trainingTypes: TrainingType[]) => {
+        console.log('[ManagerCalendar] Training types loaded:', trainingTypes.length);
         this.trainingTypeOptions = trainingTypes.map(tt => ({
           id: tt.id,
           name: tt.name
         }));
+      },
+      error: (err) => {
+        console.log('[ManagerCalendar] Error loading training types:', err);
       }
     });
   }

@@ -1,0 +1,48 @@
+.p-input-icon-left {
+  position: relative;
+  display: inline-block;
+}
+
+.p-input-icon-left i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-color-secondary);
+}
+
+.p-input-icon-left input {
+  padding-left: 2.5rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep {
+  .p-card {
+    .p-card-header {
+      padding: 1rem;
+      background: var(--surface-100);
+      border-bottom: 1px solid var(--surface-200);
+      font-weight: 600;
+    }
+    
+    .p-card-body {
+      padding: 1rem;
+    }
+  }
+  
+  .p-datatable {
+    .p-datatable-header {
+      background: var(--surface-0);
+      border: none;
+    }
+  }
+}

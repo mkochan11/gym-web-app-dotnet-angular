@@ -1,0 +1,17 @@
+<div *ngIf="isBaseRoute()">
+  <div class="dashboard-container">
+    <h1>Receptionist Dashboard</h1>
+    <p>Welcome to the receptionist panel. Use the sidebar to navigate.</p>
+    
+    <div class="quick-links">
+      <h3>Quick Actions</h3>
+      <ul>
+        <li><a routerLink="/management/manager/calendar">View Calendar</a></li>
+        <li><a routerLink="/management/manager/clients">Manage Clients</a></li>
+        <li><a routerLink="/management/manager/membership-plans">Membership Plans</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<router-outlet></router-outlet>

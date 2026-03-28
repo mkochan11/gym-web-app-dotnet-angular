@@ -37,7 +37,7 @@ public class MembershipPlansController : BaseController
     }
 
     [HttpPost]
-    [Authorize(Roles = "Administrator,Manager")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<MembershipPlanWebModel>> CreateMembershipPlan([FromBody] CreateMembershipPlanCommand command)
     {
         command.CreatedById = CurrentUserId;
@@ -46,7 +46,7 @@ public class MembershipPlansController : BaseController
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Administrator,Manager")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<MembershipPlanWebModel>> UpdateMembershipPlan(int id, [FromBody] UpdateMembershipPlanCommand command)
     {
         if (id != command.Id)
@@ -59,7 +59,7 @@ public class MembershipPlansController : BaseController
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Administrator,Manager")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> DeleteMembershipPlan(int id)
     {
         await _mediator.Send(new DeleteMembershipPlanCommand { Id = id });

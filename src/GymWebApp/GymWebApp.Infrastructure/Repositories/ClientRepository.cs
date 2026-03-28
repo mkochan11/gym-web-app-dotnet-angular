@@ -39,4 +39,36 @@ public class ClientRepository : Repository<Client>, IClientRepository
         await _context.SaveChangesAsync();
         return client;
     }
+
+    public async Task<IEnumerable<Client>> GetAllWithMembershipAsync(string? search = null, int page = 1, int pageSize = 50)
+    {
+        var query = _context.Set<Client>()
+            .Include(c => c.GymMemberships)
+            .ThenInclude(m => m.MembershipPlan)
+            .Where(c => !c.Removed)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLower();
+            query = query.Where(c => 
+                c.Name.ToLower().Contains(searchLower) || 
+                c.Surname.ToLower().Contains(searchLower));
+        }
+
+        return await query
+            .OrderBy(c => c.Surname)
+            .ThenBy(c => c.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+    }
+
+    public async Task<Client?> GetByIdWithDetailsAsync(int id)
+    {
+        return await _context.Set<Client>()
+            .Include(c => c.GymMemberships)
+            .ThenInclude(m => m.MembershipPlan)
+            .FirstOrDefaultAsync(c => c.Id == id && !c.Removed);
+    }
 }

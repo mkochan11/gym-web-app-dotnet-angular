@@ -98,7 +98,7 @@ export const routes: Routes = [
           {
             path: 'membership-plans',
             canActivate: [authGuard, roleGuard],
-            data: { roles: ['Admin', 'Manager'] },
+            data: { roles: ['Admin', 'Manager', 'Receptionist'] },
             loadComponent: () => import('./features/membership-plans/membership-plans-list/membership-plans-list.component').then(m => m.MembershipPlansListComponent)
           }
         ]
@@ -116,8 +116,14 @@ export const routes: Routes = [
           {
             path: 'calendar',
             canActivate: [authGuard, roleGuard],
-            data: { roles: ['Manager', 'Admin'] },
+            data: { roles: ['Manager', 'Admin', 'Receptionist'] },
             loadComponent: () => import('./management/manager/manager-calendar/manager-calendar.component').then(m => m.ManagerCalendarComponent)
+          },
+          {
+            path: 'membership-plans',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin', 'Manager', 'Receptionist'] },
+            loadComponent: () => import('./features/membership-plans/membership-plans-list/membership-plans-list.component').then(m => m.MembershipPlansListComponent)
           },
           {
             path: 'trainers',
@@ -134,8 +140,38 @@ export const routes: Routes = [
           {
             path: 'clients',
             canActivate: [authGuard, roleGuard],
-            data: { roles: ['Admin','Manager','Owner'] },
-            loadComponent: () => import('./shared/components/manage-users/clients/clients.component').then(m => m.ClientsComponent)
+            data: { roles: ['Admin','Manager','Receptionist','Owner'] },
+            loadComponent: () => import('./features/clients/clients.component').then(m => m.ClientsComponent)
+          }
+        ]
+      },
+      {
+        path: 'receptionist',
+        component: ManagerLayoutComponent,
+        children: [
+          {
+            path: '',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Receptionist'] },
+            loadComponent: () => import('./management/receptionist/dashboard/dashboard.component').then(m => m.ReceptionistDashboardComponent)
+          },
+          {
+            path: 'calendar',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Manager', 'Admin', 'Receptionist'] },
+            loadComponent: () => import('./management/manager/manager-calendar/manager-calendar.component').then(m => m.ManagerCalendarComponent)
+          },
+          {
+            path: 'membership-plans',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin', 'Manager', 'Receptionist'] },
+            loadComponent: () => import('./features/membership-plans/membership-plans-list/membership-plans-list.component').then(m => m.MembershipPlansListComponent)
+          },
+          {
+            path: 'clients',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin','Manager','Receptionist','Owner'] },
+            loadComponent: () => import('./features/clients/clients.component').then(m => m.ClientsComponent)
           }
         ]
       },
