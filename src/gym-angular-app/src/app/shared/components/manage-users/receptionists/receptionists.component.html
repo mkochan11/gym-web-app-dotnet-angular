@@ -1,1 +1,50 @@
-<p>receptionists works!</p>
+<p-toast></p-toast>
+
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="start">
+      <h2 class="m-0">Receptionists</h2>
+    </ng-template>
+    <ng-template pTemplate="center">
+      <button pButton pRipple label="Manage All Users" icon="pi pi-users" class="p-button-info" routerLink="/management/manager/users"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    [value]="receptionists"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} receptionists"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    styleClass="p-datatable-striped"
+    [tableStyle]="{ 'min-width': '50rem' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+        <th pSortableColumn="firstName">First Name <p-sortIcon field="firstName"></p-sortIcon></th>
+        <th pSortableColumn="lastName">Last Name <p-sortIcon field="lastName"></p-sortIcon></th>
+        <th>Role</th>
+        <th pSortableColumn="createdAt">Created At <p-sortIcon field="createdAt"></p-sortIcon></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-receptionist>
+      <tr>
+        <td>{{ receptionist.email }}</td>
+        <td>{{ receptionist.firstName }}</td>
+        <td>{{ receptionist.lastName }}</td>
+        <td>
+          <p-tag [value]="receptionist.role" [severity]="getSeverity(receptionist.role)"></p-tag>
+        </td>
+        <td>{{ receptionist.createdAt | date: 'medium' }}</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center">No receptionists found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

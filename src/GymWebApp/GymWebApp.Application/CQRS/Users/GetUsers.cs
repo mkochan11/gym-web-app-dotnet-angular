@@ -1,8 +1,15 @@
+using GymWebApp.Application.Common.Authorization;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Application.WebModels.User;
 using MediatR;
+using System.Security.Claims;
 
 namespace GymWebApp.Application.CQRS.Users;
+
+public class GetUsersQuery : IRequest<List<UserWebModel>>
+{
+    public string? CurrentUserRole { get; set; }
+}
 
 public static class GetUsers
 {
@@ -17,11 +24,15 @@ public static class GetUsers
 
         public async Task<List<UserWebModel>> Handle(GetUsersQuery query, CancellationToken ct)
         {
-            return await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            if (!string.IsNullOrEmpty(query.CurrentUserRole))
+            {
+                var manageableRoles = UserRolePolicy.GetManageableRoles(query.CurrentUserRole);
+                users = users.Where(u => manageableRoles.Contains(u.Role)).ToList();
+            }
+
+            return users;
         }
     }
-}
-
-public class GetUsersQuery : IRequest<List<UserWebModel>>
-{
 }

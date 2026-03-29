@@ -1,8 +1,14 @@
+using GymWebApp.Application.Common.Authorization;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Domain.Enums;
 using MediatR;
 
 namespace GymWebApp.Application.CQRS.Users;
+
+public class GetRolesQuery : IRequest<List<string>>
+{
+    public string? CurrentUserRole { get; set; }
+}
 
 public static class GetRoles
 {
@@ -18,11 +24,15 @@ public static class GetRoles
         public async Task<List<string>> Handle(GetRolesQuery query, CancellationToken ct)
         {
             var roles = await _userRepository.GetAllRolesAsync();
-            return roles.Select(r => r.ToString()).ToList();
+            var roleNames = roles.Select(r => r.ToString()).ToList();
+
+            if (!string.IsNullOrEmpty(query.CurrentUserRole))
+            {
+                var manageableRoles = UserRolePolicy.GetManageableRoles(query.CurrentUserRole);
+                roleNames = roleNames.Where(r => manageableRoles.Contains(r)).ToList();
+            }
+
+            return roleNames;
         }
     }
-}
-
-public class GetRolesQuery : IRequest<List<string>>
-{
 }

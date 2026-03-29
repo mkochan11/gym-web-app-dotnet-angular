@@ -120,6 +120,12 @@ export const routes: Routes = [
             loadComponent: () => import('./management/manager/manager-calendar/manager-calendar.component').then(m => m.ManagerCalendarComponent)
           },
           {
+            path: 'users',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Manager', 'Admin'] },
+            loadComponent: () => import('./management/manager/users/manager-users.component').then(m => m.ManagerUsersComponent)
+          },
+          {
             path: 'membership-plans',
             canActivate: [authGuard, roleGuard],
             data: { roles: ['Admin', 'Manager', 'Receptionist'] },

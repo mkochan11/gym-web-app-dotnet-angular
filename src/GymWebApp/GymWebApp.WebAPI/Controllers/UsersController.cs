@@ -3,12 +3,13 @@ using GymWebApp.Application.WebModels.User;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GymWebApp.WebAPI.Controllers;
 
 [Route("api/users")]
 [ApiController]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Manager")]
 public class UsersController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -18,16 +19,26 @@ public class UsersController : ControllerBase
         _mediator = mediator;
     }
 
+    private string? GetCurrentUserRole()
+    {
+        return User.FindFirst(ClaimTypes.Role)?.Value;
+    }
+
     [HttpGet]
     public async Task<ActionResult<List<UserWebModel>>> GetUsers()
     {
-        var users = await _mediator.Send(new GetUsersQuery());
+        var query = new GetUsersQuery
+        {
+            CurrentUserRole = GetCurrentUserRole()
+        };
+        var users = await _mediator.Send(query);
         return Ok(users);
     }
 
     [HttpPost]
     public async Task<ActionResult<UserWebModel>> CreateUser([FromBody] CreateUserCommand command)
     {
+        command.CurrentUserRole = GetCurrentUserRole();
         var user = await _mediator.Send(command);
         return Ok(user);
     }
@@ -35,7 +46,11 @@ public class UsersController : ControllerBase
     [HttpGet("roles")]
     public async Task<ActionResult<List<string>>> GetRoles()
     {
-        var roles = await _mediator.Send(new GetRolesQuery());
+        var query = new GetRolesQuery
+        {
+            CurrentUserRole = GetCurrentUserRole()
+        };
+        var roles = await _mediator.Send(query);
         return Ok(roles);
     }
 
@@ -57,6 +72,7 @@ public class UsersController : ControllerBase
         {
             return BadRequest("User ID mismatch");
         }
+        command.CurrentUserRole = GetCurrentUserRole();
         var user = await _mediator.Send(command);
         return Ok(user);
     }
@@ -64,7 +80,11 @@ public class UsersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        var command = new DeleteUserCommand { UserId = id };
+        var command = new DeleteUserCommand
+        {
+            UserId = id,
+            CurrentUserRole = GetCurrentUserRole()
+        };
         var result = await _mediator.Send(command);
         if (!result)
         {

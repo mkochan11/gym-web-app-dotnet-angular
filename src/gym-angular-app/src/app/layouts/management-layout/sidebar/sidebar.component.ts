@@ -21,6 +21,7 @@ export class SidebarComponent {
     { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/management/manager'] },
     { label: 'Calendar', icon: 'pi pi-calendar', routerLink: ['/management/manager/calendar'] },
     { label: 'Clients', icon: 'pi pi-users', routerLink: ['/management/manager/clients'] },
+    { label: 'User Management', icon: 'pi pi-user-edit', routerLink: ['/management/manager/users'] },
     { label: 'Membership Plans', icon: 'pi pi-credit-card', routerLink: ['/management/manager/membership-plans'] },
     { label: 'Employees', icon: 'pi pi-users', items: [
       { label: 'Trainers', icon: 'pi pi-user-edit', routerLink: ['/management/manager/trainers'] },

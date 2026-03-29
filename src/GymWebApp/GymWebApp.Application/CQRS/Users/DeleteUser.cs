@@ -1,10 +1,17 @@
 using FluentValidation;
+using GymWebApp.Application.Common.Authorization;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using MediatR;
 using ValidationException = GymWebApp.Application.Common.Exceptions.ValidationException;
 
 namespace GymWebApp.Application.CQRS.Users;
+
+public class DeleteUserCommand : IRequest<bool>
+{
+    public string UserId { get; set; } = null!;
+    public string? CurrentUserRole { get; set; }
+}
 
 public static class DeleteUser
 {
@@ -30,6 +37,17 @@ public static class DeleteUser
             if (existingUser == null)
             {
                 throw new NotFoundException("User", command.UserId);
+            }
+
+            if (!string.IsNullOrEmpty(command.CurrentUserRole))
+            {
+                if (!UserRolePolicy.CanManageRole(command.CurrentUserRole, existingUser.Role))
+                {
+                    throw new ValidationException("Cannot delete this user", new Dictionary<string, string[]>
+                    {
+                        { "DeleteUser", new[] { "You don't have permission to delete users with this role" } }
+                    });
+                }
             }
 
             var currentUserId = await _userRepository.GetCurrentUserIdAsync();
@@ -63,9 +81,9 @@ public static class DeleteUser
 
         private static bool IsEmployeeRole(string role)
         {
-            return role == "Owner" || 
-                   role == "Manager" || 
-                   role == "Trainer" || 
+            return role == "Owner" ||
+                   role == "Manager" ||
+                   role == "Trainer" ||
                    role == "Receptionist";
         }
     }
@@ -84,9 +102,4 @@ public static class DeleteUser
             return !string.IsNullOrWhiteSpace(id);
         }
     }
-}
-
-public class DeleteUserCommand : IRequest<bool>
-{
-    public string UserId { get; set; } = null!;
 }

@@ -1,4 +1,5 @@
 using FluentValidation;
+using GymWebApp.Application.Common.Authorization;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Application.WebModels.User;
@@ -8,6 +9,17 @@ using MediatR;
 using ValidationException = GymWebApp.Application.Common.Exceptions.ValidationException;
 
 namespace GymWebApp.Application.CQRS.Users;
+
+public class UpdateUserCommand : IRequest<UserWebModel>
+{
+    public string Id { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string? PhoneNumber { get; set; }
+    public string Role { get; set; } = null!;
+    public string? CurrentUserRole { get; set; }
+}
 
 public static class UpdateUser
 {
@@ -33,6 +45,25 @@ public static class UpdateUser
             if (existingUser == null)
             {
                 throw new NotFoundException("User", command.Id);
+            }
+
+            if (!string.IsNullOrEmpty(command.CurrentUserRole))
+            {
+                if (!UserRolePolicy.CanManageRole(command.CurrentUserRole, existingUser.Role))
+                {
+                    throw new ValidationException("Cannot modify this user", new Dictionary<string, string[]>
+                    {
+                        { "UpdateUser", new[] { "You don't have permission to modify users with this role" } }
+                    });
+                }
+
+                if (!UserRolePolicy.CanManageRole(command.CurrentUserRole, command.Role))
+                {
+                    throw new ValidationException($"Role '{command.Role}' cannot be assigned by {command.CurrentUserRole}", new Dictionary<string, string[]>
+                    {
+                        { "Role", new[] { $"You don't have permission to assign role '{command.Role}'" } }
+                    });
+                }
             }
 
             if (!string.Equals(existingUser.Email, command.Email, StringComparison.OrdinalIgnoreCase))
@@ -77,10 +108,10 @@ public static class UpdateUser
         }
 
         private async Task HandleRelatedEntityChangesAsync(
-            string userId, 
-            string oldRole, 
-            string newRole, 
-            string firstName, 
+            string userId,
+            string oldRole,
+            string newRole,
+            string firstName,
             string lastName)
         {
             var oldIsEmployee = IsEmployeeRole(oldRole);
@@ -159,9 +190,9 @@ public static class UpdateUser
 
         private static bool IsEmployeeRole(string role)
         {
-            return role == "Owner" || 
-                   role == "Manager" || 
-                   role == "Trainer" || 
+            return role == "Owner" ||
+                   role == "Manager" ||
+                   role == "Trainer" ||
                    role == "Receptionist";
         }
 
@@ -211,14 +242,4 @@ public static class UpdateUser
             return Enum.TryParse<UserRole>(role, out _);
         }
     }
-}
-
-public class UpdateUserCommand : IRequest<UserWebModel>
-{
-    public string Id { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
-    public string? PhoneNumber { get; set; }
-    public string Role { get; set; } = null!;
 }

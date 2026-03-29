@@ -1,4 +1,5 @@
 using FluentValidation;
+using GymWebApp.Application.Common.Authorization;
 using GymWebApp.Application.Common.Exceptions;
 using GymWebApp.Application.Interfaces.Repositories;
 using GymWebApp.Application.WebModels.User;
@@ -8,6 +9,17 @@ using MediatR;
 using ValidationException = GymWebApp.Application.Common.Exceptions.ValidationException;
 
 namespace GymWebApp.Application.CQRS.Users;
+
+public class CreateUserCommand : IRequest<UserWebModel>
+{
+    public string Email { get; set; } = null!;
+    public string Password { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string? PhoneNumber { get; set; }
+    public string Role { get; set; } = null!;
+    public string? CurrentUserRole { get; set; }
+}
 
 public static class CreateUser
 {
@@ -29,6 +41,17 @@ public static class CreateUser
 
         public async Task<UserWebModel> Handle(CreateUserCommand command, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(command.CurrentUserRole))
+            {
+                if (!UserRolePolicy.CanManageRole(command.CurrentUserRole, command.Role))
+                {
+                    throw new ValidationException($"Role '{command.Role}' cannot be assigned by {command.CurrentUserRole}", new Dictionary<string, string[]>
+                    {
+                        { "Role", new[] { $"You don't have permission to create users with role '{command.Role}'" } }
+                    });
+                }
+            }
+
             var existingUser = await _userRepository.GetByEmailAsync(command.Email);
             if (existingUser != null)
             {
@@ -115,9 +138,9 @@ public static class CreateUser
 
         private static bool IsEmployeeRole(UserRole role)
         {
-            return role == UserRole.Owner || 
-                   role == UserRole.Manager || 
-                   role == UserRole.Trainer || 
+            return role == UserRole.Owner ||
+                   role == UserRole.Manager ||
+                   role == UserRole.Trainer ||
                    role == UserRole.Receptionist;
         }
 
@@ -164,14 +187,4 @@ public static class CreateUser
             return Enum.TryParse<UserRole>(role, out _);
         }
     }
-}
-
-public class CreateUserCommand : IRequest<UserWebModel>
-{
-    public string Email { get; set; } = null!;
-    public string Password { get; set; } = null!;
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
-    public string? PhoneNumber { get; set; }
-    public string Role { get; set; } = null!;
 }

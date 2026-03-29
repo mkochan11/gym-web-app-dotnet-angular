@@ -1,0 +1,184 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="start">
+      <h2 class="m-0">User Management</h2>
+    </ng-template>
+    <ng-template pTemplate="center">
+      <button pButton pRipple label="Create New User" icon="pi pi-plus" class="p-button-success" (click)="openNewUser()"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    [value]="users"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    styleClass="p-datatable-striped"
+    [tableStyle]="{ 'min-width': '50rem' }">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+        <th pSortableColumn="firstName">First Name <p-sortIcon field="firstName"></p-sortIcon></th>
+        <th pSortableColumn="lastName">Last Name <p-sortIcon field="lastName"></p-sortIcon></th>
+        <th pSortableColumn="role">Role <p-sortIcon field="role"></p-sortIcon></th>
+        <th pSortableColumn="createdAt">Created At <p-sortIcon field="createdAt"></p-sortIcon></th>
+        <th style="width: 10rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user>
+      <tr>
+        <td>{{ user.email }}</td>
+        <td>{{ user.firstName }}</td>
+        <td>{{ user.lastName }}</td>
+        <td>
+          <p-tag [value]="user.role" [severity]="getSeverity(user.role)"></p-tag>
+        </td>
+        <td>{{ user.createdAt | date: 'medium' }}</td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-text" pTooltip="Edit User" (click)="editUser(user)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-text" pTooltip="Delete User" [disabled]="user.id === getCurrentUserId()" (click)="confirmDeleteUser(user)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center">No users found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="userDialog"
+  [style]="{ width: '450px' }"
+  [header]="isEditMode ? 'Edit User' : 'Create New User'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  (onHide)="hideDialog()">
+
+  <ng-template pTemplate="content">
+    <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+      <div class="field">
+        <label for="email">Email *</label>
+        <input
+          id="email"
+          type="email"
+          pInputText
+          formControlName="email"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && userForm.get('email')?.invalid }"
+        />
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('email')?.invalid">
+          Email is required and must be valid.
+        </small>
+      </div>
+
+      <div class="field" *ngIf="!isEditMode">
+        <label for="password">Password *</label>
+        <p-password
+          id="password"
+          formControlName="password"
+          [toggleMask]="true"
+          [feedback]="true"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && userForm.get('password')?.invalid }"
+        ></p-password>
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('password')?.invalid">
+          Password must be at least 8 characters.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="firstName">First Name *</label>
+        <input
+          id="firstName"
+          type="text"
+          pInputText
+          formControlName="firstName"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && userForm.get('firstName')?.invalid }"
+        />
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('firstName')?.invalid">
+          First name is required.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="lastName">Last Name *</label>
+        <input
+          id="lastName"
+          type="text"
+          pInputText
+          formControlName="lastName"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && userForm.get('lastName')?.invalid }"
+        />
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('lastName')?.invalid">
+          Last name is required.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="phoneNumber">Phone Number</label>
+        <input
+          id="phoneNumber"
+          type="text"
+          pInputText
+          formControlName="phoneNumber"
+        />
+      </div>
+
+      <div class="field">
+        <label for="role">Role *</label>
+        <p-dropdown
+          id="role"
+          formControlName="role"
+          [options]="roles"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select a role"
+          [ngClass]="{ 'ng-invalid ng-dirty': submitted && userForm.get('role')?.invalid }"
+        ></p-dropdown>
+        <small class="ng-dirty ng-invalid" *ngIf="submitted && userForm.get('role')?.invalid">
+          Role is required.
+        </small>
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-success" (click)="saveUser()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="deleteDialog"
+  [style]="{ width: '450px' }"
+  header="Confirm Delete"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid"
+  (onHide)="hideDeleteDialog()">
+
+  <ng-template pTemplate="content">
+    <div class="confirmation-content">
+      <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-right: 10px; color: var(--red-500);"></i>
+      <span *ngIf="userToDelete">
+        Are you sure you want to delete <b>{{ userToDelete.firstName }} {{ userToDelete.lastName }}</b> ({{ userToDelete.email }})?
+      </span>
+      <p style="margin-top: 10px; color: var(--red-500);">This action cannot be undone.</p>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDeleteDialog()"></button>
+    <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="deleteUser()"></button>
+  </ng-template>
+</p-dialog>

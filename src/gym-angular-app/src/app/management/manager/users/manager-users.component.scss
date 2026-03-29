@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  padding: 1rem;
+}
+
+.confirmation-content {
+  display: flex;
+  align-items: center;
+}
+
+.field {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+}
+
+.p-dialog .p-dialog-content {
+  padding-bottom: 0;
+}
