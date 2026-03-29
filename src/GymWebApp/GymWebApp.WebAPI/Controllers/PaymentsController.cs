@@ -45,4 +45,25 @@ public class PaymentsController : BaseController
         var result = await _mediator.Send(command);
         return Ok(result);
     }
+
+    [HttpGet("client/{clientId}/schedule")]
+    [Authorize(Roles = "Receptionist,Manager,Admin")]
+    public async Task<ActionResult<ClientPaymentScheduleDto>> GetClientPaymentSchedule(int clientId)
+    {
+        var query = new GetClientPaymentSchedule.Query
+        {
+            ClientId = clientId
+        };
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpPost("accept")]
+    [Authorize(Roles = "Receptionist,Manager,Admin")]
+    public async Task<ActionResult<PaymentResultWebModel>> AcceptPayment([FromBody] AcceptPayment.Command command)
+    {
+        command.ProcessedById = CurrentUserId;
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
 }

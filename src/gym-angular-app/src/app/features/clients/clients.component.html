@@ -85,6 +85,15 @@
             (click)="viewClientDetails(client)">
           </button>
           <button
+            *ngIf="canViewPayments(client)"
+            pButton
+            pRipple
+            icon="pi pi-credit-card"
+            class="p-button-rounded p-button-help p-button-text"
+            pTooltip="View Payments"
+            (click)="navigateToClientPayments(client)">
+          </button>
+          <button
             *ngIf="canActivateMembership(client)"
             pButton
             pRipple

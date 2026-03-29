@@ -41,3 +41,26 @@ export enum PaymentMethod {
   BankTransfer = 2,
   Other = 3
 }
+
+export interface AcceptPaymentRequest {
+  clientId: number;
+  paymentId: number;
+  paymentMethod: PaymentMethod;
+  transactionId: string | null;
+}
+
+export interface ClientPaymentSchedule {
+  clientId: number;
+  clientName: string;
+  clientSurname: string;
+  membershipId: number | null;
+  planName: string | null;
+  isActive: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  payments: Payment[];
+  totalPayments: number;
+  paidPayments: number;
+  pendingPayments: number;
+  overduePayments: number;
+}

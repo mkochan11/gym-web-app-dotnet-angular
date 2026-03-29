@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpService } from './http.service';
-import { Payment, PaymentResult, ProcessPaymentRequest, ProcessMultiplePaymentsRequest } from '../models/payment.model';
+import { Payment, PaymentResult, ProcessPaymentRequest, ProcessMultiplePaymentsRequest, AcceptPaymentRequest, ClientPaymentSchedule } from '../models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,5 +19,13 @@ export class PaymentService {
 
   processMultiplePayments(request: ProcessMultiplePaymentsRequest): Observable<PaymentResult[]> {
     return this.httpService.post<PaymentResult[]>('payments/process-multiple', request);
+  }
+
+  getClientPaymentSchedule(clientId: number): Observable<ClientPaymentSchedule> {
+    return this.httpService.get<ClientPaymentSchedule>(`payments/client/${clientId}/schedule`);
+  }
+
+  acceptPayment(request: AcceptPaymentRequest): Observable<PaymentResult> {
+    return this.httpService.post<PaymentResult>('payments/accept', request);
   }
 }

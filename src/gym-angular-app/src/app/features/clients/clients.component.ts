@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ClientService } from '../../core/api-services/client.service';
 import { ClientListItem, ClientDetails } from '../../core/models/client';
 import { AuthService } from '../../core/api-services/auth.service';
@@ -49,6 +50,7 @@ export class ClientsComponent implements OnInit {
   private authService = inject(AuthService);
   private messageService = inject(MessageService);
   private dialogService = inject(DialogService);
+  private router = inject(Router);
 
   clients: ClientListItem[] = [];
   loading = false;
@@ -241,5 +243,14 @@ export class ClientsComponent implements OnInit {
         });
       }
     });
+  }
+
+  canViewPayments(client: ClientListItem): boolean {
+    const userRole = this.authService.getRole();
+    return userRole === 'Manager' || userRole === 'Receptionist' || userRole === 'Admin';
+  }
+
+  navigateToClientPayments(client: ClientListItem) {
+    this.router.navigate(['/management/receptionist/client-payments', client.id]);
   }
 }

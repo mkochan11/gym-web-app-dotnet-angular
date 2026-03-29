@@ -142,6 +142,12 @@ export const routes: Routes = [
             canActivate: [authGuard, roleGuard],
             data: { roles: ['Admin','Manager','Receptionist','Owner'] },
             loadComponent: () => import('./features/clients/clients.component').then(m => m.ClientsComponent)
+          },
+          {
+            path: 'client-payments/:clientId',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin','Manager','Receptionist'] },
+            loadComponent: () => import('./management/receptionist/client-payments/client-payments.component').then(m => m.ClientPaymentsComponent)
           }
         ]
       },
@@ -172,6 +178,12 @@ export const routes: Routes = [
             canActivate: [authGuard, roleGuard],
             data: { roles: ['Admin','Manager','Receptionist','Owner'] },
             loadComponent: () => import('./features/clients/clients.component').then(m => m.ClientsComponent)
+          },
+          {
+            path: 'client-payments/:clientId',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Admin','Manager','Receptionist'] },
+            loadComponent: () => import('./management/receptionist/client-payments/client-payments.component').then(m => m.ClientPaymentsComponent)
           }
         ]
       },

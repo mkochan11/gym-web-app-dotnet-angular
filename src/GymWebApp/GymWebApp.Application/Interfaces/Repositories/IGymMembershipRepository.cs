@@ -6,6 +6,7 @@ namespace GymWebApp.Application.Interfaces.Repositories;
 public interface IGymMembershipRepository : IRepository<GymMembership>
 {
     Task<GymMembership?> GetByIdWithDetailsAsync(int id);
+    Task<GymMembership?> GetByClientIdWithDetailsAsync(int clientId);
     Task<GymMembership?> GetActiveMembershipByClientIdAsync(int clientId);
     Task<IEnumerable<GymMembership>> GetMembershipsByClientIdAsync(int clientId);
     Task<bool> HasActiveMembershipAsync(int clientId);

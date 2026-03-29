@@ -20,6 +20,15 @@ public class GymMembershipRepository : Repository<GymMembership>, IGymMembership
             .FirstOrDefaultAsync(m => m.Id == id && !m.Removed);
     }
 
+    public async Task<GymMembership?> GetByClientIdWithDetailsAsync(int clientId)
+    {
+        return await _context.Set<GymMembership>()
+            .Include(m => m.Client)
+            .Include(m => m.MembershipPlan)
+            .Include(m => m.Payments)
+            .FirstOrDefaultAsync(m => m.ClientId == clientId && !m.Removed);
+    }
+
     public async Task<GymMembership?> GetActiveMembershipByClientIdAsync(int clientId)
     {
         var today = DateTime.UtcNow.Date;
