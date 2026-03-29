@@ -1,0 +1,83 @@
+.change-plan-dialog {
+  .client-info {
+    background-color: var(--surface-100);
+    padding: 1rem;
+    border-radius: 8px;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0.5rem 0;
+    }
+  }
+
+  .plans-list {
+    .plan-option {
+      p-card {
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+          ::ng-deep .p-card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+        }
+
+        ::ng-deep .p-card {
+          padding: 1rem;
+          transition: all 0.2s;
+        }
+
+        &.plan-selected {
+          ::ng-deep .p-card {
+            border: 3px solid #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+          }
+        }
+      }
+
+      .features {
+        small {
+          display: inline-block;
+          margin-right: 1rem;
+        }
+      }
+    }
+  }
+
+  .plan-comparison {
+    .p-card {
+      height: 100%;
+    }
+  }
+
+  .credit-info {
+    p-card {
+      ::ng-deep .p-card {
+        background-color: #eff6ff;
+      }
+    }
+  }
+
+  .payment-method {
+    .field-checkbox {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--surface-200);
+  }
+
+  .success-message {
+    i {
+      display: block;
+    }
+  }
+}

@@ -1,0 +1,237 @@
+<div class="change-plan-dialog">
+  <p-steps [model]="steps" [activeIndex]="currentStep" [readonly]="true"></p-steps>
+
+  <div *ngIf="!changeComplete" class="dialog-content mt-4">
+    <!-- Step 1: Select Plan -->
+    <div *ngIf="currentStep === 0" class="step-content">
+      <div class="client-info mb-4">
+        <h4>Current Membership</h4>
+        <p><strong>Client:</strong> {{ client.firstName }} {{ client.lastName }}</p>
+        <p *ngIf="currentMembership">
+          <strong>Current Plan:</strong> {{ currentMembership.planName }}
+        </p>
+        <p *ngIf="currentMembership">
+          <strong>Price:</strong> {{ formatCurrency(currentMembership.planPrice) }}/month
+        </p>
+      </div>
+
+      <div class="plan-selection">
+        <label class="block text-900 font-medium mb-2">Select New Plan</label>
+        <div *ngIf="loadingPlans" class="text-center py-4">
+          <i class="pi pi-spin pi-spinner text-2xl"></i>
+          <p>Loading available plans...</p>
+        </div>
+
+        <div *ngIf="!loadingPlans && availablePlans.length === 0" class="text-center py-4">
+          <p class="text-500">No other plans available for change.</p>
+        </div>
+
+        <div *ngIf="!loadingPlans && availablePlans.length > 0" class="plans-list">
+          <div *ngFor="let plan of availablePlans" class="plan-option mb-3">
+            <p-card [ngClass]="{'cursor-pointer': true, 'plan-selected': selectedPlan?.id === plan.id}"
+                    (click)="onPlanSelect(plan)">
+              <div class="flex align-items-center justify-content-between">
+                <div>
+                  <h5 class="m-0">{{ plan.type }}</h5>
+                  <p class="m-0 text-600">{{ plan.description }}</p>
+                  <div class="features mt-2">
+                    <small *ngIf="plan.canAccessGroupTraining" class="mr-2">
+                      <i class="pi pi-check text-green-500"></i> Group Training
+                    </small>
+                    <small *ngIf="plan.canAccessPersonalTraining" class="mr-2">
+                      <i class="pi pi-check text-green-500"></i> Personal Training
+                    </small>
+                    <small *ngIf="plan.canReceiveTrainingPlans" class="mr-2">
+                      <i class="pi pi-check text-green-500"></i> Training Plans
+                    </small>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <h4 class="m-0 text-primary">{{ formatCurrency(plan.price) }}</h4>
+                  <small class="text-500">/month</small>
+                </div>
+              </div>
+            </p-card>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions flex justify-content-end gap-2 mt-4">
+        <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close()"></button>
+        <button pButton type="button" label="Next" (click)="nextStep()" [disabled]="!canProceedToNextStep()"></button>
+      </div>
+    </div>
+
+    <!-- Step 2: Review -->
+    <div *ngIf="currentStep === 1" class="step-content">
+      <div *ngIf="loadingCalculation" class="text-center py-4">
+        <i class="pi pi-spin pi-spinner text-2xl"></i>
+        <p>Calculating credit...</p>
+      </div>
+
+      <div *ngIf="!loadingCalculation && creditCalculation" class="review-content">
+        <h4>Plan Change Summary</h4>
+
+        <div class="plan-comparison mb-4">
+          <div class="grid">
+            <div class="col-6">
+              <p-card header="Current Plan">
+                <p><strong>{{ creditCalculation.currentPlanName }}</strong></p>
+                <p>{{ formatCurrency(creditCalculation.currentPlanPrice) }}/month</p>
+              </p-card>
+            </div>
+            <div class="col-6">
+              <p-card header="New Plan">
+                <p><strong>{{ creditCalculation.newPlanName }}</strong></p>
+                <p>{{ formatCurrency(creditCalculation.newPlanPrice) }}/month</p>
+              </p-card>
+            </div>
+          </div>
+        </div>
+
+        <div class="credit-info mb-4">
+          <p-card styleClass="bg-blue-50">
+            <div class="flex flex-column gap-2">
+              <div class="flex justify-content-between">
+                <span>Unused Days:</span>
+                <strong>{{ creditCalculation.unusedDays }} days</strong>
+              </div>
+              <div class="flex justify-content-between">
+                <span>Credit Amount:</span>
+                <strong>{{ formatCurrency(creditCalculation.creditAmount) }}</strong>
+              </div>
+              <div *ngIf="isUpgrade()" class="flex justify-content-between text-red-500">
+                <span>Additional Payment Required:</span>
+                <strong>{{ formatCurrency(creditCalculation.firstPaymentAmount) }}</strong>
+              </div>
+              <div *ngIf="!isUpgrade()" class="flex justify-content-between text-green-500">
+                <span>Credit Applied:</span>
+                <strong>{{ formatCurrency(abs(creditCalculation.totalDifference)) }}</strong>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+
+      <div class="actions flex justify-content-between gap-2 mt-4">
+        <button pButton type="button" label="Back" class="p-button-secondary" (click)="prevStep()"></button>
+        <div class="flex gap-2">
+          <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close()"></button>
+          <button pButton type="button" [label]="requiresPayment() ? 'Next' : 'Confirm Change'" (click)="nextStep()" [disabled]="!canProceedToNextStep()"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Payment (only for upgrades) -->
+    <div *ngIf="currentStep === 2" class="step-content">
+      <div *ngIf="requiresPayment()" class="payment-section">
+        <h4>Additional Payment Required</h4>
+
+        <div class="payment-info mb-4">
+          <p-card styleClass="bg-green-50">
+            <div class="text-center">
+              <h3 class="m-0 text-primary">{{ formatCurrency(creditCalculation?.firstPaymentAmount ?? 0) }}</h3>
+              <p class="m-0">Additional payment required for upgrade</p>
+            </div>
+          </p-card>
+        </div>
+
+        <div class="payment-method mb-4">
+          <label class="block text-900 font-medium mb-2">Payment Method</label>
+          <div class="flex flex-wrap gap-3">
+            <div *ngFor="let method of paymentMethods" class="field-checkbox">
+              <p-radioButton
+                [name]="'paymentMethod'"
+                [value]="method.value"
+                [(ngModel)]="paymentMethod"
+                [inputId]="method.value">
+              </p-radioButton>
+              <label [for]="method.value" class="ml-2">{{ method.label }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="paymentMethod === 'Card' || paymentMethod === 'BankTransfer'" class="transaction-field mb-4">
+          <label for="transactionId" class="block text-900 font-medium mb-2">Transaction ID (Optional)</label>
+          <input id="transactionId" type="text" pInputText [(ngModel)]="transactionId" class="w-full" placeholder="Enter transaction reference...">
+        </div>
+      </div>
+
+      <div *ngIf="!requiresPayment()" class="no-payment-needed text-center py-4">
+        <i class="pi pi-check-circle text-green-500 text-4xl mb-3"></i>
+        <h4>No Additional Payment Required</h4>
+        <p>Credit covers the cost difference.</p>
+      </div>
+
+      <div class="actions flex justify-content-between gap-2 mt-4">
+        <button pButton type="button" label="Back" class="p-button-secondary" (click)="prevStep()"></button>
+        <div class="flex gap-2">
+          <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close()"></button>
+          <button pButton type="button" label="Confirm Change" (click)="nextStep()" [disabled]="!canProceedToNextStep()"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Confirm -->
+    <div *ngIf="currentStep === 3" class="step-content">
+      <div class="confirmation-content">
+        <h4>Confirm Plan Change</h4>
+
+        <div class="confirmation-details mb-4">
+          <p-card>
+            <div class="flex flex-column gap-3">
+              <div class="flex justify-content-between">
+                <span>Client:</span>
+                <strong>{{ client.firstName }} {{ client.lastName }}</strong>
+              </div>
+              <div class="flex justify-content-between">
+                <span>New Plan:</span>
+                <strong>{{ selectedPlan?.type }}</strong>
+              </div>
+              <div class="flex justify-content-between">
+                <span>New Monthly Price:</span>
+                <strong>{{ formatCurrency(selectedPlan?.price ?? 0) }}</strong>
+              </div>
+              <div *ngIf="creditCalculation" class="flex justify-content-between">
+                <span>First Payment:</span>
+                <strong [class.text-red-500]="isUpgrade()" [class.text-green-500]="!isUpgrade()">
+                  {{ formatCurrency(creditCalculation.firstPaymentAmount) }}
+                </strong>
+              </div>
+            </div>
+          </p-card>
+        </div>
+
+        <p-card styleClass="bg-yellow-50">
+          <div class="flex align-items-center">
+            <i class="pi pi-info-circle text-yellow-500 mr-2"></i>
+            <span>
+              The new plan will take effect immediately. Client will have access to new features right away.
+            </span>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="actions flex justify-content-between gap-2 mt-4">
+        <button pButton type="button" label="Back" class="p-button-secondary" (click)="prevStep()"></button>
+        <div class="flex gap-2">
+          <button pButton type="button" label="Cancel" class="p-button-secondary" (click)="close()"></button>
+          <button pButton type="button" label="Confirm Change" class="p-button-success" (click)="changePlan()" [loading]="loading" [disabled]="loading"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="changeComplete" class="success-message text-center py-4">
+    <i class="pi pi-check-circle text-green-500 text-6xl mb-4"></i>
+    <h3>Plan Changed Successfully</h3>
+    <p class="text-600 mb-4">
+      The membership plan for <strong>{{ client.firstName }} {{ client.lastName }}</strong> has been changed to <strong>{{ selectedPlan?.type }}</strong>.
+    </p>
+    <p class="text-600 mb-4">
+      New monthly price: <strong>{{ formatCurrency(selectedPlan?.price ?? 0) }}</strong>
+    </p>
+    <button pButton type="button" label="Close" (click)="close()"></button>
+  </div>
+</div>

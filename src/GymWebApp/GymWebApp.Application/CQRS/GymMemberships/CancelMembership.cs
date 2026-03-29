@@ -15,6 +15,7 @@ public static class CancelMembership
         public int MembershipId { get; set; }
         public string? CancellationReason { get; set; }
         public string? UpdatedById { get; set; }
+        public bool RequireCancellationReason { get; set; }
     }
 
     public class Handler : IRequestHandler<Command, GymMembershipWebModel>
@@ -80,7 +81,13 @@ public static class CancelMembership
                 .WithMessage("Membership ID must be greater than 0.");
 
             RuleFor(x => x.CancellationReason)
+                .NotEmpty()
+                .When(x => x.RequireCancellationReason)
+                .WithMessage("Cancellation reason is required for staff-initiated cancellations.");
+
+            RuleFor(x => x.CancellationReason)
                 .MaximumLength(500)
+                .When(x => !string.IsNullOrEmpty(x.CancellationReason))
                 .WithMessage("Cancellation reason cannot exceed 500 characters.");
         }
     }

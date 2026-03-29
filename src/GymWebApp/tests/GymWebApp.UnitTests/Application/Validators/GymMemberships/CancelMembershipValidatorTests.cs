@@ -99,4 +99,50 @@ public class CancelMembershipValidatorTests
         result.IsValid.Should().BeTrue();
         result.Errors.Should().NotContain(e => e.PropertyName == "CancellationReason");
     }
+
+    [Fact]
+    public void Validate_StaffActionWithoutReason_FailsValidation()
+    {
+        var command = new CancelMembership.Command
+        {
+            MembershipId = 1,
+            CancellationReason = null,
+            RequireCancellationReason = true
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == "CancellationReason");
+    }
+
+    [Fact]
+    public void Validate_StaffActionWithReason_PassesValidation()
+    {
+        var command = new CancelMembership.Command
+        {
+            MembershipId = 1,
+            CancellationReason = "Client moving to another city",
+            RequireCancellationReason = true
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_ClientActionWithoutReason_PassesValidation()
+    {
+        var command = new CancelMembership.Command
+        {
+            MembershipId = 1,
+            CancellationReason = null,
+            RequireCancellationReason = false
+        };
+
+        var result = _validator.Validate(command);
+
+        result.IsValid.Should().BeTrue();
+    }
 }

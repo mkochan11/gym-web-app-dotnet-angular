@@ -1,0 +1,44 @@
+.cancel-dialog {
+  .client-info {
+    background-color: var(--surface-100);
+    padding: 1rem;
+    border-radius: 8px;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    p {
+      margin: 0.5rem 0;
+    }
+  }
+
+  .cancellation-info {
+    p-card {
+      ::ng-deep .p-card {
+        background-color: #fffbeb;
+        border: 1px solid #fcd34d;
+      }
+    }
+  }
+
+  .reason-field {
+    textarea {
+      width: 100%;
+    }
+  }
+
+  .actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--surface-200);
+  }
+
+  .success-message {
+    i {
+      display: block;
+    }
+  }
+}

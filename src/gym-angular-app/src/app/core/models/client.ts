@@ -9,7 +9,7 @@ export interface ClientListItem {
   firstName: string;
   lastName: string;
   email: string;
-  membershipStatus: 'Active' | 'Expired' | 'Cancelled' | 'None';
+  membershipStatus: 'Active' | 'Pending Cancellation' | 'Expired' | 'Cancelled' | 'None';
   currentPlanName?: string;
 }
 
@@ -17,7 +17,7 @@ export interface ClientMembership {
   id: number;
   planName: string;
   planDescription: string;
-  status: 'Active' | 'Expired' | 'Cancelled';
+  status: 'Active' | 'Pending Cancellation' | 'Expired' | 'Cancelled';
   startDate: Date;
   endDate: Date;
   price: number;

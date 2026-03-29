@@ -35,7 +35,7 @@ public static class ClientExtensions
             membershipStatus = currentMembership.Status switch
             {
                 MembershipStatus.Active => "Active",
-                MembershipStatus.PendingCancellation => "Active",
+                MembershipStatus.PendingCancellation => "Pending Cancellation",
                 MembershipStatus.Cancelled => "Cancelled",
                 MembershipStatus.Expired => "Expired",
                 _ => "None"
@@ -79,7 +79,7 @@ public static class ClientExtensions
                 Status = currentMembership.Status switch
                 {
                     MembershipStatus.Active => "Active",
-                    MembershipStatus.PendingCancellation => "Active",
+                    MembershipStatus.PendingCancellation => "Pending Cancellation",
                     MembershipStatus.Cancelled => "Cancelled",
                     MembershipStatus.Expired => "Expired",
                     _ => "Unknown"

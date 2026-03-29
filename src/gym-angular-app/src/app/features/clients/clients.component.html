@@ -76,22 +76,40 @@
         </td>
         <td>{{ client.currentPlanName || 'No active plan' }}</td>
         <td>
-          <button 
-            pButton 
-            pRipple 
-            icon="pi pi-eye" 
-            class="p-button-rounded p-button-info p-button-text" 
-            pTooltip="View Details" 
+          <button
+            pButton
+            pRipple
+            icon="pi pi-eye"
+            class="p-button-rounded p-button-info p-button-text"
+            pTooltip="View Details"
             (click)="viewClientDetails(client)">
           </button>
-          <button 
+          <button
             *ngIf="canActivateMembership(client)"
-            pButton 
-            pRipple 
-            icon="pi pi-plus" 
-            class="p-button-rounded p-button-success p-button-text" 
-            pTooltip="Activate Membership" 
+            pButton
+            pRipple
+            icon="pi pi-plus"
+            class="p-button-rounded p-button-success p-button-text"
+            pTooltip="Activate Membership"
             (click)="openActivationDialog(client)">
+          </button>
+          <button
+            *ngIf="canCancelMembership(client)"
+            pButton
+            pRipple
+            icon="pi pi-times"
+            class="p-button-rounded p-button-danger p-button-text"
+            pTooltip="Cancel Membership"
+            (click)="openCancelDialog(client)">
+          </button>
+          <button
+            *ngIf="canChangePlan(client)"
+            pButton
+            pRipple
+            icon="pi pi-sync"
+            class="p-button-rounded p-button-warning p-button-text"
+            pTooltip="Change Plan"
+            (click)="openChangePlanDialog(client)">
           </button>
         </td>
       </tr>

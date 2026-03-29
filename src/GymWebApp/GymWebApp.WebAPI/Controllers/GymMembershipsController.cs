@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using GymWebApp.Application.CQRS.GymMemberships;
 using GymWebApp.Application.WebModels.GymMembership;
 using GymWebApp.Application.WebModels.MembershipPlan;
@@ -54,6 +55,8 @@ public class GymMembershipsController : BaseController
     {
         command.MembershipId = id;
         command.UpdatedById = CurrentUserId;
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        command.RequireCancellationReason = userRole is "Manager" or "Receptionist";
         var membership = await _mediator.Send(command);
         return Ok(membership);
     }

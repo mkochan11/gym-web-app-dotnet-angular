@@ -8,6 +8,8 @@ import { MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ClientActivationDialogComponent } from './client-activation-dialog/client-activation-dialog.component';
 import { ClientRegistrationDialogComponent } from './client-registration-dialog/client-registration-dialog.component';
+import { ClientCancelDialogComponent } from './client-cancel-dialog/client-cancel-dialog.component';
+import { ClientChangePlanDialogComponent } from './client-change-plan-dialog/client-change-plan-dialog.component';
 import { ClientUser } from '../../core/models/client';
 
 import { TableModule } from 'primeng/table';
@@ -110,6 +112,8 @@ export class ClientsComponent implements OnInit {
     switch (status) {
       case 'Active':
         return 'success';
+      case 'Pending Cancellation':
+        return 'warning';
       case 'Expired':
         return 'warning';
       case 'Cancelled':
@@ -128,8 +132,24 @@ export class ClientsComponent implements OnInit {
   canActivateMembership(client: ClientListItem): boolean {
     const userRole = this.authService.getRole();
     const hasPermission = userRole === 'Manager' || userRole === 'Receptionist';
-    const canActivate = client.membershipStatus !== 'Active';
+    const canActivate = client.membershipStatus === 'None' ||
+                       client.membershipStatus === 'Expired' ||
+                       client.membershipStatus === 'Cancelled';
     return hasPermission && canActivate;
+  }
+
+  canCancelMembership(client: ClientListItem): boolean {
+    const userRole = this.authService.getRole();
+    const hasPermission = userRole === 'Manager' || userRole === 'Receptionist';
+    const canCancel = client.membershipStatus === 'Active';
+    return hasPermission && canCancel;
+  }
+
+  canChangePlan(client: ClientListItem): boolean {
+    const userRole = this.authService.getRole();
+    const hasPermission = userRole === 'Manager' || userRole === 'Receptionist';
+    const canChange = client.membershipStatus === 'Active';
+    return hasPermission && canChange;
   }
 
   openActivationDialog(client: ClientListItem) {
@@ -176,6 +196,48 @@ export class ClientsComponent implements OnInit {
           summary: 'Client Registered',
           detail: `Client ${result.firstName} ${result.lastName} registered successfully. Temporary password: ${result.temporaryPassword}`,
           sticky: true
+        });
+      }
+    });
+  }
+
+  openCancelDialog(client: ClientListItem) {
+    this.ref = this.dialogService.open(ClientCancelDialogComponent, {
+      header: 'Cancel Membership',
+      width: '500px',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      data: { client: client }
+    });
+
+    this.ref.onClose.subscribe((result: boolean) => {
+      if (result) {
+        this.loadClients();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Membership cancelled successfully'
+        });
+      }
+    });
+  }
+
+  openChangePlanDialog(client: ClientListItem) {
+    this.ref = this.dialogService.open(ClientChangePlanDialogComponent, {
+      header: 'Change Membership Plan',
+      width: '70vw',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      data: { client: client }
+    });
+
+    this.ref.onClose.subscribe((result: boolean) => {
+      if (result) {
+        this.loadClients();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Membership plan changed successfully'
         });
       }
     });

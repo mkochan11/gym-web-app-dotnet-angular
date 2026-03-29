@@ -1,0 +1,78 @@
+<div class="cancel-dialog">
+  <div *ngIf="!cancellationComplete" class="cancel-form">
+    <div class="client-info mb-4">
+      <h4>Client Information</h4>
+      <p><strong>Name:</strong> {{ client.firstName }} {{ client.lastName }}</p>
+      <p><strong>Email:</strong> {{ client.email }}</p>
+      <p><strong>Current Plan:</strong> {{ client.currentPlanName || 'N/A' }}</p>
+      <p *ngIf="effectiveEndDate">
+        <strong>Access Until:</strong> {{ formatDate(effectiveEndDate) }}
+      </p>
+    </div>
+
+    <div class="cancellation-info mb-4">
+      <p-card styleClass="bg-yellow-50">
+        <div class="flex align-items-center">
+          <i class="pi pi-info-circle text-yellow-500 mr-2"></i>
+          <span>
+            The client will retain access until the end of the current billing period.
+            All future scheduled payments will be cancelled.
+          </span>
+        </div>
+      </p-card>
+    </div>
+
+    <div class="reason-field mb-4">
+      <label for="cancellationReason" class="block text-900 font-medium mb-2">
+        Cancellation Reason <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        id="cancellationReason"
+        pInputTextarea
+        [(ngModel)]="cancellationReason"
+        [rows]="4"
+        [autoResize]="true"
+        placeholder="Enter reason for cancellation (required)..."
+        class="w-full">
+      </textarea>
+      <small class="text-500">Maximum 500 characters</small>
+    </div>
+
+    <div class="actions flex justify-content-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Cancel"
+        class="p-button-secondary"
+        (click)="close()"
+        [disabled]="loading">
+      </button>
+      <button
+        pButton
+        type="button"
+        label="Confirm Cancellation"
+        class="p-button-danger"
+        (click)="cancelMembership()"
+        [disabled]="!canCancel() || loading"
+        [loading]="loading">
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="cancellationComplete" class="success-message text-center py-4">
+    <i class="pi pi-check-circle text-green-500 text-6xl mb-4"></i>
+    <h3>Membership Cancelled Successfully</h3>
+    <p class="text-600 mb-4">
+      The membership for <strong>{{ client.firstName }} {{ client.lastName }}</strong> has been cancelled.
+    </p>
+    <p *ngIf="effectiveEndDate" class="text-600 mb-4">
+      The client will retain access until <strong>{{ formatDate(effectiveEndDate) }}</strong>.
+    </p>
+    <button
+      pButton
+      type="button"
+      label="Close"
+      (click)="close()">
+    </button>
+  </div>
+</div>
