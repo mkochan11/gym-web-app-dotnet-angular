@@ -144,6 +144,12 @@ export const routes: Routes = [
             loadComponent: () => import('./shared/components/manage-users/receptionists/receptionists.component').then(m => m.ReceptionistsComponent)
           },
           {
+            path: 'employees/:id/employments',
+            canActivate: [authGuard, roleGuard],
+            data: { roles: ['Manager'] },
+            loadComponent: () => import('./management/manager/employee-employments/employee-employments.component').then(m => m.EmployeeEmploymentsComponent)
+          },
+          {
             path: 'clients',
             canActivate: [authGuard, roleGuard],
             data: { roles: ['Admin','Manager','Receptionist','Owner'] },

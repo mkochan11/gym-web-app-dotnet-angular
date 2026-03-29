@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { UserService } from '../../../../core/api-services/user.service';
-import { User } from '../../../../core/models/user';
+import { EmployeeService } from '../../../../core/api-services/employee.service';
+import { Employee } from '../../../../core/models/employee';
 import { MessageService } from 'primeng/api';
 
 import { TableModule } from 'primeng/table';
@@ -30,10 +30,10 @@ import { ToolbarModule } from 'primeng/toolbar';
   styleUrl: './receptionists.component.scss'
 })
 export class ReceptionistsComponent implements OnInit {
-  private userService = inject(UserService);
+  private employeeService = inject(EmployeeService);
   private messageService = inject(MessageService);
 
-  receptionists: User[] = [];
+  receptionists: Employee[] = [];
   loading = false;
 
   ngOnInit() {
@@ -42,9 +42,9 @@ export class ReceptionistsComponent implements OnInit {
 
   loadReceptionists() {
     this.loading = true;
-    this.userService.getUsers().subscribe({
-      next: (users) => {
-        this.receptionists = users.filter(u => u.role === 'Receptionist');
+    this.employeeService.getAllEmployees().subscribe({
+      next: (employees) => {
+        this.receptionists = employees.filter(e => e.role === 'Receptionist');
         this.loading = false;
       },
       error: (err) => {

@@ -14,6 +14,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
     {
         return await _context.Set<Employee>()
                        .Include(e => e.Employments)
+                           .ThenInclude(emp => emp.CreatedBy)
                        .FirstOrDefaultAsync(e => e.Id == employeeId);
     }
 

@@ -11,7 +11,12 @@ public static class EmploymentExtensions
 
         return new EmploymentWebModel()
         {
-            StartDate = employment.StartDate, EndDate = employment.EndDate, HourlyRate = employment.HourlyRate
+            Id = employment.Id,
+            StartDate = employment.StartDate,
+            EndDate = employment.EndDate,
+            HourlyRate = employment.HourlyRate ?? 0,
+            CreatedAt = employment.CreatedAt,
+            CreatedBy = employment.CreatedBy?.UserName ?? "Unknown"
         };
     }
 }
